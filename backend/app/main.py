@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 
-app = FastAPI(title="DocMind AI")
+from app.core.config import APP_NAME, APP_VERSION, APP_DESCRIPTION
+
+app = FastAPI(title=APP_NAME, version=APP_VERSION, description=APP_DESCRIPTION)
 
 
 @app.get("/")
