@@ -17,7 +17,13 @@ def extract_text_from_pdf(file: UploadFile) -> str:
     Returns:
         The concatenated text from all pages, stripped of leading/trailing whitespace.
     """
-    doc = fitz.open(stream=file.file.read(), filetype="pdf")
+    try:
+        doc = fitz.open(stream=file.file.read(), filetype="pdf")
+    except Exception:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid or corrupted PDF file.",
+        )
     text = "\n".join(page.get_text() for page in doc)
     doc.close()
     file.file.seek(0)
