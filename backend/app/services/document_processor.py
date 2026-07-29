@@ -1,6 +1,7 @@
 from fastapi import UploadFile
 
 from app.services.pdf import extract_text_from_pdf, validate_extracted_text
+from app.services.text_cleaner import clean_text
 from app.services.validation import validate_upload_file
 
 
@@ -16,4 +17,5 @@ def process_document(file: UploadFile) -> str:
     validate_upload_file(file)
     text = extract_text_from_pdf(file)
     validate_extracted_text(text)
-    return text
+    cleaned_text = clean_text(text)
+    return cleaned_text
