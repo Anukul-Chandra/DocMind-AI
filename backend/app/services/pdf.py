@@ -13,6 +13,7 @@ def extract_text_from_pdf(file: UploadFile) -> str:
         The concatenated text from all pages, stripped of leading/trailing whitespace.
     """
     doc = fitz.open(stream=file.file.read(), filetype="pdf")
-    text = "".join(page.get_text() for page in doc)
+    text = "\n".join(page.get_text() for page in doc)
     doc.close()
+    file.file.seek(0)
     return text.strip()
