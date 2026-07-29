@@ -1,6 +1,6 @@
 from fastapi import UploadFile, HTTPException
 
-ALLOWED_MIME_TYPES = {"application/pdf", "image/png", "image/jpeg"}
+ALLOWED_CONTENT_TYPES = {"application/pdf", "image/png", "image/jpeg"}
 
 
 def validate_upload_file(file: UploadFile) -> None:
@@ -12,7 +12,7 @@ def validate_upload_file(file: UploadFile) -> None:
     Raises:
         HTTPException: If the file's content type is not supported.
     """
-    if file.content_type not in ALLOWED_MIME_TYPES:
+    if file.content_type not in ALLOWED_CONTENT_TYPES:
         raise HTTPException(
             status_code=400,
             detail="Unsupported file type.",
