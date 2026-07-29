@@ -1,6 +1,6 @@
 import fitz
 
-from fastapi import UploadFile
+from fastapi import UploadFile, HTTPException
 
 
 def extract_text_from_pdf(file: UploadFile) -> str:
@@ -16,4 +16,10 @@ def extract_text_from_pdf(file: UploadFile) -> str:
     text = "\n".join(page.get_text() for page in doc)
     doc.close()
     file.file.seek(0)
-    return text.strip()
+    text = text.strip()
+    if not text:
+        raise HTTPException(
+            status_code=400,
+            detail="The uploaded PDF contains no extractable text.",
+        )
+    return text
