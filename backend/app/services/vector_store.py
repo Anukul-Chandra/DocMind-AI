@@ -70,6 +70,15 @@ class VectorStore:
         )
         faiss.write_index(self._index, path)
 
+    def load_index(self, path: str) -> None:
+        """Load a FAISS index into this store from disk.
+
+        Args:
+            path: The file path to load the index from.
+        """
+        if os.path.exists(path):
+            self._index = faiss.read_index(path)
+
     @classmethod
     def load(cls, path: str, dimension: int) -> "VectorStore":
         """Load a FAISS index from disk, or create an empty one if missing.
@@ -82,6 +91,5 @@ class VectorStore:
             A VectorStore instance backed by the loaded index.
         """
         store = cls(dimension)
-        if os.path.exists(path):
-            store._index = faiss.read_index(path)
+        store.load_index(path)
         return store
