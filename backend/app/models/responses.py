@@ -1,6 +1,11 @@
 from pydantic import BaseModel
 
 
+class ChunkResponse(BaseModel):
+    id: int
+    text: str
+
+
 class DocumentResponse(BaseModel):
 
     """
@@ -9,4 +14,4 @@ class DocumentResponse(BaseModel):
 
     filename: str
     chunk_count: int
-    chunks: list[str]
+    chunks: list[ChunkResponse]

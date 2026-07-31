@@ -12,5 +12,8 @@ async def upload(file: UploadFile):
     return {
         "filename": file.filename,
         "chunk_count": len(chunks),
-        "chunks": chunks,
+        "chunks": [
+            {"id": index, "text": chunk}
+            for index, chunk in enumerate(chunks, start=1)
+        ],
     }
