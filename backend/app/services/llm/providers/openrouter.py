@@ -2,13 +2,13 @@ import httpx
 
 from app.core.config import settings
 from app.services.llm.model_pool import ModelPoolManager
-from app.services.llm.providers.base import BaseProvider
+from app.services.llm.providers.base import BaseProvider, RecoverableError
 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 CHAT_COMPLETIONS_URL = f"{OPENROUTER_BASE_URL}/chat/completions"
 
 
-class OpenRouterError(Exception):
+class OpenRouterError(RecoverableError):
     """Base exception for OpenRouter provider failures."""
 
 

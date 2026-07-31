@@ -1,6 +1,10 @@
 from abc import ABC, abstractmethod
 
 
+class RecoverableError(Exception):
+    """Base class for recoverable provider errors that allow failover."""
+
+
 class BaseProvider(ABC):
     """Abstract interface for all LLM providers."""
 

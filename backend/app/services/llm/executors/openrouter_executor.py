@@ -2,6 +2,7 @@ import logging
 
 from app.services.llm.model_pool import ModelPoolManager
 from app.services.llm.providers.openrouter import (
+    OpenRouterError,
     OpenRouterHTTPError,
     OpenRouterProvider,
     OpenRouterRequestError,
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 RETRYABLE_HTTP_STATUS_CODES = {429, 500, 502, 503}
 
 
-class OpenRouterExhaustedError(Exception):
+class OpenRouterExhaustedError(OpenRouterError):
     """Raised when all OpenRouter models have been exhausted."""
 
 
