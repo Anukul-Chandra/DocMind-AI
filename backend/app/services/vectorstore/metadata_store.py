@@ -5,13 +5,13 @@ class MetadataStore:
         self.documents: list[dict] = []
 
     def add_documents(self, texts: list[str], filename: str) -> None:
-        """Store document chunks with sequential ids.
+        """Store document chunks with sequential ids starting from 1.
 
         Args:
             texts: The document text chunks.
             filename: The source document's filename.
         """
-        start_id = len(self.documents)
+        start_id = len(self.documents) + 1
         for offset, text in enumerate(texts):
             self.documents.append(
                 {
@@ -29,5 +29,18 @@ class MetadataStore:
 
         Returns:
             The stored document.
+
+        Raises:
+            IndexError: If the index is out of range.
         """
+        if index < 0 or index >= len(self.documents):
+            raise IndexError("document index out of range")
         return self.documents[index]
+
+    def get_all_documents(self) -> list[dict]:
+        """Return all stored documents.
+
+        Returns:
+            A list of all stored documents.
+        """
+        return self.documents
