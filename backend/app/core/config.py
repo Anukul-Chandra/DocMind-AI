@@ -25,10 +25,15 @@ class Settings(BaseSettings):
     max_tokens: int = 1000
     timeout: int = 60
 
+    provider_priority: str = "openrouter,github,cerebras,gemini,groq,sambanova"
+
     openrouter_api_key: str = ""
     openai_api_key: str = ""
     gemini_api_key: str = ""
     groq_api_key: str = ""
+    github_api_key: str = ""
+    cerebras_api_key: str = ""
+    sambanova_api_key: str = ""
 
 
 settings = Settings()
