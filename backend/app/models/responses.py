@@ -2,7 +2,10 @@ from pydantic import BaseModel
 
 
 class DocumentResponse(BaseModel):
-    """Response model for the document upload endpoint."""
+
+    """
+    Response returned after successfully processing a document.
+    """
 
     filename: str
     chunk_count: int
