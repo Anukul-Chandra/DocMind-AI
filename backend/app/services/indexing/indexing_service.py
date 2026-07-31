@@ -1,4 +1,4 @@
-from app.core.config import FAISS_INDEX_PATH, METADATA_PATH
+from app.core.config import settings
 from app.services.embedding import EmbeddingService
 from app.services.vector_store import VectorStore
 from app.services.vectorstore.metadata_store import MetadataStore
@@ -27,5 +27,5 @@ class IndexingService:
         embeddings = self._embedding_service.generate_embeddings(chunks)
         self._vector_store.add_embeddings(embeddings)
         self._metadata_store.add_documents(chunks, filename)
-        self._vector_store.save(FAISS_INDEX_PATH)
-        self._metadata_store.save(METADATA_PATH)
+        self._vector_store.save(settings.faiss_index_path)
+        self._metadata_store.save(settings.metadata_path)

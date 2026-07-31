@@ -1,4 +1,4 @@
-from app.core.config import FAISS_INDEX_PATH, METADATA_PATH
+from app.core.config import settings
 from app.services.vector_store import VectorStore
 from app.services.vectorstore.metadata_store import MetadataStore
 
@@ -16,5 +16,5 @@ class StorageManager:
 
     def initialize(self) -> None:
         """Load stored index and metadata, or start with empty stores."""
-        self._vector_store.load_index(FAISS_INDEX_PATH)
-        self._metadata_store.load(METADATA_PATH)
+        self._vector_store.load_index(settings.faiss_index_path)
+        self._metadata_store.load(settings.metadata_path)

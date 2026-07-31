@@ -1,12 +1,12 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from app.core.config import CHUNK_OVERLAP, CHUNK_SIZE
+from app.core.config import settings
 
 
 def chunk_text(
     text: str,
-    chunk_size: int = CHUNK_SIZE,
-    chunk_overlap: int = CHUNK_OVERLAP,
+    chunk_size: int = settings.chunk_size,
+    chunk_overlap: int = settings.chunk_overlap,
 ) -> list[str]:
     """Split text into fixed-size character chunks with overlap.
 
