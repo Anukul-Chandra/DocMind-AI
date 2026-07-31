@@ -19,3 +19,11 @@ class EmbeddingService:
             A list of embedding vectors, one per input text.
         """
         return self._model.encode(texts).tolist()
+
+    def get_embedding_dimension(self) -> int:
+        """Return the dimension of the embedding vectors produced by the model.
+
+        Returns:
+            The number of dimensions in each embedding vector.
+        """
+        return self._model.get_embedding_dimension()
