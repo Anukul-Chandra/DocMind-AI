@@ -1,7 +1,10 @@
+from app.core.config import CHUNK_OVERLAP, CHUNK_SIZE
+
+
 def chunk_text(
     text: str,
-    chunk_size: int = 1000,
-    chunk_overlap: int = 200,
+    chunk_size: int = CHUNK_SIZE,
+    chunk_overlap: int = CHUNK_OVERLAP,
 ) -> list[str]:
     """Split text into fixed-size character chunks with overlap.
 
