@@ -1,15 +1,16 @@
 from fastapi import APIRouter, UploadFile
 
+from app.models.responses import DocumentResponse
 from app.services.document_processor import process_document
 
 router = APIRouter()
 
 
-@router.post("/upload")
+@router.post("/upload", response_model=DocumentResponse)
 async def upload(file: UploadFile):
-    extracted_text = process_document(file)
+    chunks = process_document(file)
     return {
         "filename": file.filename,
-        "content_type": file.content_type,
-        "text": extracted_text,
+        "chunk_count": len(chunks),
+        "chunks": chunks,
     }
