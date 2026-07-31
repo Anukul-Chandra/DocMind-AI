@@ -1,3 +1,7 @@
+import json
+from pathlib import Path
+
+
 class MetadataStore:
     """Store document chunk metadata in the order they are added."""
 
@@ -44,3 +48,28 @@ class MetadataStore:
             A list of all stored documents.
         """
         return self.documents
+
+    def save(self, path: str) -> None:
+        """Persist all metadata to disk as pretty-printed JSON.
+
+        Args:
+            path: The file path to save the metadata to.
+        """
+        Path(path).parent.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(self.documents, f, indent=2)
+
+    def load(self, path: str) -> None:
+        """Restore metadata from disk, or start empty if the file is missing.
+
+        Args:
+            path: The file path to load the metadata from.
+        """
+        if Path(path).exists():
+            with open(path, "r", encoding="utf-8") as f:
+                self.documents = json.load(f)
+        else:
+            self.documents = []

@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import numpy as np
 import faiss
@@ -63,6 +64,10 @@ class VectorStore:
         Args:
             path: The file path to save the index to.
         """
+        Path(path).parent.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
         faiss.write_index(self._index, path)
 
     @classmethod
