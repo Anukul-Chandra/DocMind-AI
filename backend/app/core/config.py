@@ -21,11 +21,13 @@ class Settings(BaseSettings):
 
     llm_provider: str = ""
     default_model: str = "gpt-4o-mini"
+    gemini_model: str = "gemini-2.0-flash"
+    groq_model: str = "llama-3.3-70b-versatile"
     temperature: float = 0.0
     max_tokens: int = 1000
     timeout: int = 60
 
-    provider_priority: str = "openrouter,github,cerebras,gemini,groq,sambanova"
+    provider_priority: str = "openrouter,gemini,groq"
 
     openrouter_api_key: str = ""
     openai_api_key: str = ""

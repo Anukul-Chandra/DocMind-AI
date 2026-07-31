@@ -47,6 +47,8 @@ class ProviderManager:
         """
         self._errors = []
         for provider in self._providers:
+            provider_name = type(provider).__name__
+            logger.info("Trying %s...", provider_name)
             try:
                 text = await provider.generate(
                     prompt,
@@ -54,10 +56,11 @@ class ProviderManager:
                     temperature=temperature,
                     max_tokens=max_tokens,
                 )
-                return LLMResponse(text=text, provider=type(provider).__name__)
+                logger.info("Success: Provider = %s", provider_name)
+                return LLMResponse(text=text, provider=provider_name)
             except RecoverableError as exc:
-                self._errors.append((type(provider).__name__, exc))
+                self._errors.append((provider_name, exc))
                 logger.warning(
-                    "Provider %s failed: %s", type(provider).__name__, exc
+                    "Provider %s failed: %s", provider_name, exc
                 )
         raise LLMUnavailableError("All providers failed to generate a response.")
