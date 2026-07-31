@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import faiss
 
@@ -54,3 +56,27 @@ class VectorStore:
         query = np.array([query_embedding], dtype=np.float32)
         distances, indices = self._index.search(query, k)
         return distances.tolist(), indices.tolist()
+
+    def save(self, path: str) -> None:
+        """Persist the FAISS index to disk.
+
+        Args:
+            path: The file path to save the index to.
+        """
+        faiss.write_index(self._index, path)
+
+    @classmethod
+    def load(cls, path: str, dimension: int) -> "VectorStore":
+        """Load a FAISS index from disk, or create an empty one if missing.
+
+        Args:
+            path: The file path to load the index from.
+            dimension: The embedding dimension for a new empty index.
+
+        Returns:
+            A VectorStore instance backed by the loaded index.
+        """
+        store = cls(dimension)
+        if os.path.exists(path):
+            store._index = faiss.read_index(path)
+        return store
