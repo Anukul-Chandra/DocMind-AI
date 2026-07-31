@@ -8,6 +8,7 @@ class VectorStore:
     def __init__(self, dimension: int) -> None:
         self._index = faiss.IndexFlatL2(dimension)
         self._embeddings: list[list[float]] = []
+        self.documents: list[dict] = []
 
     def add_embeddings(self, embeddings: list[list[float]]) -> None:
         """Add embeddings to the index.
@@ -18,6 +19,23 @@ class VectorStore:
         vectors = np.array(embeddings, dtype=np.float32)
         self._index.add(vectors)
         self._embeddings.extend(embeddings)
+
+    def add_documents(self, texts: list[str], filename: str) -> None:
+        """Store document chunks mapped to the FAISS index order.
+
+        Args:
+            texts: The document text chunks.
+            filename: The source document's filename.
+        """
+        start_id = len(self.documents)
+        for offset, text in enumerate(texts):
+            self.documents.append(
+                {
+                    "id": start_id + offset,
+                    "text": text,
+                    "filename": filename,
+                }
+            )
 
     def search(
         self,
