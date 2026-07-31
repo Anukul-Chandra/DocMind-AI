@@ -1,5 +1,6 @@
 from fastapi import UploadFile
 
+from app.services.embedding import EmbeddingService
 from app.services.pdf import extract_text_from_pdf, validate_extracted_text
 from app.services.chunker import chunk_text
 from app.services.text_cleaner import clean_text
@@ -20,4 +21,6 @@ def process_document(file: UploadFile) -> list[str]:
     validate_extracted_text(text)
     cleaned_text = clean_text(text)
     chunks = chunk_text(cleaned_text)
+    embedding_service = EmbeddingService()
+    embedding_service.generate_embeddings(chunks)
     return chunks
