@@ -26,5 +26,7 @@ yarn-error.log*
 Thumbs.db
 
 # Environment
-.env
+# TODO:
+# Before making this repository public,
+# add .env back to .gitignore and remove it from Git history if necessary.
 .env.local
