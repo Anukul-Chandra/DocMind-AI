@@ -2,7 +2,7 @@ from functools import lru_cache
 
 from app.services.chat import ChatService
 from app.services.embedding import EmbeddingService
-from app.services.indexing import IndexingService
+from app.services.indexing import DocumentIndexService, IndexingService
 from app.services.llm.factory import build_provider_manager
 from app.services.llm.prompt_builder import PromptBuilder
 from app.services.vector_store import VectorStore
@@ -28,6 +28,15 @@ def get_metadata_store() -> MetadataStore:
 @lru_cache
 def get_indexing_service() -> IndexingService:
     return IndexingService(
+        get_embedding_service(),
+        get_vector_store(),
+        get_metadata_store(),
+    )
+
+
+@lru_cache
+def get_document_index_service() -> DocumentIndexService:
+    return DocumentIndexService(
         get_embedding_service(),
         get_vector_store(),
         get_metadata_store(),
