@@ -5,37 +5,31 @@ from groq import (
 )
 from groq import APIStatusError, GroqError
 
-from app.core.config import settings
-from app.services.llm.providers.base import BaseProvider, RecoverableError
-
-
-class GroqProviderError(RecoverableError):
-    """Base exception for Groq provider failures."""
-
-
-class GroqAuthenticationError(GroqProviderError):
-    """Raised when Groq rejects the API key."""
-
-
-class GroqRateLimitError(GroqProviderError):
-    """Raised when Groq rate limits the request."""
-
-
-class GroqAPIError(GroqProviderError):
-    """Raised when the Groq API returns an error."""
-
-
-class GroqInvalidResponseError(GroqProviderError):
-    """Raised when the Groq response cannot be parsed."""
+from app.services.llm.providers.base import (
+    APIError,
+    AuthenticationError,
+    BaseProvider,
+    InvalidResponseError,
+    RateLimitError,
+)
 
 
 class GroqProvider(BaseProvider):
-    """Groq-backed LLM provider."""
+    """Groq-backed LLM provider.
 
-    def __init__(self) -> None:
-        """Initialize the provider with an API key and model from settings."""
-        self._api_key: str = settings.groq_api_key
-        self._model: str = settings.groq_model
+    Configuration is injected through the constructor so the provider has no
+    direct dependency on the global settings object.
+    """
+
+    def __init__(self, api_key: str, model: str) -> None:
+        """Initialize the provider with an API key and model.
+
+        Args:
+            api_key: The Groq API key.
+            model: The Groq model identifier.
+        """
+        self._api_key = api_key
+        self._model = model
         self._client = AsyncGroq(api_key=self._api_key)
 
     @property
@@ -66,10 +60,10 @@ class GroqProvider(BaseProvider):
             The generated text from the model.
 
         Raises:
-            GroqAuthenticationError: If the API key is rejected.
-            GroqRateLimitError: If Groq rate limits the request.
-            GroqAPIError: If the Groq API returns an error.
-            GroqInvalidResponseError: If the response is invalid.
+            AuthenticationError: If the API key is rejected.
+            RateLimitError: If Groq rate limits the request.
+            APIError: If the Groq API returns an error.
+            InvalidResponseError: If the response is invalid.
         """
         messages: list[dict] = []
         if system_prompt:
@@ -84,27 +78,27 @@ class GroqProvider(BaseProvider):
                 max_tokens=max_tokens,
             )
         except GroqSDKAuthenticationError as exc:
-            raise GroqAuthenticationError(
+            raise AuthenticationError(
                 "Groq authentication failed; check your API key."
             ) from exc
         except GroqSDKRateLimitError as exc:
-            raise GroqRateLimitError(
+            raise RateLimitError(
                 "Groq rate limit exceeded."
             ) from exc
         except APIStatusError as exc:
-            raise GroqAPIError(f"Groq API error {exc.status_code}: {exc}") from exc
+            raise APIError(f"Groq API error {exc.status_code}: {exc}") from exc
         except GroqError as exc:
-            raise GroqAPIError(f"Groq request failed: {exc}") from exc
+            raise APIError(f"Groq request failed: {exc}") from exc
 
         try:
             content = response.choices[0].message.content
         except (AttributeError, IndexError) as exc:
-            raise GroqInvalidResponseError(
+            raise InvalidResponseError(
                 f"Invalid Groq response: {exc}"
             ) from exc
 
         if content is None:
-            raise GroqInvalidResponseError(
+            raise InvalidResponseError(
                 "Groq response contained no text."
             )
 

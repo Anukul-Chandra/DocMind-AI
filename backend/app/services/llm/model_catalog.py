@@ -2,8 +2,6 @@ import logging
 
 from openai import OpenAI
 
-from app.core.config import settings
-
 logger = logging.getLogger(__name__)
 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
@@ -22,10 +20,16 @@ class ModelCatalogService:
 
     def __init__(
         self,
-        api_key: str | None = None,
+        api_key: str,
         base_url: str = OPENROUTER_BASE_URL,
     ) -> None:
-        self._client = OpenAI(api_key=api_key or settings.openrouter_api_key, base_url=base_url)
+        """Initialize the catalog with an OpenRouter API key.
+
+        Args:
+            api_key: The OpenRouter API key used to list models.
+            base_url: The OpenRouter base URL.
+        """
+        self._client = OpenAI(api_key=api_key, base_url=base_url)
 
     def get_all_models(self) -> list[str]:
         """Return the complete list of model ids from OpenRouter.

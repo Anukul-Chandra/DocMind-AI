@@ -4,13 +4,17 @@ Manual integration test for the GroqProvider.
 
 import asyncio
 
+from app.core.config import settings
 from app.services.llm.providers.groq import GroqProvider
 
 
 async def main() -> None:
     """Run the Groq provider integration test."""
 
-    provider = GroqProvider()
+    provider = GroqProvider(
+        api_key=settings.groq_api_key,
+        model=settings.groq_model,
+    )
 
     response = await provider.generate(
         prompt="Explain Python in one sentence."
