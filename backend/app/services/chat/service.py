@@ -40,8 +40,8 @@ class ChatService:
         """Answer a question using retrieved context and conversation history.
 
         Args:
-            request: The chat request with the question and an optional
-                ``conversation_id``.
+            request: The chat request with the question, an optional
+                ``conversation_id``, and a ``workspace_id``.
 
         Returns:
             A chat response containing the answer, provenance, conversation id,
@@ -50,7 +50,10 @@ class ChatService:
         conversation_id = request.conversation_id or self._memory.create_conversation()
         history = self._memory.get_history(conversation_id)
 
-        contexts = self._retriever.retrieve(request.question)
+        contexts = self._retriever.retrieve(
+            request.question,
+            workspace_id=request.workspace_id,
+        )
         rag_prompt = self._prompt_builder.build_prompt(
             request.question,
             contexts,

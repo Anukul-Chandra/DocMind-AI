@@ -13,6 +13,7 @@ from app.services.pdf import extract_text_from_pdf
 from app.services.text_cleaner import clean_text
 from app.services.vector_store import VectorStore
 from app.services.vectorstore.metadata_store import MetadataStore
+from app.services.vectorstore.workspace import DEFAULT_WORKSPACE
 
 
 @dataclass(frozen=True)
@@ -53,11 +54,16 @@ class DocumentIndexService:
         self._vector_store = vector_store
         self._metadata_store = metadata_store
 
-    def index_document(self, pdf_path: str) -> DocumentIndexResult:
+    def index_document(
+        self,
+        pdf_path: str,
+        workspace_id: str = DEFAULT_WORKSPACE,
+    ) -> DocumentIndexResult:
         """Extract, clean, chunk, embed, and persist a PDF document.
 
         Args:
             pdf_path: Filesystem path to the PDF to index.
+            workspace_id: The workspace the document belongs to.
 
         Returns:
             A summary of the indexed document.
@@ -72,7 +78,11 @@ class DocumentIndexService:
 
             embeddings = self._embedding_service.generate_embeddings(chunks)
             self._vector_store.add_embeddings(embeddings)
-            self._metadata_store.add_documents(chunks, Path(pdf_path).name)
+            self._metadata_store.add_documents(
+                chunks,
+                Path(pdf_path).name,
+                workspace_id,
+            )
 
             self._vector_store.save(settings.faiss_index_path)
             self._metadata_store.save(settings.metadata_path)

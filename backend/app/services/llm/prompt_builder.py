@@ -28,8 +28,8 @@ class PromptBuilder:
 
         Args:
             question: The user's question.
-            contexts: A list of retrieved context documents, each with an
-                ``id``, ``text``, and ``filename``.
+            contexts: A list of retrieved context documents, each with
+                ``text``, ``filename``, and ``chunk_id``.
             history: Optional prior messages (``{"role", "content"}``) to
                 prepend before the current question.
 
@@ -53,7 +53,7 @@ class PromptBuilder:
             "Answer:"
         )
         sources = [
-            {"filename": context["filename"], "chunk_id": context["id"]}
+            {"filename": context["filename"], "chunk_id": context["chunk_id"]}
             for context in contexts
         ]
         return RAGPrompt(text=text, sources=sources)
