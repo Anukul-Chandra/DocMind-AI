@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 
 from app.api.dependencies import get_chat_service
+from app.models.responses import SuccessResponse
 from app.services.chat import (
     ChatRequest,
     ChatResponse,
@@ -16,11 +17,15 @@ from app.services.llm.provider_manager import LLMUnavailableError
 router = APIRouter(prefix="/chat", tags=["chat"])
 
 
-@router.post("/", response_model=ChatResponse, status_code=status.HTTP_200_OK)
+@router.post(
+    "/",
+    response_model=SuccessResponse[ChatResponse],
+    status_code=status.HTTP_200_OK,
+)
 async def chat(
     request: ChatRequest,
     chat_service: ChatService = Depends(get_chat_service),
-) -> ChatResponse:
+) -> SuccessResponse[ChatResponse]:
     """Answer a question using the retrieved document context.
 
     Args:
@@ -28,18 +33,19 @@ async def chat(
         chat_service: The ChatService that orchestrates retrieval and generation.
 
     Returns:
-        A ChatResponse with the answer and provider provenance.
+        A success envelope with the answer and provider provenance.
 
     Raises:
         HTTPException: If no LLM provider is available to answer the question.
     """
     try:
-        return await chat_service.chat(request)
+        response = await chat_service.chat(request)
     except LLMUnavailableError as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=f"All LLM providers failed: {exc}",
         ) from exc
+    return SuccessResponse(data=response)
 
 
 def _sse(event: ChatStreamEvent) -> str:
