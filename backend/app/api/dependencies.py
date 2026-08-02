@@ -8,9 +8,10 @@ from app.services.indexing import DocumentIndexService
 from app.services.llm.factory import build_provider_manager
 from app.services.llm.prompt_builder import PromptBuilder
 from app.services.logging import RequestLogger
+from app.services.retrieval import BM25Retriever, HybridRetriever, Retriever
 from app.services.vector_store import VectorStore
 from app.services.vectorstore.metadata_store import MetadataStore
-from app.services.vectorstore.retriever import Retriever
+from app.services.vectorstore.retriever import SemanticRetriever
 
 
 @lru_cache
@@ -48,11 +49,17 @@ def get_document_registry() -> DocumentRegistry:
 
 @lru_cache
 def get_retriever() -> Retriever:
-    return Retriever(
-        get_embedding_service(),
-        get_vector_store(),
-        get_metadata_store(),
-        get_document_registry(),
+    return HybridRetriever(
+        semantic_retriever=SemanticRetriever(
+            get_embedding_service(),
+            get_vector_store(),
+            get_metadata_store(),
+            get_document_registry(),
+        ),
+        bm25_retriever=BM25Retriever(
+            get_metadata_store(),
+            get_document_registry(),
+        ),
     )
 
 

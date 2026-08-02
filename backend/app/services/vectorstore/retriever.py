@@ -1,10 +1,20 @@
+from typing import Protocol
+
 from app.services.embedding import EmbeddingService
+from app.services.retrieval.base import Retriever
 from app.services.vector_store import VectorStore
 from app.services.vectorstore.metadata_store import MetadataStore
 from app.services.vectorstore.workspace import DEFAULT_WORKSPACE
 
 
-class Retriever:
+class DeletionAwareRegistry(Protocol):
+    """Minimal structural interface for a deletions registry."""
+
+    def is_deleted(self, document_id: str) -> bool:
+        """Return whether a document is marked as deleted."""
+
+
+class SemanticRetriever(Retriever):
     """Retrieve relevant document chunks for a query using embeddings and FAISS."""
 
     def __init__(
@@ -12,12 +22,12 @@ class Retriever:
         embedding_service: EmbeddingService,
         vector_store: VectorStore,
         metadata_store: MetadataStore,
-        document_registry=None,
+        document_registry: DeletionAwareRegistry | None = None,
     ) -> None:
+        self._document_registry = document_registry
         self._embedding_service = embedding_service
         self._vector_store = vector_store
         self._metadata_store = metadata_store
-        self._document_registry = document_registry
 
     def retrieve(
         self,
@@ -43,12 +53,12 @@ class Retriever:
             if index == -1:
                 continue
             document = self._metadata_store.get_document(index)
-            if not self._is_eligible(document, workspace_id):
+            if not self.is_eligible(document, workspace_id):
                 continue
             documents.append(document)
         return documents
 
-    def _is_eligible(self, document: dict, workspace_id: str) -> bool:
+    def is_eligible(self, document: dict, workspace_id: str) -> bool:
         """Return whether a chunk should be returned for the workspace.
 
         Args:

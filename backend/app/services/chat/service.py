@@ -15,7 +15,7 @@ from app.services.chat.models import (
 from app.services.llm.provider_manager import ProviderManager
 from app.services.llm.prompt_builder import PromptBuilder
 from app.services.logging.request_logger import RequestLogEntry, RequestLogger
-from app.services.vectorstore.retriever import Retriever
+from app.services.retrieval import Retriever
 
 
 class ChatService:
