@@ -2,8 +2,46 @@ from abc import ABC, abstractmethod
 from typing import AsyncIterator
 
 
-class RecoverableError(Exception):
-    """Base class for recoverable provider errors that allow failover."""
+class ProviderError(Exception):
+    """Base class for recoverable provider errors that allow failover.
+
+    All provider-specific failures subclass this so that ProviderManager can
+    fail over to the next provider. Programming errors must not subclass it.
+    """
+
+
+class AuthenticationError(ProviderError):
+    """Raised when a provider rejects the supplied API credentials."""
+
+
+class RateLimitError(ProviderError):
+    """Raised when a provider rate limits the request."""
+
+
+class APIError(ProviderError):
+    """Raised when a provider returns a non-success HTTP API response.
+
+    Attributes:
+        status_code: The HTTP status code returned by the provider, if known.
+    """
+
+    def __init__(self, detail: str, status_code: int | None = None) -> None:
+        """Initialize the API error.
+
+        Args:
+            detail: A human-readable description of the failure.
+            status_code: The HTTP status code from the provider, if known.
+        """
+        self.status_code = status_code
+        super().__init__(detail)
+
+
+class InvalidResponseError(ProviderError):
+    """Raised when a provider response cannot be parsed."""
+
+
+#: Backward-compatible alias retained so ProviderManager failover keeps working.
+RecoverableError = ProviderError
 
 
 class BaseProvider(ABC):
@@ -36,6 +74,9 @@ class BaseProvider(ABC):
 
         Returns:
             The generated text.
+
+        Raises:
+            ProviderError: If the provider fails (recoverable).
         """
 
     async def generate_stream(
@@ -61,7 +102,7 @@ class BaseProvider(ABC):
             The generated text, as one or more chunks.
 
         Raises:
-            RecoverableError: If the provider fails.
+            ProviderError: If the provider fails.
         """
         text = await self.generate(
             prompt,

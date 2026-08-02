@@ -3,52 +3,43 @@ from typing import AsyncIterator
 
 import httpx
 
-from app.core.config import settings
 from app.services.llm.model_pool import ModelPoolManager
-from app.services.llm.providers.base import BaseProvider, RecoverableError
+from app.services.llm.providers.base import (
+    APIError,
+    AuthenticationError,
+    BaseProvider,
+    InvalidResponseError,
+    ProviderError,
+)
 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
-CHAT_COMPLETIONS_URL = f"{OPENROUTER_BASE_URL}/chat/completions"
-
-
-class OpenRouterError(RecoverableError):
-    """Base exception for OpenRouter provider failures."""
-
-
-class OpenRouterRequestError(OpenRouterError):
-    """Raised when the OpenRouter request fails at the network level."""
-
-
-class OpenRouterAuthenticationError(OpenRouterError):
-    """Raised when OpenRouter rejects the API key."""
-
-
-class OpenRouterHTTPError(OpenRouterError):
-    """Raised when OpenRouter returns an HTTP error."""
-
-    def __init__(self, status_code: int, detail: str) -> None:
-        self.status_code = status_code
-        super().__init__(detail)
-
-
-class OpenRouterInvalidResponseError(OpenRouterError):
-    """Raised when the OpenRouter response cannot be parsed."""
 
 
 class OpenRouterProvider(BaseProvider):
-    """OpenRouter-backed LLM provider."""
+    """OpenRouter-backed LLM provider.
 
-    def __init__(self, model_pool: ModelPoolManager) -> None:
-        """Initialize the provider with a model pool and API key from settings.
+    Configuration is injected through the constructor so the provider has no
+    direct dependency on the global settings object.
+    """
+
+    def __init__(
+        self,
+        model_pool: ModelPoolManager,
+        api_key: str,
+        timeout: int = 60,
+    ) -> None:
+        """Initialize the provider with a model pool, API key, and timeout.
 
         Args:
             model_pool: The model pool providing the current model.
+            api_key: The OpenRouter API key.
+            timeout: Request timeout in seconds.
         """
         self._model_pool = model_pool
-        self._api_key: str = settings.openrouter_api_key
+        self._api_key = api_key
         self._client = httpx.AsyncClient(
             base_url=OPENROUTER_BASE_URL,
-            timeout=settings.timeout,
+            timeout=timeout,
         )
 
     @property
@@ -79,10 +70,10 @@ class OpenRouterProvider(BaseProvider):
             The generated text from the model.
 
         Raises:
-            OpenRouterError: If the request fails.
-            OpenRouterAuthenticationError: If the API key is rejected.
-            OpenRouterHTTPError: If OpenRouter returns an HTTP error.
-            OpenRouterInvalidResponseError: If the response is invalid.
+            ProviderError: If the request fails at the network level.
+            AuthenticationError: If the API key is rejected.
+            APIError: If OpenRouter returns an HTTP error.
+            InvalidResponseError: If the response is invalid.
         """
         model = self._model_pool.get_current_model()
 
@@ -109,27 +100,27 @@ class OpenRouterProvider(BaseProvider):
                 json=payload,
             )
         except httpx.TimeoutException as exc:
-            raise OpenRouterRequestError(f"OpenRouter request timed out: {exc}") from exc
+            raise ProviderError(f"OpenRouter request timed out: {exc}") from exc
         except httpx.ConnectError as exc:
-            raise OpenRouterRequestError(f"OpenRouter connection failed: {exc}") from exc
+            raise ProviderError(f"OpenRouter connection failed: {exc}") from exc
         except httpx.RequestError as exc:
-            raise OpenRouterRequestError(f"OpenRouter request failed: {exc}") from exc
+            raise ProviderError(f"OpenRouter request failed: {exc}") from exc
 
         if response.status_code in (401, 403):
-            raise OpenRouterAuthenticationError(
+            raise AuthenticationError(
                 "OpenRouter authentication failed; check your API key."
             )
         if response.status_code != 200:
-            raise OpenRouterHTTPError(
-                response.status_code,
+            raise APIError(
                 f"OpenRouter returned HTTP {response.status_code}: {response.text}",
+                status_code=response.status_code,
             )
 
         try:
             data = response.json()
             content = data["choices"][0]["message"]["content"]
         except (ValueError, KeyError, IndexError, TypeError) as exc:
-            raise OpenRouterInvalidResponseError(
+            raise InvalidResponseError(
                 f"Invalid OpenRouter response: {exc}"
             ) from exc
 
@@ -154,8 +145,8 @@ class OpenRouterProvider(BaseProvider):
             Text fragments as they arrive from OpenRouter.
 
         Raises:
-            OpenRouterAuthenticationError: If the API key is rejected.
-            OpenRouterHTTPError: If OpenRouter returns an HTTP error.
+            AuthenticationError: If the API key is rejected.
+            APIError: If OpenRouter returns an HTTP error.
         """
         model = self._model_pool.get_current_model()
 
@@ -184,14 +175,14 @@ class OpenRouterProvider(BaseProvider):
                 json=payload,
             ) as response:
                 if response.status_code in (401, 403):
-                    raise OpenRouterAuthenticationError(
+                    raise AuthenticationError(
                         "OpenRouter authentication failed; check your API key."
                     )
                 if response.status_code != 200:
                     await response.aread()
-                    raise OpenRouterHTTPError(
-                        response.status_code,
+                    raise APIError(
                         f"OpenRouter returned HTTP {response.status_code}: {response.text}",
+                        status_code=response.status_code,
                     )
                 async for line in response.aiter_lines():
                     if not line.startswith("data: "):
@@ -208,8 +199,8 @@ class OpenRouterProvider(BaseProvider):
                     if content:
                         yield content
         except httpx.TimeoutException as exc:
-            raise OpenRouterRequestError(f"OpenRouter stream timed out: {exc}") from exc
+            raise ProviderError(f"OpenRouter stream timed out: {exc}") from exc
         except httpx.ConnectError as exc:
-            raise OpenRouterRequestError(f"OpenRouter connection failed: {exc}") from exc
+            raise ProviderError(f"OpenRouter connection failed: {exc}") from exc
         except httpx.RequestError as exc:
-            raise OpenRouterRequestError(f"OpenRouter stream request failed: {exc}") from exc
+            raise ProviderError(f"OpenRouter stream request failed: {exc}") from exc
