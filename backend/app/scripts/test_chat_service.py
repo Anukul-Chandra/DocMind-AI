@@ -4,13 +4,13 @@ This script wires together the document retrieval, prompt building, and LLM
 generation layers, inserts a small sample document into a FAISS-backed vector
 store, and asks a single question through ChatService.
 
-It is intended to be run manually only. It does not create any API endpoint,
-conversation memory, or streaming behavior.
+It is intended to be run manually only. It does not create any API endpoint or streaming behavior.
 """
 
 import asyncio
 
-from app.services.chat.models import ChatResponse
+from app.services.chat.memory import ConversationMemory
+from app.services.chat.models import ChatRequest, ChatResponse
 from app.services.chat.service import ChatService
 from app.services.embedding import EmbeddingService
 from app.services.llm.factory import build_provider_manager
@@ -52,10 +52,15 @@ async def main() -> None:
     retriever = build_retriever()
     prompt_builder = PromptBuilder()
     provider_manager = build_provider_manager()
-    chat_service = ChatService(retriever, prompt_builder, provider_manager)
+    chat_service = ChatService(
+        retriever,
+        prompt_builder,
+        provider_manager,
+        ConversationMemory(),
+    )
 
     try:
-        response: ChatResponse = await chat_service.chat(QUESTION)
+        response: ChatResponse = await chat_service.chat(ChatRequest(question=QUESTION))
     except LLMUnavailableError as exc:
         print("=" * 60)
         print("All LLM providers failed.")

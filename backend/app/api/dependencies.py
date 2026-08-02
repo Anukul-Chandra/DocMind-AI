@@ -1,7 +1,7 @@
 from functools import lru_cache
 
 from app.core.config import settings
-from app.services.chat import ChatService
+from app.services.chat import ChatService, ConversationMemory
 from app.services.embedding import EmbeddingService
 from app.services.indexing import DocumentIndexService
 from app.services.llm.factory import build_provider_manager
@@ -54,4 +54,5 @@ def get_chat_service() -> ChatService:
         get_retriever(),
         PromptBuilder(),
         build_provider_manager(),
+        ConversationMemory(),
     )

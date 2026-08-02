@@ -25,7 +25,7 @@ async def chat(
         HTTPException: If no LLM provider is available to answer the question.
     """
     try:
-        return await chat_service.chat(request.question)
+        return await chat_service.chat(request)
     except LLMUnavailableError as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
