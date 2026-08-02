@@ -1,4 +1,10 @@
+from pathlib import Path
+
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Project root is the directory that contains the storage/ folder (i.e. backend/).
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 
 class Settings(BaseSettings):
@@ -13,9 +19,9 @@ class Settings(BaseSettings):
     chunk_size: int = 1000
     chunk_overlap: int = 200
 
-    storage_dir: str = "storage"
-    faiss_index_path: str = "storage/faiss/index.faiss"
-    metadata_path: str = "storage/metadata.json"
+    storage_dir: str = str(PROJECT_ROOT / "storage")
+    faiss_index_path: str = str(PROJECT_ROOT / "storage" / "faiss" / "index.faiss")
+    metadata_path: str = str(PROJECT_ROOT / "storage" / "metadata.json")
 
     embedding_model: str = "all-MiniLM-L6-v2"
 
@@ -36,6 +42,23 @@ class Settings(BaseSettings):
     github_api_key: str = ""
     cerebras_api_key: str = ""
     sambanova_api_key: str = ""
+
+    @model_validator(mode="after")
+    def _resolve_storage_paths(self) -> "Settings":
+        """Anchor any relative storage paths to the project root.
+
+        Relative paths (defaults or .env overrides) are resolved against the
+        project root so persistence is machine-independent and never depends
+        on the process working directory.
+
+        Returns:
+            The settings instance with normalized storage paths.
+        """
+        for field in ("storage_dir", "faiss_index_path", "metadata_path"):
+            path = Path(getattr(self, field))
+            if not path.is_absolute():
+                setattr(self, field, str((PROJECT_ROOT / path).resolve()))
+        return self
 
 
 settings = Settings()

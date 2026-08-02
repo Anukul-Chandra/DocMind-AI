@@ -1,8 +1,9 @@
 from functools import lru_cache
 
+from app.core.config import settings
 from app.services.chat import ChatService
 from app.services.embedding import EmbeddingService
-from app.services.indexing import DocumentIndexService, IndexingService
+from app.services.indexing import DocumentIndexService
 from app.services.llm.factory import build_provider_manager
 from app.services.llm.prompt_builder import PromptBuilder
 from app.services.vector_store import VectorStore
@@ -17,21 +18,16 @@ def get_embedding_service() -> EmbeddingService:
 
 @lru_cache
 def get_vector_store() -> VectorStore:
-    return VectorStore(get_embedding_service().get_embedding_dimension())
+    store = VectorStore(get_embedding_service().get_embedding_dimension())
+    store.load_index(settings.faiss_index_path)
+    return store
 
 
 @lru_cache
 def get_metadata_store() -> MetadataStore:
-    return MetadataStore()
-
-
-@lru_cache
-def get_indexing_service() -> IndexingService:
-    return IndexingService(
-        get_embedding_service(),
-        get_vector_store(),
-        get_metadata_store(),
-    )
+    store = MetadataStore()
+    store.load(settings.metadata_path)
+    return store
 
 
 @lru_cache
