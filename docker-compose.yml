@@ -1,0 +1,32 @@
+# Docker Compose configuration for the DocMind-AI local development environment.
+version: "3.9"
+
+services:
+  # PostgreSQL database service used for local development.
+  db:
+    image: postgres:17
+    container_name: docmind-db
+    restart: unless-stopped
+    environment:
+      # Database name created on first startup.
+      POSTGRES_DB: docmind
+      # Superuser name for the database.
+      POSTGRES_USER: docmind
+      # Password for the database user.
+      POSTGRES_PASSWORD: docmind
+    ports:
+      # Expose PostgreSQL on the host so tools/apps can connect.
+      - "5432:5432"
+    volumes:
+      # Persistent volume so data survives container restarts/recreates.
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # Check the database is ready and accepting connections.
+      test: ["CMD-SHELL", "pg_isready -U docmind -d docmind"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# Named volume for persistent PostgreSQL data.
+volumes:
+  pgdata:
