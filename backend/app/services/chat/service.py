@@ -4,7 +4,10 @@ from datetime import datetime, timezone
 from typing import AsyncIterator
 
 from app.models.llm import LLMResponse
-from app.services.chat.memory import ConversationMemory
+from app.repositories.interfaces import (
+    ConversationRepository,
+    LogRepository,
+)
 from app.services.chat.models import (
     ChatRequest,
     ChatResponse,
@@ -14,7 +17,7 @@ from app.services.chat.models import (
 )
 from app.services.llm.provider_manager import ProviderManager
 from app.services.llm.prompt_builder import PromptBuilder
-from app.services.logging.request_logger import RequestLogEntry, RequestLogger
+from app.services.logging.request_logger import RequestLogEntry
 from app.services.retrieval import Retriever
 
 
@@ -33,8 +36,8 @@ class ChatService:
         retriever: Retriever,
         prompt_builder: PromptBuilder,
         provider_manager: ProviderManager,
-        memory: ConversationMemory,
-        request_logger: RequestLogger | None = None,
+        memory: ConversationRepository,
+        request_logger: LogRepository | None = None,
     ) -> None:
         """Initialize the chat service with its collaborators.
 
@@ -42,7 +45,7 @@ class ChatService:
             retriever: Retrieves relevant document chunks for a question.
             prompt_builder: Builds the prompt to send to the LLM.
             provider_manager: Generates an answer via the configured LLM provider.
-            memory: Preserves recent conversation history across follow-ups.
+            memory: Persists conversation history across follow-ups.
             request_logger: Optional best-effort logger for chat requests.
         """
         self._retriever = retriever

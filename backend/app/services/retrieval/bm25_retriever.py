@@ -1,20 +1,14 @@
 import math
 import re
 from collections import Counter
-from typing import Mapping, Protocol
+from typing import Mapping
 
+from app.repositories.interfaces import DocumentRepository
 from app.services.retrieval.base import Retriever
 from app.services.vectorstore.metadata_store import MetadataStore
 from app.services.vectorstore.workspace import DEFAULT_WORKSPACE
 
 TOKEN_PATTERN = re.compile(r"[a-z0-9]+")
-
-
-class DeletionAwareRegistry(Protocol):
-    """Minimal structural interface for a document deletions registry."""
-
-    def is_deleted(self, document_id: str) -> bool:
-        """Return whether a document is marked as deleted."""
 
 
 class BM25Retriever(Retriever):
@@ -32,7 +26,7 @@ class BM25Retriever(Retriever):
     def __init__(
         self,
         metadata_store: MetadataStore,
-        document_registry: DeletionAwareRegistry | None = None,
+        document_registry: DocumentRepository | None = None,
     ) -> None:
         """Initialize the retriever, building the index on first use.
 
