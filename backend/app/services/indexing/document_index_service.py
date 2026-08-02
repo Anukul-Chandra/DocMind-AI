@@ -58,12 +58,14 @@ class DocumentIndexService:
         self,
         pdf_path: str,
         workspace_id: str = DEFAULT_WORKSPACE,
+        document_id: str | None = None,
     ) -> DocumentIndexResult:
         """Extract, clean, chunk, embed, and persist a PDF document.
 
         Args:
             pdf_path: Filesystem path to the PDF to index.
             workspace_id: The workspace the document belongs to.
+            document_id: Identifier of the owning document, or None.
 
         Returns:
             A summary of the indexed document.
@@ -82,6 +84,7 @@ class DocumentIndexService:
                 chunks,
                 Path(pdf_path).name,
                 workspace_id,
+                document_id,
             )
 
             self._vector_store.save(settings.faiss_index_path)
