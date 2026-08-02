@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+from app.services.vectorstore.workspace import DEFAULT_WORKSPACE
+
 
 class MetadataStore:
     """Store document chunk metadata in the order they are added."""
@@ -8,20 +10,28 @@ class MetadataStore:
     def __init__(self) -> None:
         self.documents: list[dict] = []
 
-    def add_documents(self, texts: list[str], filename: str) -> None:
+    def add_documents(
+        self,
+        texts: list[str],
+        filename: str,
+        workspace_id: str = DEFAULT_WORKSPACE,
+    ) -> None:
         """Store document chunks with sequential ids starting from 1.
 
         Args:
             texts: The document text chunks.
             filename: The source document's filename.
+            workspace_id: The workspace the document belongs to.
         """
         start_id = len(self.documents) + 1
         for offset, text in enumerate(texts):
             self.documents.append(
                 {
                     "id": start_id + offset,
-                    "text": text,
+                    "workspace_id": workspace_id,
                     "filename": filename,
+                    "chunk_id": offset + 1,
+                    "text": text,
                 }
             )
 

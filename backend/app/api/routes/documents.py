@@ -1,10 +1,11 @@
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, status
 
 from app.api.dependencies import get_document_index_service
 from app.core.config import settings
 from app.services.indexing import DocumentIndexError, DocumentIndexService
+from app.services.vectorstore.workspace import DEFAULT_WORKSPACE
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -13,6 +14,7 @@ router = APIRouter(prefix="/documents", tags=["documents"])
 async def upload_document(
     file: UploadFile,
     document_index_service: DocumentIndexService = Depends(get_document_index_service),
+    workspace_id: str = Query(default=DEFAULT_WORKSPACE),
 ) -> dict[str, object]:
     """Upload and automatically index a PDF document.
 
@@ -42,7 +44,7 @@ async def upload_document(
     saved_path = _save_upload(file.filename, content)
 
     try:
-        result = document_index_service.index_document(str(saved_path))
+        result = document_index_service.index_document(str(saved_path), workspace_id=workspace_id)
     except DocumentIndexError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

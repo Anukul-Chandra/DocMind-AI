@@ -1,11 +1,14 @@
 from pydantic import BaseModel
 
+from app.services.vectorstore.workspace import DEFAULT_WORKSPACE
+
 
 class ChatRequest(BaseModel):
     """Request payload for a chat completion."""
 
     question: str
     conversation_id: str | None = None
+    workspace_id: str = DEFAULT_WORKSPACE
 
 
 class SourceReference(BaseModel):
