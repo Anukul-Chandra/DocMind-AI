@@ -12,10 +12,12 @@ class Retriever:
         embedding_service: EmbeddingService,
         vector_store: VectorStore,
         metadata_store: MetadataStore,
+        document_registry=None,
     ) -> None:
         self._embedding_service = embedding_service
         self._vector_store = vector_store
         self._metadata_store = metadata_store
+        self._document_registry = document_registry
 
     def retrieve(
         self,
@@ -31,7 +33,8 @@ class Retriever:
             workspace_id: Only chunks belonging to this workspace are returned.
 
         Returns:
-            A list of matching document metadata filtered to the workspace.
+            A list of matching document metadata filtered to the workspace and
+            to non-deleted documents.
         """
         query_embedding = self._embedding_service.generate_embeddings([query])[0]
         _, indices = self._vector_store.search(query_embedding, k)
@@ -40,6 +43,25 @@ class Retriever:
             if index == -1:
                 continue
             document = self._metadata_store.get_document(index)
-            if document["workspace_id"] == workspace_id:
-                documents.append(document)
+            if not self._is_eligible(document, workspace_id):
+                continue
+            documents.append(document)
         return documents
+
+    def _is_eligible(self, document: dict, workspace_id: str) -> bool:
+        """Return whether a chunk should be returned for the workspace.
+
+        Args:
+            document: The chunk metadata to check.
+            workspace_id: The requested workspace.
+
+        Returns:
+            True if the chunk belongs to the workspace and its document is not
+            deleted.
+        """
+        if document["workspace_id"] != workspace_id:
+            return False
+        document_id = document.get("document_id")
+        if document_id and self._document_registry is not None:
+            return not self._document_registry.is_deleted(document_id)
+        return True

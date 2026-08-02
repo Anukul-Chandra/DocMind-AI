@@ -15,6 +15,7 @@ class MetadataStore:
         texts: list[str],
         filename: str,
         workspace_id: str = DEFAULT_WORKSPACE,
+        document_id: str | None = None,
     ) -> None:
         """Store document chunks with sequential ids starting from 1.
 
@@ -22,7 +23,9 @@ class MetadataStore:
             texts: The document text chunks.
             filename: The source document's filename.
             workspace_id: The workspace the document belongs to.
+            document_id: The identifier of the owning document, or None.
         """
+        document_id = document_id or ""
         start_id = len(self.documents) + 1
         for offset, text in enumerate(texts):
             self.documents.append(
@@ -31,6 +34,7 @@ class MetadataStore:
                     "workspace_id": workspace_id,
                     "filename": filename,
                     "chunk_id": offset + 1,
+                    "document_id": document_id,
                     "text": text,
                 }
             )
