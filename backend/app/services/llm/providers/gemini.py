@@ -1,5 +1,6 @@
 from google import genai
 from google.genai import errors, types
+from httpx import ConnectError, TimeoutException
 
 from app.core.config import settings
 from app.services.llm.providers.base import BaseProvider, RecoverableError
@@ -94,8 +95,10 @@ class GeminiProvider(BaseProvider):
             raise GeminiAPIError(f"Gemini server error {exc.code}: {exc}") from exc
         except errors.APIError as exc:
             raise GeminiAPIError(f"Gemini API error {exc.code}: {exc}") from exc
-        except Exception as exc:
-            raise GeminiError(f"Gemini request failed: {exc}") from exc
+        except (TimeoutException, ConnectError) as exc:
+            raise GeminiError(
+                f"Gemini request failed at the network layer: {exc}"
+            ) from exc
 
         content = response.text
         if content is None:
