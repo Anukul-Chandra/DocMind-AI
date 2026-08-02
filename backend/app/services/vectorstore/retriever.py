@@ -1,17 +1,9 @@
-from typing import Protocol
-
+from app.repositories.interfaces import DocumentRepository
 from app.services.embedding import EmbeddingService
 from app.services.retrieval.base import Retriever
 from app.services.vector_store import VectorStore
 from app.services.vectorstore.metadata_store import MetadataStore
 from app.services.vectorstore.workspace import DEFAULT_WORKSPACE
-
-
-class DeletionAwareRegistry(Protocol):
-    """Minimal structural interface for a deletions registry."""
-
-    def is_deleted(self, document_id: str) -> bool:
-        """Return whether a document is marked as deleted."""
 
 
 class SemanticRetriever(Retriever):
@@ -22,7 +14,7 @@ class SemanticRetriever(Retriever):
         embedding_service: EmbeddingService,
         vector_store: VectorStore,
         metadata_store: MetadataStore,
-        document_registry: DeletionAwareRegistry | None = None,
+        document_registry: DocumentRepository | None = None,
     ) -> None:
         self._document_registry = document_registry
         self._embedding_service = embedding_service

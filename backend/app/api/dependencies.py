@@ -1,7 +1,18 @@
 from functools import lru_cache
 
 from app.core.config import settings
-from app.services.chat import ChatService, ConversationMemory
+from app.repositories import (
+    ConversationRepository,
+    DocumentRepository,
+    JsonConversationRepository,
+    JsonDocumentRepository,
+    JsonLogRepository,
+    JsonWorkspaceRepository,
+    LogRepository,
+    WorkspaceRepository,
+)
+from app.services.chat import ChatService
+from app.services.chat.memory import ConversationMemory
 from app.services.document_registry import DocumentRegistry
 from app.services.embedding import EmbeddingService
 from app.services.indexing import DocumentIndexService
@@ -48,17 +59,27 @@ def get_document_registry() -> DocumentRegistry:
 
 
 @lru_cache
+def get_document_repository() -> DocumentRepository:
+    return JsonDocumentRepository(get_document_registry())
+
+
+@lru_cache
+def get_workspace_repository() -> WorkspaceRepository:
+    return JsonWorkspaceRepository(get_document_repository())
+
+
+@lru_cache
 def get_retriever() -> Retriever:
     return HybridRetriever(
         semantic_retriever=SemanticRetriever(
             get_embedding_service(),
             get_vector_store(),
             get_metadata_store(),
-            get_document_registry(),
+            get_document_repository(),
         ),
         bm25_retriever=BM25Retriever(
             get_metadata_store(),
-            get_document_registry(),
+            get_document_repository(),
         ),
     )
 
@@ -69,11 +90,21 @@ def get_request_logger() -> RequestLogger:
 
 
 @lru_cache
+def get_log_repository() -> LogRepository:
+    return JsonLogRepository(get_request_logger())
+
+
+@lru_cache
+def get_conversation_repository() -> ConversationRepository:
+    return JsonConversationRepository(ConversationMemory())
+
+
+@lru_cache
 def get_chat_service() -> ChatService:
     return ChatService(
         get_retriever(),
         PromptBuilder(),
         build_provider_manager(),
-        ConversationMemory(),
-        get_request_logger(),
+        get_conversation_repository(),
+        get_log_repository(),
     )

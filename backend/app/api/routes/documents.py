@@ -3,10 +3,14 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, status
 
-from app.api.dependencies import get_document_index_service, get_document_registry
+from app.api.dependencies import (
+    get_document_index_service,
+    get_document_repository,
+)
 from app.core.config import settings
 from app.models.responses import DeleteResult, SuccessResponse, UploadResult
-from app.services.document_registry import Document, DocumentRegistry
+from app.repositories.interfaces import DocumentRepository
+from app.services.document_registry import Document
 from app.services.indexing import DocumentIndexError, DocumentIndexService
 from app.services.vectorstore.workspace import DEFAULT_WORKSPACE
 
@@ -21,7 +25,7 @@ router = APIRouter(prefix="/documents", tags=["documents"])
 async def upload_document(
     file: UploadFile,
     document_index_service: DocumentIndexService = Depends(get_document_index_service),
-    document_registry: DocumentRegistry = Depends(get_document_registry),
+    document_repository: DocumentRepository = Depends(get_document_repository),
     workspace_id: str = Query(default=DEFAULT_WORKSPACE),
 ) -> SuccessResponse[UploadResult]:
     """Upload and automatically index a PDF document.
@@ -29,7 +33,7 @@ async def upload_document(
     Args:
         file: The uploaded PDF file.
         document_index_service: The service that indexes the uploaded PDF.
-        document_registry: Registers the indexed document for management.
+        document_repository: Persists the indexed document for management.
         workspace_id: The workspace the document belongs to.
 
     Returns:
@@ -71,7 +75,7 @@ async def upload_document(
             detail=f"Unexpected error while indexing: {exc}",
         ) from exc
 
-    document = document_registry.register(
+    document = document_repository.register(
         workspace_id=workspace_id,
         filename=result.filename,
         chunk_count=result.total_chunks,
@@ -92,29 +96,29 @@ async def upload_document(
 
 @router.get("", response_model=SuccessResponse[list[Document]])
 def list_documents(
-    document_registry: DocumentRegistry = Depends(get_document_registry),
+    document_repository: DocumentRepository = Depends(get_document_repository),
 ) -> SuccessResponse[list[Document]]:
     """Return all indexed documents.
 
     Args:
-        document_registry: The registry of indexed documents.
+        document_repository: The repository of indexed documents.
 
     Returns:
         A success envelope with all registered documents.
     """
-    return SuccessResponse(data=document_registry.list_documents())
+    return SuccessResponse(data=document_repository.list_documents())
 
 
 @router.get("/{document_id}", response_model=SuccessResponse[Document])
 def get_document(
     document_id: str,
-    document_registry: DocumentRegistry = Depends(get_document_registry),
+    document_repository: DocumentRepository = Depends(get_document_repository),
 ) -> SuccessResponse[Document]:
     """Return a single indexed document.
 
     Args:
         document_id: The document identifier.
-        document_registry: The registry of indexed documents.
+        document_repository: The repository of indexed documents.
 
     Returns:
         A success envelope with the matching document.
@@ -122,7 +126,7 @@ def get_document(
     Raises:
         HTTPException: If the document does not exist.
     """
-    document = document_registry.get_document(document_id)
+    document = document_repository.get_document(document_id)
     if document is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -134,7 +138,7 @@ def get_document(
 @router.delete("/{document_id}", response_model=SuccessResponse[DeleteResult])
 def delete_document(
     document_id: str,
-    document_registry: DocumentRegistry = Depends(get_document_registry),
+    document_repository: DocumentRepository = Depends(get_document_repository),
 ) -> SuccessResponse[DeleteResult]:
     """Mark a document as deleted so retrieval and chat ignore it.
 
@@ -142,7 +146,7 @@ def delete_document(
 
     Args:
         document_id: The document identifier.
-        document_registry: The registry of indexed documents.
+        document_repository: The repository of indexed documents.
 
     Returns:
         A success envelope describing the deletion outcome.
@@ -150,7 +154,7 @@ def delete_document(
     Raises:
         HTTPException: If the document does not exist or is already deleted.
     """
-    if not document_registry.delete_document(document_id):
+    if not document_repository.delete_document(document_id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Document not found or already deleted.",

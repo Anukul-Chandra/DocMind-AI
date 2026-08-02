@@ -9,6 +9,7 @@ It is intended to be run manually only. It does not create any API endpoint or s
 
 import asyncio
 
+from app.repositories.json.conversation_repository import JsonConversationRepository
 from app.services.chat.memory import ConversationMemory
 from app.services.chat.models import ChatRequest, ChatResponse
 from app.services.chat.service import ChatService
@@ -56,7 +57,7 @@ async def main() -> None:
         retriever,
         prompt_builder,
         provider_manager,
-        ConversationMemory(),
+        JsonConversationRepository(ConversationMemory()),
     )
 
     try:
