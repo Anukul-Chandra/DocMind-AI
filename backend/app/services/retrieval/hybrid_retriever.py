@@ -3,6 +3,7 @@
 from collections import defaultdict
 
 from app.services.retrieval.base import Retriever
+from app.services.retrieval.reranker import Reranker, SemanticReranker
 from app.services.vectorstore.workspace import DEFAULT_WORKSPACE
 
 
@@ -15,7 +16,8 @@ class HybridRetriever(Retriever):
         3. Merge both result lists.
         4. Remove duplicate chunks (a single chunk may appear in both lists).
         5. Rank combined results by reciprocal rank fusion (RRF).
-        6. Return the top-k chunks.
+        6. Rerank the fused results with an injected reranker.
+        7. Return the top-k chunks.
     """
 
     RRF_K = 60.0
@@ -24,15 +26,22 @@ class HybridRetriever(Retriever):
         self,
         semantic_retriever: Retriever,
         bm25_retriever: Retriever,
+        reranker: Reranker | None = None,
     ) -> None:
-        """Initialize the hybrid retriever with its two sub-retrievers.
+        """Initialize the hybrid retriever with its sub-retrievers.
+
+        The reranker defaults to the dependency-free ``SemanticReranker``; pass
+        a different ``Reranker`` implementation (e.g. a Cohere or BGE-powered
+        one) to swap it without changing callers.
 
         Args:
             semantic_retriever: The FAISS-backed semantic retriever.
             bm25_retriever: The keyword-backed BM25 retriever.
+            reranker: The reranker used to reorder fused results.
         """
         self._semantic = semantic_retriever
         self._bm25 = bm25_retriever
+        self._reranker = reranker or SemanticReranker()
 
     def retrieve(
         self,
@@ -40,7 +49,7 @@ class HybridRetriever(Retriever):
         k: int = 5,
         workspace_id: str = DEFAULT_WORKSPACE,
     ) -> list[dict]:
-        """Retrieve the top-k chunks combining BM25 and FAISS results.
+        """Retrieve and rerank the top-k chunks combining BM25 and FAISS.
 
         Args:
             query: The search query text.
@@ -48,7 +57,7 @@ class HybridRetriever(Retriever):
             workspace_id: Only chunks belonging to this workspace are returned.
 
         Returns:
-            The top-k merged, deduplicated chunks ordered best first.
+            The top-k merged, deduplicated, reranked chunks (best first).
         """
         semantic_results = self._semantic.retrieve(
             query, k=k, workspace_id=workspace_id
@@ -58,7 +67,7 @@ class HybridRetriever(Retriever):
         )
 
         fused = self._fuse(semantic_results, keyword_results)
-        return fused[:k]
+        return self._reranker.rerank(query, fused, k=k)
 
     def _fuse(
         self,
