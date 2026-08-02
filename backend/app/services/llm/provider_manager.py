@@ -57,7 +57,11 @@ class ProviderManager:
                     max_tokens=max_tokens,
                 )
                 logger.info("Success: Provider = %s", provider_name)
-                return LLMResponse(text=text, provider=provider_name)
+                return LLMResponse(
+                    text=text,
+                    provider=provider_name,
+                    model=provider.model,
+                )
             except RecoverableError as exc:
                 self._errors.append((provider_name, exc))
                 logger.warning(

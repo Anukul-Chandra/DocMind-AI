@@ -8,6 +8,15 @@ class RecoverableError(Exception):
 class BaseProvider(ABC):
     """Abstract interface for all LLM providers."""
 
+    @property
+    @abstractmethod
+    def model(self) -> str:
+        """Return the identifier of the model currently used by the provider.
+
+        Returns:
+            The current model identifier.
+        """
+
     @abstractmethod
     async def generate(
         self,

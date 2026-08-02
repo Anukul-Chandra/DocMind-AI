@@ -48,6 +48,15 @@ class OpenRouterProvider(BaseProvider):
             timeout=settings.timeout,
         )
 
+    @property
+    def model(self) -> str:
+        """Return the current OpenRouter model from the pool.
+
+        Returns:
+            The current model identifier.
+        """
+        return self._model_pool.get_current_model()
+
     async def generate(
         self,
         prompt: str,

@@ -38,6 +38,15 @@ class GroqProvider(BaseProvider):
         self._model: str = settings.groq_model
         self._client = AsyncGroq(api_key=self._api_key)
 
+    @property
+    def model(self) -> str:
+        """Return the configured Groq model identifier.
+
+        Returns:
+            The current model identifier.
+        """
+        return self._model
+
     async def generate(
         self,
         prompt: str,

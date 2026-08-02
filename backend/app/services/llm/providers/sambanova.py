@@ -4,6 +4,15 @@ from app.services.llm.providers.base import BaseProvider
 class SambaNovaProvider(BaseProvider):
     """SambaNova-backed LLM provider."""
 
+    @property
+    def model(self) -> str:
+        """Return the provider name as a placeholder model identifier.
+
+        Returns:
+            The provider name.
+        """
+        return type(self).__name__
+
     async def generate(
         self,
         prompt: str,
