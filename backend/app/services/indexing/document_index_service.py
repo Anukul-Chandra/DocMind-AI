@@ -20,8 +20,12 @@ class DocumentIndexResult:
     """Summary of a completed document indexing operation."""
 
     filename: str
-    chunks_indexed: int
-    embedding_count: int
+    total_chunks: int
+    total_embeddings: int
+
+
+class DocumentIndexError(Exception):
+    """Raised when a document cannot be fully indexed."""
 
 
 class DocumentIndexService:
@@ -59,24 +63,28 @@ class DocumentIndexService:
             A summary of the indexed document.
 
         Raises:
-            HTTPException: If the PDF cannot be parsed or contains no text.
-            Exception: If indexing fails and the PDF is invalid.
+            DocumentIndexError: If the document cannot be extracted or indexed.
         """
-        text = extract_text_from_pdf(self._to_upload_file(pdf_path))
-        cleaned_text = clean_text(text)
-        chunks = chunk_text(cleaned_text)
+        try:
+            text = extract_text_from_pdf(self._to_upload_file(pdf_path))
+            cleaned_text = clean_text(text)
+            chunks = chunk_text(cleaned_text)
 
-        embeddings = self._embedding_service.generate_embeddings(chunks)
-        self._vector_store.add_embeddings(embeddings)
-        self._metadata_store.add_documents(chunks, Path(pdf_path).name)
+            embeddings = self._embedding_service.generate_embeddings(chunks)
+            self._vector_store.add_embeddings(embeddings)
+            self._metadata_store.add_documents(chunks, Path(pdf_path).name)
 
-        self._vector_store.save(settings.faiss_index_path)
-        self._metadata_store.save(settings.metadata_path)
+            self._vector_store.save(settings.faiss_index_path)
+            self._metadata_store.save(settings.metadata_path)
+        except Exception as exc:
+            raise DocumentIndexError(
+                f"Failed to index document {Path(pdf_path).name}: {exc}"
+            ) from exc
 
         return DocumentIndexResult(
             filename=Path(pdf_path).name,
-            chunks_indexed=len(chunks),
-            embedding_count=len(embeddings),
+            total_chunks=len(chunks),
+            total_embeddings=len(embeddings),
         )
 
     @staticmethod
