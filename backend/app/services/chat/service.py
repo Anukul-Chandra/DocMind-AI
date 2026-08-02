@@ -1,5 +1,5 @@
 from app.models.llm import LLMResponse
-from app.services.chat.models import ChatResponse
+from app.services.chat.models import ChatResponse, SourceReference
 from app.services.llm.provider_manager import ProviderManager
 from app.services.llm.prompt_builder import PromptBuilder
 from app.services.vectorstore.retriever import Retriever
@@ -38,14 +38,18 @@ class ChatService:
             question: The user's question.
 
         Returns:
-            A chat response containing the LLM answer and provenance
-            information (provider and model).
+            A chat response containing the LLM answer, provider provenance,
+            and the source references used to generate the answer.
         """
         contexts = self._retriever.retrieve(question)
-        prompt = self._prompt_builder.build_prompt(question, contexts)
-        response: LLMResponse = await self._provider_manager.generate(prompt)
+        rag_prompt = self._prompt_builder.build_prompt(question, contexts)
+        response: LLMResponse = await self._provider_manager.generate(rag_prompt.text)
         return ChatResponse(
             answer=response.text,
             provider=response.provider,
             model=response.model,
+            sources=[
+                SourceReference(filename=source["filename"], chunk_id=source["chunk_id"])
+                for source in rag_prompt.sources
+            ],
         )
