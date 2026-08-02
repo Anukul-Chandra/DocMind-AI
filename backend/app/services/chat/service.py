@@ -1,10 +1,17 @@
 import time
 import uuid
 from datetime import datetime, timezone
+from typing import AsyncIterator
 
 from app.models.llm import LLMResponse
 from app.services.chat.memory import ConversationMemory
-from app.services.chat.models import ChatRequest, ChatResponse, SourceReference
+from app.services.chat.models import (
+    ChatRequest,
+    ChatResponse,
+    ChatStreamEvent,
+    SourceReference,
+    StreamEventType,
+)
 from app.services.llm.provider_manager import ProviderManager
 from app.services.llm.prompt_builder import PromptBuilder
 from app.services.logging.request_logger import RequestLogEntry, RequestLogger
@@ -99,6 +106,100 @@ class ChatService:
             success = False
             error_message = str(exc)
             raise
+        finally:
+            response_time_ms = (time.perf_counter() - start) * 1000.0
+            self._write_log(
+                request,
+                request_id,
+                conversation_id,
+                provider,
+                model,
+                chunk_count,
+                response_time_ms,
+                success,
+                error_message,
+            )
+
+    async def stream_chat(self, request: ChatRequest) -> AsyncIterator[ChatStreamEvent]:
+        """Answer a question over a streaming response channel.
+
+        Retrieval, prompt building, conversation memory, and logging behave the
+        same as :meth:`chat`. The LLM output is streamed back as a sequence of
+        events: ``sources`` (workspace, conversation, and retrieved sources),
+        ``delta`` (text fragments), and ``provenance`` (provider and model). On
+        failure, an ``error`` event is emitted instead of a completed answer.
+
+        Args:
+            request: The chat request with the question, an optional
+                ``conversation_id``, and a ``workspace_id``.
+
+        Yields:
+            ChatStreamEvent objects describing the streaming chat turn.
+
+        Raises:
+            LLMUnavailableError: If no provider could start streaming.
+        """
+        request_id = str(uuid.uuid4())
+        start = time.perf_counter()
+        conversation_id = request.conversation_id or self._memory.create_conversation()
+        provider = ""
+        model = ""
+        chunk_count = 0
+        success = True
+        error_message = None
+        parts: list[str] = []
+
+        try:
+            contexts = self._retriever.retrieve(
+                request.question,
+                workspace_id=request.workspace_id,
+            )
+            chunk_count = len(contexts)
+            rag_prompt = self._prompt_builder.build_prompt(
+                request.question,
+                contexts,
+                self._memory.get_history(conversation_id),
+            )
+            sources = [
+                {"filename": source["filename"], "chunk_id": source["chunk_id"]}
+                for source in rag_prompt.sources
+            ]
+            yield ChatStreamEvent(
+                type=StreamEventType.SOURCES,
+                data={
+                    "workspace_id": request.workspace_id,
+                    "conversation_id": conversation_id,
+                    "sources": sources,
+                },
+            )
+            async for chunk in self._provider_manager.generate_stream(rag_prompt.text):
+                provider = chunk.provider
+                model = chunk.model
+                parts.append(chunk.content)
+                yield ChatStreamEvent(
+                    type=StreamEventType.DELTA,
+                    data={"content": chunk.content},
+                )
+            self._memory.add_exchange(
+                conversation_id,
+                request.question,
+                "".join(parts),
+            )
+            yield ChatStreamEvent(
+                type=StreamEventType.PROVENANCE,
+                data={
+                    "provider": provider,
+                    "model": model,
+                    "conversation_id": conversation_id,
+                },
+            )
+        except Exception as exc:
+            success = False
+            error_message = str(exc)
+            yield ChatStreamEvent(
+                type=StreamEventType.ERROR,
+                data={"message": str(exc)},
+            )
         finally:
             response_time_ms = (time.perf_counter() - start) * 1000.0
             self._write_log(
