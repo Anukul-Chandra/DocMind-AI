@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, status
 
 from app.api.dependencies import get_document_index_service, get_document_registry
 from app.core.config import settings
+from app.models.responses import DeleteResult, SuccessResponse, UploadResult
 from app.services.document_registry import Document, DocumentRegistry
 from app.services.indexing import DocumentIndexError, DocumentIndexService
 from app.services.vectorstore.workspace import DEFAULT_WORKSPACE
@@ -12,13 +13,17 @@ from app.services.vectorstore.workspace import DEFAULT_WORKSPACE
 router = APIRouter(prefix="/documents", tags=["documents"])
 
 
-@router.post("/upload", status_code=status.HTTP_200_OK)
+@router.post(
+    "/upload",
+    response_model=SuccessResponse[UploadResult],
+    status_code=status.HTTP_200_OK,
+)
 async def upload_document(
     file: UploadFile,
     document_index_service: DocumentIndexService = Depends(get_document_index_service),
     document_registry: DocumentRegistry = Depends(get_document_registry),
     workspace_id: str = Query(default=DEFAULT_WORKSPACE),
-) -> dict[str, object]:
+) -> SuccessResponse[UploadResult]:
     """Upload and automatically index a PDF document.
 
     Args:
@@ -28,7 +33,7 @@ async def upload_document(
         workspace_id: The workspace the document belongs to.
 
     Returns:
-        A dict summarizing the indexed document.
+        A success envelope summarizing the indexed document.
 
     Raises:
         HTTPException: If the file is invalid, cannot be saved, or cannot be indexed.
@@ -73,36 +78,38 @@ async def upload_document(
         document_id=document_id,
     )
 
-    return {
-        "document_id": document.document_id,
-        "workspace_id": document.workspace_id,
-        "filename": document.filename,
-        "chunks": result.total_chunks,
-        "embeddings": result.total_embeddings,
-        "status": "indexed",
-    }
+    return SuccessResponse(
+        data=UploadResult(
+            document_id=document.document_id,
+            workspace_id=document.workspace_id,
+            filename=document.filename,
+            chunks=result.total_chunks,
+            embeddings=result.total_embeddings,
+            status="indexed",
+        )
+    )
 
 
-@router.get("", response_model=list[Document])
+@router.get("", response_model=SuccessResponse[list[Document]])
 def list_documents(
     document_registry: DocumentRegistry = Depends(get_document_registry),
-) -> list[Document]:
+) -> SuccessResponse[list[Document]]:
     """Return all indexed documents.
 
     Args:
         document_registry: The registry of indexed documents.
 
     Returns:
-        A list of all registered documents.
+        A success envelope with all registered documents.
     """
-    return document_registry.list_documents()
+    return SuccessResponse(data=document_registry.list_documents())
 
 
-@router.get("/{document_id}", response_model=Document)
+@router.get("/{document_id}", response_model=SuccessResponse[Document])
 def get_document(
     document_id: str,
     document_registry: DocumentRegistry = Depends(get_document_registry),
-) -> Document:
+) -> SuccessResponse[Document]:
     """Return a single indexed document.
 
     Args:
@@ -110,7 +117,7 @@ def get_document(
         document_registry: The registry of indexed documents.
 
     Returns:
-        The matching document.
+        A success envelope with the matching document.
 
     Raises:
         HTTPException: If the document does not exist.
@@ -121,14 +128,14 @@ def get_document(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Document not found.",
         )
-    return document
+    return SuccessResponse(data=document)
 
 
-@router.delete("/{document_id}")
+@router.delete("/{document_id}", response_model=SuccessResponse[DeleteResult])
 def delete_document(
     document_id: str,
     document_registry: DocumentRegistry = Depends(get_document_registry),
-) -> dict[str, object]:
+) -> SuccessResponse[DeleteResult]:
     """Mark a document as deleted so retrieval and chat ignore it.
 
     The FAISS vectors are not removed; only the registry entry is marked.
@@ -138,7 +145,7 @@ def delete_document(
         document_registry: The registry of indexed documents.
 
     Returns:
-        A dict describing the deletion outcome.
+        A success envelope describing the deletion outcome.
 
     Raises:
         HTTPException: If the document does not exist or is already deleted.
@@ -148,7 +155,9 @@ def delete_document(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Document not found or already deleted.",
         )
-    return {"document_id": document_id, "status": "deleted"}
+    return SuccessResponse(
+        data=DeleteResult(document_id=document_id, status="deleted")
+    )
 
 
 def _is_pdf(filename: str | None) -> bool:
