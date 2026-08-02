@@ -5,6 +5,7 @@ class ChatRequest(BaseModel):
     """Request payload for a chat completion."""
 
     question: str
+    conversation_id: str | None = None
 
 
 class SourceReference(BaseModel):
@@ -21,3 +22,4 @@ class ChatResponse(BaseModel):
     provider: str
     model: str
     sources: list[SourceReference]
+    conversation_id: str

@@ -1,3 +1,4 @@
+from app.services.chat.memory import ConversationMemory
 from app.services.chat.models import (
     ChatRequest,
     ChatResponse,
@@ -5,4 +6,10 @@ from app.services.chat.models import (
 )
 from app.services.chat.service import ChatService
 
-__all__ = ["ChatRequest", "ChatResponse", "ChatService", "SourceReference"]
+__all__ = [
+    "ChatRequest",
+    "ChatResponse",
+    "ChatService",
+    "ConversationMemory",
+    "SourceReference",
+]
