@@ -6,22 +6,16 @@ from app.services.llm.model_catalog import ModelCatalogService, ModelCatalogErro
 from app.services.llm.model_pool import ModelPoolManager
 from app.services.llm.provider_manager import ProviderManager
 from app.services.llm.providers.base import BaseProvider
-from app.services.llm.providers.cerebras import CerebrasProvider
 from app.services.llm.providers.gemini import GeminiProvider
-from app.services.llm.providers.github_models import GitHubModelsProvider
 from app.services.llm.providers.groq import GroqProvider
 from app.services.llm.providers.openrouter import OpenRouterProvider
-from app.services.llm.providers.sambanova import SambaNovaProvider
 
 logger = logging.getLogger(__name__)
 
 PROVIDERS: dict[str, type[BaseProvider]] = {
     "openrouter": OpenRouterProvider,
-    "github": GitHubModelsProvider,
-    "cerebras": CerebrasProvider,
     "gemini": GeminiProvider,
     "groq": GroqProvider,
-    "sambanova": SambaNovaProvider,
 }
 
 
