@@ -18,7 +18,7 @@ from app.services.llm.provider_manager import LLMUnavailableError
 from app.services.llm.prompt_builder import PromptBuilder
 from app.services.vector_store import VectorStore
 from app.services.vectorstore.metadata_store import MetadataStore
-from app.services.vectorstore.retriever import Retriever
+from app.services.vectorstore.retriever import SemanticRetriever
 
 SAMPLE_FILENAME = "sample_docs.txt"
 SAMPLE_CHUNKS: list[str] = [
@@ -29,11 +29,11 @@ SAMPLE_CHUNKS: list[str] = [
 QUESTION = "What is FastAPI?"
 
 
-def build_retriever() -> Retriever:
-    """Build a Retriever seeded with a small sample document.
+def build_retriever() -> SemanticRetriever:
+    """Build a SemanticRetriever seeded with a small sample document.
 
 Returns:
-            A Retriever backed by an in-memory FAISS index that contains the
+            A SemanticRetriever backed by an in-memory FAISS index that contains the
             sample chunks, ready for retrieval.
     """
     embedding_service = EmbeddingService()
@@ -44,7 +44,7 @@ Returns:
     vector_store.add_embeddings(embeddings)
     metadata_store.add_documents(SAMPLE_CHUNKS, SAMPLE_FILENAME)
 
-    return Retriever(embedding_service, vector_store, metadata_store)
+    return SemanticRetriever(embedding_service, vector_store, metadata_store)
 
 
 async def main() -> None:

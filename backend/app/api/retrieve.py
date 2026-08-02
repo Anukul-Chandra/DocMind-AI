@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app.api.dependencies import get_retriever as get_shared_retriever
 from app.models.retrieve import RetrieveRequest, RetrieveResponse
-from app.services.vectorstore.retriever import Retriever
+from app.services.retrieval import Retriever
 
 router = APIRouter()
 
