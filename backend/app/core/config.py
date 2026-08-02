@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     faiss_index_path: str = str(PROJECT_ROOT / "storage" / "faiss" / "index.faiss")
     metadata_path: str = str(PROJECT_ROOT / "storage" / "metadata.json")
     documents_path: str = str(PROJECT_ROOT / "storage" / "documents.json")
+    logs_dir: str = str(PROJECT_ROOT / "storage" / "logs")
 
     embedding_model: str = "all-MiniLM-L6-v2"
 
@@ -55,7 +56,13 @@ class Settings(BaseSettings):
         Returns:
             The settings instance with normalized storage paths.
         """
-        for field in ("storage_dir", "faiss_index_path", "metadata_path", "documents_path"):
+        for field in (
+        "storage_dir",
+        "faiss_index_path",
+        "metadata_path",
+        "documents_path",
+        "logs_dir",
+    ):
             path = Path(getattr(self, field))
             if not path.is_absolute():
                 setattr(self, field, str((PROJECT_ROOT / path).resolve()))
