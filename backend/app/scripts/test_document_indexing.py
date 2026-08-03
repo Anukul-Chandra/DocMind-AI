@@ -1,4 +1,4 @@
-"""Manual integration test for the DocumentIndexService.
+"""Manual integration test for the DocumentService.
 
 This manually indexes a single PDF end to end and prints a summary, then
 reloads the persisted FAISS index and metadata from disk to verify that the
@@ -10,26 +10,35 @@ Usage:
 It is intended to be run manually only. It does not create any API endpoint.
 """
 
+import asyncio
 import os
 import sys
 
 from app.core.config import settings
+from app.services.document import Chunker, DocumentService, PDFProcessor
 from app.services.embedding import EmbeddingService
-from app.services.indexing import DocumentIndexService
 from app.services.vector_store import VectorStore
 from app.services.vectorstore.metadata_store import MetadataStore
 
 
-def build_indexing_service() -> tuple[DocumentIndexService, VectorStore, MetadataStore]:
-    """Build a DocumentIndexService with its collaborators.
+def build_document_service() -> tuple[DocumentService, VectorStore, MetadataStore]:
+    """Build a DocumentService with its collaborators.
 
     Returns:
-        A tuple of the DocumentIndexService, its VectorStore, and its MetadataStore.
+        A tuple of the DocumentService, its VectorStore, and its MetadataStore.
     """
     embedding_service = EmbeddingService()
     vector_store = VectorStore(dimension=embedding_service.get_embedding_dimension())
     metadata_store = MetadataStore()
-    service = DocumentIndexService(embedding_service, vector_store, metadata_store)
+    service = DocumentService(
+        PDFProcessor(),
+        Chunker(),
+        embedding_service,
+        vector_store,
+        metadata_store,
+        faiss_index_path=settings.faiss_index_path,
+        metadata_path=settings.metadata_path,
+    )
     return service, vector_store, metadata_store
 
 
@@ -53,10 +62,10 @@ def main(pdf_path: str) -> None:
         print("=" * 60)
         return
 
-    service, vector_store, metadata_store = build_indexing_service()
+    service, vector_store, metadata_store = build_document_service()
 
     try:
-        result = service.index_document(pdf_path)
+        result = asyncio.run(service.index_document(pdf_path))
     except Exception as exc:  # noqa: BLE001 - manual test should not crash
         print("\nIndexing failed:")
         print(f"  {type(exc).__name__}: {exc}")
