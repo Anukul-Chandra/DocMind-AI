@@ -10,6 +10,12 @@ from app.repositories.json import (
     JsonLogRepository,
     JsonWorkspaceRepository,
 )
+from app.repositories.postgres import (
+    PostgresConversationRepository,
+    PostgresDocumentRepository,
+    PostgresLogRepository,
+    PostgresWorkspaceRepository,
+)
 
 __all__ = [
     "ConversationRepository",
@@ -20,4 +26,8 @@ __all__ = [
     "JsonDocumentRepository",
     "JsonLogRepository",
     "JsonWorkspaceRepository",
+    "PostgresConversationRepository",
+    "PostgresDocumentRepository",
+    "PostgresLogRepository",
+    "PostgresWorkspaceRepository",
 ]

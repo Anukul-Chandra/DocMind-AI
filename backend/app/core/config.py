@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     documents_path: str = str(PROJECT_ROOT / "storage" / "documents.json")
     logs_dir: str = str(PROJECT_ROOT / "storage" / "logs")
 
+    persistence_backend: str = "json"
+    database_url: str = ""
+
     embedding_model: str = "all-MiniLM-L6-v2"
 
     llm_provider: str = ""

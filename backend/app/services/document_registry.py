@@ -1,11 +1,12 @@
 """Document model and in-memory/JSON registry for indexed documents."""
 
-import json
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
 from pydantic import BaseModel
+
+from app.services.storage import JsonFileStore
 
 
 class Document(BaseModel):
@@ -140,18 +141,12 @@ class DocumentRegistry:
 
     def _save(self) -> None:
         """Persist the registry to the JSON storage file."""
-        self._path.parent.mkdir(parents=True, exist_ok=True)
         data = [document.model_dump(mode="json") for document in self._documents.values()]
-        with open(self._path, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2)
+        JsonFileStore.save(self._path, data)
 
     def _load(self) -> None:
         """Load documents from the JSON storage file, starting empty if missing."""
-        if not self._path.exists():
-            self._documents = {}
-            return
-        with open(self._path, "r", encoding="utf-8") as f:
-            data = json.load(f)
+        data = JsonFileStore.load(self._path, default=[])
         self._documents = {
             item["document_id"]: Document(**item) for item in data
         }

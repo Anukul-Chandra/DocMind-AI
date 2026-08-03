@@ -2,12 +2,13 @@
 Manual integration test for the OpenRouter Model Catalog.
 """
 
+from app.core.config import settings
 from app.services.llm.model_catalog import ModelCatalogService
 
 
 def main() -> None:
     """Run the OpenRouter model catalog test."""
-    service = ModelCatalogService()
+    service = ModelCatalogService(api_key=settings.openrouter_api_key)
 
     models = service.get_free_models()
 

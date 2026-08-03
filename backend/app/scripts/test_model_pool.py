@@ -2,12 +2,13 @@
 Manual test for ModelPoolManager.
 """
 
+from app.core.config import settings
 from app.services.llm.model_catalog import ModelCatalogService
 from app.services.llm.model_pool import ModelPoolManager
 
 
 def main() -> None:
-    catalog = ModelCatalogService()
+    catalog = ModelCatalogService(api_key=settings.openrouter_api_key)
 
     models = catalog.get_free_models()
 

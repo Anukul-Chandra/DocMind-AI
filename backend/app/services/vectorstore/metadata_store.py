@@ -1,6 +1,4 @@
-import json
-from pathlib import Path
-
+from app.services.storage import JsonFileStore
 from app.services.vectorstore.workspace import DEFAULT_WORKSPACE
 
 
@@ -69,12 +67,7 @@ class MetadataStore:
         Args:
             path: The file path to save the metadata to.
         """
-        Path(path).parent.mkdir(
-            parents=True,
-            exist_ok=True,
-        )
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(self.documents, f, indent=2)
+        JsonFileStore.save(path, self.documents)
 
     def load(self, path: str) -> None:
         """Restore metadata from disk, or start empty if the file is missing.
@@ -82,8 +75,4 @@ class MetadataStore:
         Args:
             path: The file path to load the metadata from.
         """
-        if Path(path).exists():
-            with open(path, "r", encoding="utf-8") as f:
-                self.documents = json.load(f)
-        else:
-            self.documents = []
+        self.documents = JsonFileStore.load(path, default=[])
