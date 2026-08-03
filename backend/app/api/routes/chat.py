@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
-from app.api.dependencies import get_rag_chat_service
+from app.api.dependencies import get_chat_service
 from app.services.chat.chat_service import ChatService
 from app.services.llm.provider_manager import LLMUnavailableError
 
@@ -36,7 +36,7 @@ router = APIRouter(prefix="/chat", tags=["chat"])
 )
 async def chat(
     request: ChatRequest,
-    chat_service: ChatService = Depends(get_rag_chat_service),
+    chat_service: ChatService = Depends(get_chat_service),
 ) -> ChatResponse:
     """Answer a question through the ChatService orchestration layer.
 

@@ -4,14 +4,14 @@ from uuid import uuid4
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, status
 
 from app.api.dependencies import (
-    get_document_index_service,
     get_document_repository,
+    get_document_service,
 )
 from app.core.config import settings
 from app.models.responses import DeleteResult, SuccessResponse, UploadResult
 from app.repositories.interfaces import DocumentRepository
+from app.services.document import DocumentIndexError, DocumentService
 from app.services.document_registry import Document
-from app.services.indexing import DocumentIndexError, DocumentIndexService
 from app.services.vectorstore.workspace import DEFAULT_WORKSPACE
 
 router = APIRouter(prefix="/documents", tags=["documents"])
@@ -24,7 +24,7 @@ router = APIRouter(prefix="/documents", tags=["documents"])
 )
 async def upload_document(
     file: UploadFile,
-    document_index_service: DocumentIndexService = Depends(get_document_index_service),
+    document_service: DocumentService = Depends(get_document_service),
     document_repository: DocumentRepository = Depends(get_document_repository),
     workspace_id: str = Query(default=DEFAULT_WORKSPACE),
 ) -> SuccessResponse[UploadResult]:
@@ -32,7 +32,7 @@ async def upload_document(
 
     Args:
         file: The uploaded PDF file.
-        document_index_service: The service that indexes the uploaded PDF.
+        document_service: The service that indexes the uploaded PDF.
         document_repository: Persists the indexed document for management.
         workspace_id: The workspace the document belongs to.
 
@@ -59,7 +59,7 @@ async def upload_document(
     document_id = str(uuid4())
 
     try:
-        result = document_index_service.index_document(
+        result = await document_service.index_document(
             str(saved_path),
             workspace_id=workspace_id,
             document_id=document_id,

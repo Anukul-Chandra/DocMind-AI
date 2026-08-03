@@ -1,12 +1,12 @@
 """
 End-to-end verification for the DocMind AI release candidate (RC-1).
 
-Builds the full application pipeline using only existing services against an
-isolated temporary directory, then verifies every stage:
+Builds the full application pipeline using only the consolidated services
+against an isolated temporary directory, then verifies every stage:
 
     upload -> chunking -> embedding -> FAISS -> metadata persistence ->
-    retrieval -> hybrid search -> reranking -> chat -> memory -> sources ->
-    request logging -> provider/model provenance.
+    retrieval -> hybrid search -> reranking -> chat -> provider/model
+    provenance.
 
 Usage (from backend/):
     PYTHONPATH=. ../.venv/bin/python app/scripts/test_e2e.py
@@ -18,23 +18,17 @@ import asyncio
 import sys
 import tempfile
 from collections import Counter
-from datetime import datetime, timezone
 from pathlib import Path
 
 import fitz
 
 from app.core.config import settings
-from app.repositories.json.conversation_repository import JsonConversationRepository
-from app.repositories.json.log_repository import JsonLogRepository
-from app.services.chat.memory import ConversationMemory
-from app.services.chat.models import ChatRequest
-from app.services.chat.service import ChatService
+from app.services.chat.chat_service import ChatService
+from app.services.document import Chunker, DocumentService, PDFProcessor
 from app.services.document_registry import DocumentRegistry
 from app.services.embedding import EmbeddingService
-from app.services.indexing import DocumentIndexService
 from app.services.llm.factory import build_provider_manager
 from app.services.llm.prompt_builder import PromptBuilder
-from app.services.logging.request_logger import RequestLogger
 from app.services.retrieval import BM25Retriever, HybridRetriever
 from app.services.retrieval.reranker import SemanticReranker, TOKEN_PATTERN
 from app.services.vector_store import VectorStore
@@ -121,7 +115,6 @@ async def main() -> int:
         faiss_path = tmp / "faiss" / "index.faiss"
         metadata_path = tmp / "metadata.json"
         documents_path = tmp / "documents.json"
-        log_dir = tmp / "logs"
 
         original_faiss = settings.faiss_index_path
         original_metadata = settings.metadata_path
@@ -134,10 +127,14 @@ async def main() -> int:
             )
             metadata_store = MetadataStore()
             document_registry = DocumentRegistry(documents_path)
-            index_service = DocumentIndexService(
+            document_service = DocumentService(
+                PDFProcessor(),
+                Chunker(),
                 embedding_service,
                 vector_store,
                 metadata_store,
+                faiss_index_path=str(faiss_path),
+                metadata_path=str(metadata_path),
             )
 
             uploaded = False
@@ -145,7 +142,7 @@ async def main() -> int:
             embeddings_generated = 0
             try:
                 create_sample_pdf(pdf_path)
-                result = index_service.index_document(
+                result = await document_service.index_document(
                     str(pdf_path),
                     workspace_id=DEFAULT_WORKSPACE,
                     document_id="e2e-doc",
@@ -268,53 +265,27 @@ async def main() -> int:
             run_checks(results, [("Reranking", rerank_ok, detail)])
 
             chat_ok = False
-            memory_ok = False
-            sources_ok = False
             provider_ok = False
             chat_detail = "chat not attempted"
-            memory_detail = "no history"
-            sources_detail = "no sources"
             provider_detail = "no provider reported"
             try:
-                memory = JsonConversationRepository(ConversationMemory())
-                request_logger = JsonLogRepository(RequestLogger(log_dir))
                 chat_service = ChatService(
                     hybrid_retriever,
                     PromptBuilder(),
                     build_provider_manager(),
-                    memory,
-                    request_logger,
                 )
-                response = await chat_service.chat(
-                    ChatRequest(question=QUESTION)
-                )
-                chat_ok = bool(response.answer)
-                chat_detail = f"answer {len(response.answer)} chars"
-
-                history = memory.get_history(response.conversation_id)
-                memory_ok = len(history) >= 2
-                memory_detail = f"{len(history)} messages"
-
-                sources_ok = bool(response.sources)
-                sources_detail = f"{len(response.sources)} sources"
-
+                response = await chat_service.chat(QUESTION)
+                chat_ok = bool(response.text)
+                chat_detail = f"answer {len(response.text)} chars"
                 provider_ok = bool(response.provider) and bool(response.model)
                 provider_detail = f"provider={response.provider}, model={response.model}"
             except Exception as exc:  # noqa: BLE001 - verification must not crash
                 chat_detail = str(exc)
 
-            today = datetime.now(timezone.utc).date().isoformat()
-            log_file = log_dir / f"{today}.jsonl"
-            logging_ok = log_file.exists() and log_file.stat().st_size > 0
-            logging_detail = str(log_file) if logging_ok else "no log file"
-
             run_checks(
                 results,
                 [
                     ("Chat", chat_ok, chat_detail),
-                    ("Memory", memory_ok, memory_detail),
-                    ("Sources", sources_ok, sources_detail),
-                    ("Logging", logging_ok, logging_detail),
                     ("Provider", provider_ok, provider_detail),
                 ],
             )
