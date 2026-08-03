@@ -28,6 +28,11 @@ class Settings(BaseSettings):
     persistence_backend: str = "json"
     database_url: str = ""
 
+    jwt_secret: str = ""
+    jwt_algorithm: str = "HS256"
+    jwt_access_ttl_seconds: int = 900
+    jwt_refresh_ttl_seconds: int = 604800
+
     embedding_model: str = "all-MiniLM-L6-v2"
 
     llm_provider: str = ""
