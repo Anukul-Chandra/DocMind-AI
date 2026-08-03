@@ -1,41 +1,40 @@
-"""Manual integration test for the end-to-end ChatService flow.
+"""Manual integration test for the ChatService orchestration flow.
 
-This script wires together the document retrieval, prompt building, and LLM
-generation layers, inserts a small sample document into a FAISS-backed vector
-store, and asks a single question through ChatService.
+This script wires together the embedding, vector store, metadata store,
+retrieval, prompt building, and LLM provider layers, indexes a few sample
+chunks, and asks a single question through ChatService.
 
-It is intended to be run manually only. It does not create any API endpoint or streaming behavior.
+It prints the question, retrieved chunks, final prompt, provider, model, and
+the answer. It is intended to be run manually only.
 """
 
 import asyncio
 
-from app.repositories.json.conversation_repository import JsonConversationRepository
-from app.services.chat.memory import ConversationMemory
-from app.services.chat.models import ChatRequest, ChatResponse
-from app.services.chat.service import ChatService
+from app.services.chat.chat_service import ChatService
 from app.services.embedding import EmbeddingService
 from app.services.llm.factory import build_provider_manager
-from app.services.llm.provider_manager import LLMUnavailableError
 from app.services.llm.prompt_builder import PromptBuilder
+from app.services.llm.provider_manager import LLMUnavailableError, ProviderManager
+from app.services.retrieval import Retriever
 from app.services.vector_store import VectorStore
 from app.services.vectorstore.metadata_store import MetadataStore
 from app.services.vectorstore.retriever import SemanticRetriever
 
 SAMPLE_FILENAME = "sample_docs.txt"
 SAMPLE_CHUNKS: list[str] = [
-    "Python is a high-level programming language.",
     "FastAPI is a modern Python web framework.",
-    "FAISS is used for vector similarity search.",
+    "RAG stands for Retrieval-Augmented Generation.",
+    "FAISS is a vector similarity search library.",
 ]
-QUESTION = "What is FastAPI?"
+QUESTION = "What is RAG?"
 
 
 def build_retriever() -> SemanticRetriever:
     """Build a SemanticRetriever seeded with a small sample document.
 
-Returns:
-            A SemanticRetriever backed by an in-memory FAISS index that contains the
-            sample chunks, ready for retrieval.
+    Returns:
+        A SemanticRetriever backed by an in-memory FAISS index that contains
+        the sample chunks, ready for retrieval.
     """
     embedding_service = EmbeddingService()
     vector_store = VectorStore(dimension=embedding_service.get_embedding_dimension())
@@ -50,18 +49,28 @@ Returns:
 
 async def main() -> None:
     """Run the ChatService integration test end to end."""
-    retriever = build_retriever()
+    retriever: Retriever = build_retriever()
     prompt_builder = PromptBuilder()
-    provider_manager = build_provider_manager()
-    chat_service = ChatService(
-        retriever,
-        prompt_builder,
-        provider_manager,
-        JsonConversationRepository(ConversationMemory()),
-    )
+    provider_manager: ProviderManager = build_provider_manager()
+    chat_service = ChatService(retriever, prompt_builder, provider_manager)
+
+    contexts = retriever.retrieve(QUESTION)
+    rag_prompt = prompt_builder.build_prompt(QUESTION, contexts)
+
+    print("=" * 60)
+    print("Question:")
+    print(QUESTION)
+    print()
+    print("Retrieved Chunks:")
+    for index, chunk in enumerate(contexts, start=1):
+        print(f"  {index}. {chunk['text']}")
+    print()
+    print("Final Prompt:")
+    print(rag_prompt.text)
+    print("=" * 60)
 
     try:
-        response: ChatResponse = await chat_service.chat(ChatRequest(question=QUESTION))
+        response = await chat_service.chat(QUESTION)
     except LLMUnavailableError as exc:
         print("=" * 60)
         print("All LLM providers failed.")
@@ -77,18 +86,15 @@ async def main() -> None:
         print("=" * 60)
         return
 
-    print("=" * 60)
-    print("Question:")
-    print(QUESTION)
-    print()
-    print("Answer:")
-    print(response.answer)
     print()
     print("Provider:")
     print(response.provider)
     print()
     print("Model:")
     print(response.model)
+    print()
+    print("Answer:")
+    print(response.text)
     print("=" * 60)
 
 
