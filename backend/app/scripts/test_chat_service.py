@@ -47,6 +47,21 @@ def build_retriever() -> SemanticRetriever:
     return SemanticRetriever(embedding_service, vector_store, metadata_store)
 
 
+def print_section(title: str, content: str = "") -> None:
+    """Print a section header framed with separators, then the content.
+
+    Args:
+        title: The section title.
+        content: The section content to print below the header, if any.
+    """
+    print("=" * 60)
+    print(title)
+    print("=" * 60)
+    if content:
+        print(content)
+        print()
+
+
 async def main() -> None:
     """Run the ChatService integration test end to end."""
     retriever: Retriever = build_retriever()
@@ -57,17 +72,14 @@ async def main() -> None:
     contexts = retriever.retrieve(QUESTION)
     rag_prompt = prompt_builder.build_prompt(QUESTION, contexts)
 
-    print("=" * 60)
-    print("Question:")
-    print(QUESTION)
-    print()
-    print("Retrieved Chunks:")
-    for index, chunk in enumerate(contexts, start=1):
-        print(f"  {index}. {chunk['text']}")
-    print()
-    print("Final Prompt:")
-    print(rag_prompt.text)
-    print("=" * 60)
+    print_section("Question", QUESTION)
+
+    chunks = "\n".join(
+        f"  {index}. {chunk['text']}" for index, chunk in enumerate(contexts, start=1)
+    )
+    print_section("Retrieved Chunks", chunks)
+
+    print_section("Generated Prompt", rag_prompt.text)
 
     try:
         response = await chat_service.chat(QUESTION)
@@ -86,16 +98,9 @@ async def main() -> None:
         print("=" * 60)
         return
 
-    print()
-    print("Provider:")
-    print(response.provider)
-    print()
-    print("Model:")
-    print(response.model)
-    print()
-    print("Answer:")
-    print(response.text)
-    print("=" * 60)
+    print_section("Provider", response.provider)
+    print_section("Model", response.model)
+    print_section("Final Answer", response.text)
 
 
 if __name__ == "__main__":
