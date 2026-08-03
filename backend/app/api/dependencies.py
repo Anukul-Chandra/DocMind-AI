@@ -12,6 +12,7 @@ from app.repositories import (
     WorkspaceRepository,
 )
 from app.services.chat import ChatService
+from app.services.chat.chat_service import ChatService as RagChatService
 from app.services.chat.memory import ConversationMemory
 from app.services.document_registry import DocumentRegistry
 from app.services.embedding import EmbeddingService
@@ -107,4 +108,13 @@ def get_chat_service() -> ChatService:
         build_provider_manager(),
         get_conversation_repository(),
         get_log_repository(),
+    )
+
+
+@lru_cache
+def get_rag_chat_service() -> RagChatService:
+    return RagChatService(
+        get_retriever(),
+        PromptBuilder(),
+        build_provider_manager(),
     )
