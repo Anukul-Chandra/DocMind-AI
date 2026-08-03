@@ -1,3 +1,3 @@
-from app.services.storage.storage_manager import StorageManager
+from app.services.storage.json_file_store import JsonFileStore
 
-__all__ = ["StorageManager"]
+__all__ = ["JsonFileStore"]
