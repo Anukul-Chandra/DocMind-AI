@@ -77,6 +77,7 @@ class BM25Retriever(Retriever):
         query: str,
         k: int = 5,
         workspace_id: str = DEFAULT_WORKSPACE,
+        owner_id: str = "",
     ) -> list[dict]:
         """Retrieve the top-k chunks by BM25 relevance for the workspace.
 
@@ -84,6 +85,8 @@ class BM25Retriever(Retriever):
             query: The search query text.
             k: The number of chunks to return.
             workspace_id: Only chunks belonging to this workspace are returned.
+            owner_id: Only chunks owned by this user are returned. Empty for
+                legacy chunks indexed before ownership was tracked.
 
         Returns:
             A list of the top-k matching document chunks, ordered best first.
@@ -99,7 +102,7 @@ class BM25Retriever(Retriever):
             zip(self._doc_tokens, self._doc_lengths)
         ):
             document = self._metadata_store.get_document(index)
-            if not self.is_eligible(document, workspace_id):
+            if not self.is_eligible(document, workspace_id, owner_id):
                 continue
             score = self._score(term_counts, length, query_terms)
             if score > 0.0:
@@ -145,17 +148,26 @@ class BM25Retriever(Retriever):
             score += idf * (term_freq * (self.K1 + 1.0)) / denominator
         return score
 
-    def is_eligible(self, document: dict, workspace_id: str) -> bool:
-        """Return whether a chunk belongs to the workspace and is not deleted.
+    def is_eligible(
+        self,
+        document: dict,
+        workspace_id: str,
+        owner_id: str = "",
+    ) -> bool:
+        """Return whether a chunk belongs to the workspace and owner.
 
         Args:
             document: The chunk metadata to check.
             workspace_id: The requested workspace.
+            owner_id: The requested owner. Empty for legacy ownerless chunks.
 
         Returns:
-            True if the chunk is in the workspace and its document is alive.
+            True if the chunk is in the workspace and owned by the user and its
+            document is alive; False otherwise.
         """
         if document["workspace_id"] != workspace_id:
+            return False
+        if document.get("owner_id", "") != owner_id:
             return False
         document_id = document.get("document_id")
         if document_id and self._document_registry is not None:

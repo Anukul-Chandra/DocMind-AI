@@ -29,6 +29,7 @@ from app.api.dependencies import (
     get_chat_service,
     get_document_repository,
     get_document_service,
+    get_retriever,
 )
 from app.core.config import settings
 from app.db.session import get_session_factory
@@ -60,6 +61,7 @@ class FakeDocumentService:
         file_path: str,
         workspace_id: str = "default",
         document_id: str | None = None,
+        owner_id: str = "",
     ) -> IndexDocumentResult:
         """Return a canned indexing result.
 
@@ -67,6 +69,7 @@ class FakeDocumentService:
             file_path: The uploaded file path.
             workspace_id: The workspace id.
             document_id: The document id.
+            owner_id: The user id that owns the document.
 
         Returns:
             A minimal indexing result.
@@ -82,16 +85,42 @@ class FakeDocumentService:
 class FakeChatService:
     """Stands in for ChatService so /chat skips the LLM pipeline."""
 
-    async def chat(self, question: str):
-        """Return a canned chat response.
+    def __init__(self) -> None:
+        self.last_owner_id: str | None = None
+
+    async def chat(self, question: str, owner_id: str = ""):
+        """Return a canned chat response and record the owner scope.
 
         Args:
             question: The user's question.
+            owner_id: The owner scope passed through by the API layer.
 
         Returns:
             A simple namespace with provider, model, and text.
         """
+        self.last_owner_id = owner_id
         return SimpleNamespace(provider="fake", model="fake", text="Fake answer.")
+
+
+class RecordingRetriever:
+    """Stands in for the shared Retriever and records retrieval calls."""
+
+    def __init__(self) -> None:
+        self.last_owner_id: str | None = None
+
+    def retrieve(self, query: str, k: int = 5, owner_id: str = "") -> list[dict]:
+        """Record the owner scope and return no chunks.
+
+        Args:
+            query: The search query.
+            k: The number of chunks to request.
+            owner_id: The owner scope passed by the API layer.
+
+        Returns:
+            An empty chunk list.
+        """
+        self.last_owner_id = owner_id
+        return []
 
 
 def build_auth_service(users: UserRepository) -> AuthService:
@@ -260,7 +289,8 @@ def _protect_and_own(
     app.dependency_overrides[get_auth_service] = lambda: auth
     app.dependency_overrides[get_document_repository] = lambda: doc_repo
     app.dependency_overrides[get_document_service] = lambda: FakeDocumentService()
-    app.dependency_overrides[get_chat_service] = lambda: FakeChatService()
+    fake_chat = FakeChatService()
+    app.dependency_overrides[get_chat_service] = lambda: fake_chat
     tokens = JWTService(secret_key=TOKEN_SECRET)
 
     user_a = register_user(auth, a_email)
@@ -268,7 +298,7 @@ def _protect_and_own(
     token_a = tokens.create_access_token(user_a.user_id)
     token_b = tokens.create_access_token(user_b.user_id)
 
-    # A. No token is rejected on chat and document endpoints.
+    # A. No token is rejected on chat, retrieve, and document endpoints.
     check(
         f"A. {label} no token -> 401 (documents)",
         client.get("/documents").status_code == 401,
@@ -276,6 +306,10 @@ def _protect_and_own(
     check(
         f"A. {label} no token -> 401 (chat)",
         client.post("/chat/", json={"question": "hi"}).status_code == 401,
+    )
+    check(
+        f"A. {label} no token -> 401 (retrieve)",
+        client.post("/retrieve", json={"query": "hi"}).status_code == 401,
     )
 
     # B. Invalid token is rejected.
@@ -289,8 +323,16 @@ def _protect_and_own(
             "/chat/", json={"question": "hi"}, headers=bearer("not.a.jwt")
         ).status_code == 401,
     )
+    check(
+        f"B. {label} invalid token -> 401 (retrieve)",
+        client.post(
+            "/retrieve", json={"query": "hi"}, headers=bearer("not.a.jwt")
+        ).status_code == 401,
+    )
 
     # C. Valid token reaches the endpoints.
+    recording = RecordingRetriever()
+    app.dependency_overrides[get_retriever] = lambda: recording
     check(
         f"C. {label} valid token -> documents accessible",
         client.get("/documents", headers=bearer(token_a)).status_code == 200,
@@ -303,6 +345,22 @@ def _protect_and_own(
         chat_response.status_code == 200
         and chat_response.json().get("answer") == "Fake answer.",
     )
+    check(
+        f"C. {label} chat passes owner id",
+        fake_chat.last_owner_id == user_a.user_id,
+    )
+    retrieve_response = client.post(
+        "/retrieve", json={"query": "hi"}, headers=bearer(token_a)
+    )
+    check(
+        f"C. {label} valid token -> retrieve accessible",
+        retrieve_response.status_code == 200,
+    )
+    check(
+        f"C. {label} retrieve passes owner id",
+        recording.last_owner_id == user_a.user_id,
+    )
+    app.dependency_overrides.pop(get_retriever)
 
     # D. User A uploads a document.
     upload_response = upload(client, token_a, filename=f"a-{uuid.uuid4().hex[:8]}.pdf")

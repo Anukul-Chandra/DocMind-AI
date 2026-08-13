@@ -14,6 +14,7 @@ class MetadataStore:
         filename: str,
         workspace_id: str = DEFAULT_WORKSPACE,
         document_id: str | None = None,
+        owner_id: str = "",
     ) -> None:
         """Store document chunks with sequential ids starting from 1.
 
@@ -22,6 +23,8 @@ class MetadataStore:
             filename: The source document's filename.
             workspace_id: The workspace the document belongs to.
             document_id: The identifier of the owning document, or None.
+            owner_id: The user id that owns the chunk. Empty for legacy
+                chunks indexed before ownership was tracked.
         """
         document_id = document_id or ""
         start_id = len(self.documents) + 1
@@ -33,6 +36,7 @@ class MetadataStore:
                     "filename": filename,
                     "chunk_id": offset + 1,
                     "document_id": document_id,
+                    "owner_id": owner_id,
                     "text": text,
                 }
             )

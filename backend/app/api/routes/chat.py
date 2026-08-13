@@ -44,11 +44,12 @@ async def chat(
 
     The endpoint only delegates to ChatService; it performs no retrieval, no
     prompt construction, and no direct provider calls. Authentication is
-    required, but conversation memory is not scoped per user yet.
+    required and the authenticated user's id is passed as the owner scope so
+    retrieval can only use chunks owned by that user.
 
     Args:
         request: The chat request containing the user's question.
-        current_user: The authenticated user.
+        current_user: The authenticated user whose chunks may be retrieved.
         chat_service: The ChatService that orchestrates retrieval and generation.
 
     Returns:
@@ -58,7 +59,10 @@ async def chat(
         HTTPException: If no LLM provider is available to answer the question.
     """
     try:
-        response = await chat_service.chat(request.question)
+        response = await chat_service.chat(
+            request.question,
+            owner_id=current_user.user_id,
+        )
     except LLMUnavailableError as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,

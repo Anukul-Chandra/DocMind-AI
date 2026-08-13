@@ -48,6 +48,7 @@ class HybridRetriever(Retriever):
         query: str,
         k: int = 5,
         workspace_id: str = DEFAULT_WORKSPACE,
+        owner_id: str = "",
     ) -> list[dict]:
         """Retrieve and rerank the top-k chunks combining BM25 and FAISS.
 
@@ -55,15 +56,18 @@ class HybridRetriever(Retriever):
             query: The search query text.
             k: The number of chunks to return.
             workspace_id: Only chunks belonging to this workspace are returned.
+            owner_id: Only chunks owned by this user are returned. Empty for
+                legacy chunks indexed before ownership was tracked.
 
         Returns:
-            The top-k merged, deduplicated, reranked chunks (best first).
+            The top-k merged, deduplicated, reranked chunks (best first),
+            constrained to the workspace and owner.
         """
         semantic_results = self._semantic.retrieve(
-            query, k=k, workspace_id=workspace_id
+            query, k=k, workspace_id=workspace_id, owner_id=owner_id
         )
         keyword_results = self._bm25.retrieve(
-            query, k=k, workspace_id=workspace_id
+            query, k=k, workspace_id=workspace_id, owner_id=owner_id
         )
 
         fused = self._fuse(semantic_results, keyword_results)
@@ -119,14 +123,20 @@ class HybridRetriever(Retriever):
             candidate["chunk_id"],
         )
 
-    def is_eligible(self, document: dict, workspace_id: str) -> bool:
+    def is_eligible(
+        self,
+        document: dict,
+        workspace_id: str,
+        owner_id: str = "",
+    ) -> bool:
         """Delegate eligibility to the semantic sub-retriever.
 
         Args:
             document: The chunk metadata to check.
             workspace_id: The requested workspace.
+            owner_id: The requested owner.
 
         Returns:
-            Whether the chunk is eligible for the workspace.
+            Whether the chunk is eligible for the workspace and owner.
         """
-        return self._semantic.is_eligible(document, workspace_id)
+        return self._semantic.is_eligible(document, workspace_id, owner_id)

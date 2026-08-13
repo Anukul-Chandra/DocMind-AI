@@ -76,6 +76,7 @@ class DocumentService:
         file_path: str,
         workspace_id: str = DEFAULT_WORKSPACE,
         document_id: str | None = None,
+        owner_id: str = "",
     ) -> IndexDocumentResult:
         """Index an uploaded document end to end.
 
@@ -83,6 +84,8 @@ class DocumentService:
             file_path: Filesystem path to the PDF to index.
             workspace_id: The workspace the document belongs to.
             document_id: The identifier of the owning document, or None.
+            owner_id: The user id that owns the document chunks. Empty for
+                legacy indexes created before ownership was tracked.
 
         Returns:
             A summary with the filename, chunk count, embedding count, and status.
@@ -102,6 +105,7 @@ class DocumentService:
                 Path(file_path).name,
                 workspace_id,
                 document_id,
+                owner_id,
             )
 
             if self._faiss_index_path is not None:
