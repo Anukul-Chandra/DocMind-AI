@@ -1,10 +1,14 @@
 from functools import lru_cache
 
 from app.core.config import settings
+from app.db.session import get_session_factory
 from app.repositories import (
     DocumentRepository,
     JsonDocumentRepository,
+    JsonUserRepository,
+    PostgresUserRepository,
 )
+from app.services.auth import UserRepository
 from app.services.chat.chat_service import ChatService
 from app.services.document import Chunker, DocumentService, PDFProcessor
 from app.services.document_registry import DocumentRegistry
@@ -57,6 +61,19 @@ def get_document_registry() -> DocumentRegistry:
 @lru_cache
 def get_document_repository() -> DocumentRepository:
     return JsonDocumentRepository(get_document_registry())
+
+
+@lru_cache
+def get_user_repository() -> UserRepository:
+    """Return the UserRepository selected by the configured persistence backend.
+
+    ``persistence_backend`` of ``"json"`` (the default) uses the JSON store;
+    ``"postgres"`` uses the SQLAlchemy-backed repository. AuthService only ever
+    sees the resulting repository, never the backend.
+    """
+    if settings.persistence_backend == "postgres":
+        return PostgresUserRepository(get_session_factory())
+    return JsonUserRepository(settings.users_path)
 
 
 @lru_cache
