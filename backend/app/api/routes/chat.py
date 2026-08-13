@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
-from app.api.dependencies import get_chat_service
+from app.api.dependencies import get_chat_service, get_current_user
+from app.services.auth import User
 from app.services.chat.chat_service import ChatService
 from app.services.llm.provider_manager import LLMUnavailableError
 
@@ -36,15 +37,18 @@ router = APIRouter(prefix="/chat", tags=["chat"])
 )
 async def chat(
     request: ChatRequest,
+    current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
 ) -> ChatResponse:
     """Answer a question through the ChatService orchestration layer.
 
     The endpoint only delegates to ChatService; it performs no retrieval, no
-    prompt construction, and no direct provider calls.
+    prompt construction, and no direct provider calls. Authentication is
+    required, but conversation memory is not scoped per user yet.
 
     Args:
         request: The chat request containing the user's question.
+        current_user: The authenticated user.
         chat_service: The ChatService that orchestrates retrieval and generation.
 
     Returns:

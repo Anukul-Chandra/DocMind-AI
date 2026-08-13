@@ -24,14 +24,16 @@ class JsonDocumentRepository(DocumentRepository):
         workspace_id: str,
         filename: str,
         chunk_count: int,
+        owner_id: str,
         document_id: str | None = None,
     ) -> Document:
-        """Register a new indexed document.
+        """Register a new indexed document owned by a user.
 
         Args:
             workspace_id: The workspace the document belongs to.
             filename: The original document filename.
             chunk_count: The number of chunks indexed for the document.
+            owner_id: The user id that owns the document.
             document_id: An explicit identifier, or None to generate one.
 
         Returns:
@@ -41,27 +43,33 @@ class JsonDocumentRepository(DocumentRepository):
             workspace_id,
             filename,
             chunk_count,
+            owner_id,
             document_id,
         )
 
-    def list_documents(self) -> list[Document]:
-        """Return all registered documents.
+    def list_documents(self, owner_id: str) -> list[Document]:
+        """Return all documents owned by a user.
+
+        Args:
+            owner_id: The user id whose documents to return.
 
         Returns:
-            A list of all tracked documents.
+            A list of documents owned by the given user.
         """
-        return self._registry.list_documents()
+        return self._registry.list_documents(owner_id)
 
-    def get_document(self, document_id: str) -> Document | None:
-        """Return a document by its identifier.
+    def get_document(self, document_id: str, owner_id: str) -> Document | None:
+        """Return a document by identifier if it belongs to the owner.
 
         Args:
             document_id: The document identifier.
+            owner_id: The expected owner of the document.
 
         Returns:
-            The matching document, or None if it is not known.
+            The matching document, or None if it is not known or belongs to
+            another owner.
         """
-        return self._registry.get_document(document_id)
+        return self._registry.get_document(document_id, owner_id)
 
     def exists(self, document_id: str) -> bool:
         """Return whether a document identifier is registered.
@@ -74,16 +82,18 @@ class JsonDocumentRepository(DocumentRepository):
         """
         return self._registry.exists(document_id)
 
-    def delete_document(self, document_id: str) -> bool:
-        """Mark a document as deleted.
+    def delete_document(self, document_id: str, owner_id: str) -> bool:
+        """Mark a document as deleted if it belongs to the owner.
 
         Args:
             document_id: The document identifier.
+            owner_id: The expected owner of the document.
 
         Returns:
-            True if the document was found and marked deleted.
+            True if the document was found, owned by the caller, and marked
+            deleted.
         """
-        return self._registry.delete_document(document_id)
+        return self._registry.delete_document(document_id, owner_id)
 
     def is_deleted(self, document_id: str) -> bool:
         """Return whether a document is marked deleted.

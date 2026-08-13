@@ -21,11 +21,14 @@ class JsonWorkspaceRepository(WorkspaceRepository):
     def list_workspaces(self) -> list[str]:
         """Return all known workspace identifiers.
 
+        Workspaces are not owned by a single user, so the ownerless scope
+        (``""``) is used to enumerate every registered document.
+
         Returns:
             A sorted list of distinct workspace identifiers.
         """
         workspaces = {
             document.workspace_id
-            for document in self._documents.list_documents()
+            for document in self._documents.list_documents(owner_id="")
         }
         return sorted(workspaces)
