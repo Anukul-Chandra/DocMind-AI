@@ -1,5 +1,7 @@
 from functools import lru_cache
 
+from fastapi import Depends, Header, HTTPException, status
+
 from app.core.config import settings
 from app.db.session import get_session_factory
 from app.repositories import (
@@ -8,7 +10,14 @@ from app.repositories import (
     JsonUserRepository,
     PostgresUserRepository,
 )
-from app.services.auth import AuthService, JWTService, PasswordService, UserRepository
+from app.services.auth import (
+    AuthService,
+    AuthenticationError,
+    JWTService,
+    PasswordService,
+    User,
+    UserRepository,
+)
 from app.services.chat.chat_service import ChatService
 from app.services.document import Chunker, DocumentService, PDFProcessor
 from app.services.document_registry import DocumentRegistry
@@ -93,6 +102,69 @@ def get_auth_service() -> AuthService:
             refresh_ttl_seconds=settings.jwt_refresh_ttl_seconds,
         ),
     )
+
+
+_GENERIC_AUTH_FAILURE = "Invalid or missing authentication token."
+
+
+def _extract_bearer_token(authorization: str | None) -> str | None:
+    """Extract a Bearer access token from an Authorization header value.
+
+    Args:
+        authorization: The raw Authorization header, or None.
+
+    Returns:
+        The bearer token, or None if the header is absent, malformed, or does
+        not use the Bearer scheme.
+    """
+    if not authorization:
+        return None
+    parts = authorization.split()
+    if len(parts) != 2:
+        return None
+    scheme, token = parts
+    if scheme.lower() != "bearer" or not token:
+        return None
+    return token
+
+
+def get_current_user(
+    authorization: str | None = Header(None),
+    auth_service: AuthService = Depends(get_auth_service),
+) -> User:
+    """Resolve the authenticated user from a Bearer access token.
+
+    The token is verified by the existing JWTService through AuthService, and
+    the user is loaded through the configured UserRepository, so the
+    dependency works identically for JSON and PostgreSQL persistence. Every
+    authentication failure (missing or malformed header, invalid or expired
+    token, refresh token, unknown user, inactive user) raises the same generic
+    401 response.
+
+    Args:
+        authorization: The raw Authorization header value.
+        auth_service: The AuthService used to verify the token and resolve
+            the user.
+
+    Returns:
+        The active domain User identified by the token.
+
+    Raises:
+        HTTPException: If authentication fails for any reason.
+    """
+    token = _extract_bearer_token(authorization)
+    if token is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=_GENERIC_AUTH_FAILURE,
+        )
+    try:
+        return auth_service.get_user_from_access_token(token)
+    except AuthenticationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=_GENERIC_AUTH_FAILURE,
+        ) from exc
 
 
 @lru_cache

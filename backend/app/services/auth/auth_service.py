@@ -227,6 +227,36 @@ class AuthService:
             raise InvalidCredentialsError("The user for this token no longer exists.")
         return self.create_tokens_for_user(user)
 
+    def get_user_from_access_token(self, access_token: str) -> User:
+        """Resolve the active user identified by a valid access token.
+
+        The token is verified as an access token (refresh tokens are rejected
+        by the token service), the user is loaded through the repository, and
+        accounts that no longer exist or have been deactivated are rejected.
+
+        Args:
+            access_token: The bearer access token to validate.
+
+        Returns:
+            The active user identified by the token.
+
+        Raises:
+            InvalidCredentialsError: If the token is malformed, expired, or a
+                refresh token, or if it identifies a user that no longer
+                exists or is inactive. The same error is raised in every case
+                so callers cannot tell which condition failed.
+        """
+        try:
+            user_id = self._tokens.verify_token(access_token, "access")
+        except TokenExpiredError as exc:
+            raise InvalidCredentialsError("Invalid or expired token.") from exc
+        except InvalidTokenError as exc:
+            raise InvalidCredentialsError("Invalid or expired token.") from exc
+        user = self._users.get_by_id(user_id)
+        if user is None or not user.is_active:
+            raise InvalidCredentialsError("Invalid or expired token.")
+        return user
+
     def create_tokens_for_user(self, user: User) -> TokenPair:
         """Issue a fresh access/refresh token pair for a user.
 
