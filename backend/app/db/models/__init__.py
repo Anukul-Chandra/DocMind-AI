@@ -1,9 +1,7 @@
 """SQLAlchemy ORM models for the PostgreSQL persistence backend.
 
 These models back the repository implementations in
-``app.repositories.postgres``. A :class:`User` model is included as a
-placeholder for future account features but is not yet wired into any
-repository or service.
+``app.repositories.postgres``.
 """
 
 from app.db.models.chat_message import ChatMessage

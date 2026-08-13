@@ -18,21 +18,48 @@ class User:
     Attributes:
         user_id: The unique identifier of the user.
         email: The user's email address, used for authentication.
-        password_hash: The stored password hash for the user.
+        password_hash: The stored password hash for the user. Plaintext
+            passwords are never stored.
+        is_active: Whether the account is enabled. Disabled accounts are
+            retained but must not be used for authentication.
     """
 
     user_id: str
     email: str
     password_hash: str
+    is_active: bool = True
 
 
 class UserRepository(Protocol):
-    """Abstraction for retrieving users by identifier or email.
+    """Abstraction for creating and retrieving users.
 
     AuthService depends only on this protocol, so the backing store (a JSON
     repository today, a PostgreSQL repository later) can be swapped without
     changing AuthService.
     """
+
+    def create(
+        self,
+        email: str,
+        password_hash: str,
+        user_id: str | None = None,
+        is_active: bool = True,
+    ) -> User:
+        """Create a new user and persist it.
+
+        Args:
+            email: The user's unique email address.
+            password_hash: The pre-hashed password. Plaintext passwords must
+                never be passed here.
+            user_id: An explicit identifier, or None to generate one.
+            is_active: Whether the new account should be active.
+
+        Returns:
+            The created user.
+
+        Raises:
+            ValueError: If the email is already in use.
+        """
 
     def get_by_email(self, email: str) -> User | None:
         """Return the user with the given email, or None.
