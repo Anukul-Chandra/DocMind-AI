@@ -8,7 +8,7 @@ from app.repositories import (
     JsonUserRepository,
     PostgresUserRepository,
 )
-from app.services.auth import UserRepository
+from app.services.auth import AuthService, JWTService, PasswordService, UserRepository
 from app.services.chat.chat_service import ChatService
 from app.services.document import Chunker, DocumentService, PDFProcessor
 from app.services.document_registry import DocumentRegistry
@@ -74,6 +74,25 @@ def get_user_repository() -> UserRepository:
     if settings.persistence_backend == "postgres":
         return PostgresUserRepository(get_session_factory())
     return JsonUserRepository(settings.users_path)
+
+
+@lru_cache
+def get_auth_service() -> AuthService:
+    """Return the AuthService bound to the configured user repository.
+
+    The service receives the repository selected by ``get_user_repository``,
+    so it never knows whether persistence is JSON or PostgreSQL.
+    """
+    return AuthService(
+        users=get_user_repository(),
+        passwords=PasswordService(),
+        tokens=JWTService(
+            secret_key=settings.jwt_secret,
+            algorithm=settings.jwt_algorithm,
+            access_ttl_seconds=settings.jwt_access_ttl_seconds,
+            refresh_ttl_seconds=settings.jwt_refresh_ttl_seconds,
+        ),
+    )
 
 
 @lru_cache

@@ -1,6 +1,7 @@
 from app.services.auth.auth_service import (
     AuthenticationError,
     AuthService,
+    EmailAlreadyRegisteredError,
     InvalidCredentialsError,
     TokenPair,
     User,
@@ -17,6 +18,7 @@ from app.services.auth.password import PasswordService
 __all__ = [
     "AuthenticationError",
     "AuthService",
+    "EmailAlreadyRegisteredError",
     "InvalidCredentialsError",
     "InvalidTokenError",
     "JWTService",
