@@ -189,11 +189,17 @@ class AuthService:
             A token pair for the authenticated user.
 
         Raises:
-            InvalidCredentialsError: If the email is unknown or the password
-                does not match.
+            InvalidCredentialsError: If the email is unknown, the account is
+                inactive, or the password does not match. The same error is
+                raised in every case so callers cannot tell which condition
+                failed.
         """
         user = self._users.get_by_email(normalize_email(email))
-        if user is None or not self._passwords.verify(password, user.password_hash):
+        if (
+            user is None
+            or not user.is_active
+            or not self._passwords.verify(password, user.password_hash)
+        ):
             raise InvalidCredentialsError("Invalid email or password.")
         return self.create_tokens_for_user(user)
 

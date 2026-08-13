@@ -1,11 +1,11 @@
-"""Registration API integration tests (JSON and PostgreSQL persistence).
+"""Auth API integration tests (JSON and PostgreSQL persistence).
 
-Exercises POST /auth/register through the real FastAPI app with the
-``get_auth_service`` dependency overridden to a dedicated AuthService bound to
-either the JSON user repository (isolated temp file) or the PostgreSQL
-repository. Verifies success paths, duplicate handling, email normalization,
-password hashing, response safety, active state, and the standardized error
-envelope.
+Exercises POST /auth/register and POST /auth/login through the real FastAPI
+app with the ``get_auth_service`` dependency overridden to a dedicated
+AuthService bound to either the JSON user repository (isolated temp file) or
+the PostgreSQL repository. Verifies success paths, duplicate handling, email
+normalization, password hashing, token issuance/verification, response safety,
+active-state enforcement, and the standardized error envelope.
 
 Usage (from backend/):
     python -m app.scripts.test_auth_api
@@ -65,10 +65,27 @@ def register(client: TestClient, email: str, password: str):
     )
 
 
+def login(client: TestClient, email: str, password: str):
+    """POST /auth/login and return the response.
+
+    Args:
+        client: The API test client.
+        email: The email to authenticate.
+        password: The password to authenticate.
+
+    Returns:
+        The FastAPI test response.
+    """
+    return client.post(
+        "/auth/login",
+        json={"email": email, "password": password},
+    )
+
+
 def main() -> int:
-    """Run all registration scenarios."""
+    """Run all registration and login scenarios."""
     print("=" * 60)
-    print("Registration API Test")
+    print("Auth API Test (registration + login)")
     print("=" * 60)
 
     check_results: list[bool] = []
@@ -167,6 +184,100 @@ def main() -> int:
                 and body.get("error", {}).get("code") == "validation_error",
             )
 
+            # Login flow with JSON persistence.
+            login_email = "login@example.com"
+            login_password = "login-secret-1"
+            response = register(client, login_email, login_password)
+            check(
+                "login setup: register user",
+                response.status_code == 201,
+            )
+            login_user = json_repo.get_by_email(login_email)
+            login_user_id = login_user.user_id if login_user else ""
+            verifier = JWTService(secret_key="api-test-secret")
+
+            # A. Successful login with JSON persistence.
+            response = login(client, login_email, login_password)
+            body = response.json()
+            data = body.get("data", {})
+            check(
+                "A. JSON login returns token pair",
+                response.status_code == 200
+                and body.get("success") is True
+                and bool(data.get("access_token"))
+                and bool(data.get("refresh_token"))
+                and data.get("token_type") == "bearer",
+            )
+
+            # J. Response never exposes password material.
+            serialized = str(body)
+            check(
+                "J. login response contains no password fields",
+                "password" not in serialized and "password_hash" not in serialized,
+            )
+
+            # F. Access token decodes and verifies with the existing JWTService.
+            access_subject = verifier.verify_token(data["access_token"], "access")
+            check("F. access token verifies", bool(access_subject))
+
+            # G. Refresh token decodes and verifies with the existing JWTService.
+            refresh_subject = verifier.verify_token(data["refresh_token"], "refresh")
+            check("G. refresh token verifies", bool(refresh_subject))
+
+            # H. Access token subject matches the authenticated user ID.
+            check(
+                "H. access token subject matches user id",
+                access_subject == login_user_id,
+            )
+
+            # I. Mixed-case email login works (registration normalized it).
+            response = login(client, "Login@Example.com", login_password)
+            check(
+                "I. mixed-case email login succeeds",
+                response.status_code == 200
+                and response.json().get("success") is True,
+            )
+
+            # C. Wrong password returns 401 with the standard envelope.
+            response = login(client, login_email, "wrong-password")
+            body = response.json()
+            check(
+                "C. wrong password returns 401",
+                response.status_code == 401
+                and body.get("success") is False
+                and body.get("error", {}).get("code") == "unauthorized",
+            )
+
+            # D. Unknown email returns the same generic 401.
+            unknown_body = login(
+                client, "unknown@example.com", login_password
+            ).json()
+            check(
+                "D. unknown email returns 401",
+                response.status_code == 401
+                and unknown_body.get("error", {}).get("code") == "unauthorized",
+            )
+
+            # E. Inactive user cannot authenticate and gets the same generic 401.
+            inactive_email = "inactive@example.com"
+            json_repo.create(
+                email=inactive_email,
+                password_hash=PasswordService().hash(login_password),
+                is_active=False,
+            )
+            response = login(client, inactive_email, login_password)
+            inactive_body = response.json()
+            check(
+                "E. inactive user returns 401",
+                response.status_code == 401
+                and inactive_body.get("success") is False
+                and inactive_body.get("error", {}).get("code") == "unauthorized",
+            )
+            check(
+                "E. inactive response identical to unknown-email response",
+                unknown_body == inactive_body,
+            )
+
         # PostgreSQL persistence scenario.
         pg_repo = PostgresUserRepository(get_session_factory())
         app.dependency_overrides[get_auth_service] = lambda: build_auth_service(
@@ -208,6 +319,38 @@ def main() -> int:
                     response.status_code == 409
                     and body.get("error", {}).get("code") == "conflict",
                 )
+
+                # B. Successful login with PostgreSQL persistence.
+                response = login(client, pg_email, SECRET_PASSWORD)
+                body = response.json()
+                data = body.get("data", {})
+                check(
+                    "B. PostgreSQL login returns token pair",
+                    response.status_code == 200
+                    and body.get("success") is True
+                    and bool(data.get("access_token"))
+                    and bool(data.get("refresh_token"))
+                    and data.get("token_type") == "bearer",
+                )
+                check(
+                    "B. PostgreSQL tokens verify",
+                    verifier.verify_token(data["access_token"], "access")
+                    and verifier.verify_token(data["refresh_token"], "refresh"),
+                )
+                check(
+                    "J. PostgreSQL login has no password fields",
+                    "password" not in str(body)
+                    and "password_hash" not in str(body),
+                )
+                pg_login_user = pg_repo.get_by_email(pg_email)
+                check(
+                    "H. PostgreSQL access token subject matches user id",
+                    pg_login_user is not None
+                    and verifier.verify_token(
+                        data["access_token"], "access"
+                    )
+                    == pg_login_user.user_id,
+                )
         finally:
             app.dependency_overrides.clear()
             with get_session_factory()() as session:
@@ -219,7 +362,7 @@ def main() -> int:
 
     print("\n" + "=" * 60)
     all_passed = all(check_results)
-    print(f"Registration API Test {'PASSED' if all_passed else 'FAILED'}")
+    print(f"Auth API Test {'PASSED' if all_passed else 'FAILED'}")
     print("=" * 60)
     return 0 if all_passed else 1
 
