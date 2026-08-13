@@ -10,7 +10,7 @@ from app.db.models.utils import utcnow
 
 
 class Document(Base):
-    """A registered, indexed document within a workspace."""
+    """A registered, indexed document owned by a user."""
 
     __tablename__ = "documents"
 
@@ -24,3 +24,6 @@ class Document(Base):
     )
     chunk_count: Mapped[int] = mapped_column(Integer, default=0)
     deleted: Mapped[bool] = mapped_column(Boolean, default=False)
+    owner_id: Mapped[str] = mapped_column(
+        String(64), default="", server_default="", index=True
+    )

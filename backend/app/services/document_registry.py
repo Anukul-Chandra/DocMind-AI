@@ -10,7 +10,7 @@ from app.services.storage import JsonFileStore
 
 
 class Document(BaseModel):
-    """A registered, indexed document within a workspace.
+    """A registered, indexed document owned by a user.
 
     Attributes:
         document_id: Unique identifier for the document.
@@ -19,6 +19,8 @@ class Document(BaseModel):
         uploaded_at: When the document was tracked.
         chunk_count: Number of chunks produced for this document.
         deleted: Whether the document has been marked as deleted.
+        owner_id: The user id that owns the document. Empty for legacy
+            documents registered before ownership was tracked.
     """
 
     document_id: str
@@ -27,6 +29,7 @@ class Document(BaseModel):
     uploaded_at: datetime
     chunk_count: int
     deleted: bool = False
+    owner_id: str = ""
 
 
 class DocumentRegistry:
@@ -34,6 +37,10 @@ class DocumentRegistry:
 
     Persists to a single JSON file. Vectors are not removed from FAISS on
     deletion; the document is only marked as deleted in this registry.
+
+    Ownership is enforced at the registry level: every registration records
+    the owning user, and the lookup/deletion operations are scoped to an
+    owner so a caller cannot read or delete another user's document.
     """
 
     def __init__(self, path: str | Path) -> None:
@@ -51,14 +58,16 @@ class DocumentRegistry:
         workspace_id: str,
         filename: str,
         chunk_count: int,
+        owner_id: str,
         document_id: str | None = None,
     ) -> Document:
-        """Register a new indexed document.
+        """Register a new indexed document owned by a user.
 
         Args:
             workspace_id: The workspace the document belongs to.
             filename: The original document filename.
             chunk_count: Number of chunks indexed for the document.
+            owner_id: The user id that owns the document.
             document_id: An explicit identifier, or None to generate one.
 
         Returns:
@@ -71,29 +80,42 @@ class DocumentRegistry:
             filename=filename,
             uploaded_at=datetime.now(timezone.utc),
             chunk_count=chunk_count,
+            owner_id=owner_id,
         )
         self._documents[document_id] = document
         self._save()
         return document
 
-    def list_documents(self) -> list[Document]:
-        """Return all registered documents.
+    def list_documents(self, owner_id: str) -> list[Document]:
+        """Return the documents owned by a user.
+
+        Args:
+            owner_id: The user id whose documents to return.
 
         Returns:
-            A list of all tracked documents.
+            A list of documents owned by the given user.
         """
-        return list(self._documents.values())
+        return [
+            document
+            for document in self._documents.values()
+            if document.owner_id == owner_id
+        ]
 
-    def get_document(self, document_id: str) -> Document | None:
-        """Return a document by its identifier.
+    def get_document(self, document_id: str, owner_id: str) -> Document | None:
+        """Return a document by identifier if it belongs to the owner.
 
         Args:
             document_id: The document identifier.
+            owner_id: The expected owner of the document.
 
         Returns:
-            The matching document, or None if it is not known.
+            The matching document, or None if it is not known or belongs to
+            another owner.
         """
-        return self._documents.get(document_id)
+        document = self._documents.get(document_id)
+        if document is None or document.owner_id != owner_id:
+            return None
+        return document
 
     def exists(self, document_id: str) -> bool:
         """Check whether a document identifier is registered.
@@ -106,20 +128,26 @@ class DocumentRegistry:
         """
         return document_id in self._documents
 
-    def delete_document(self, document_id: str) -> bool:
-        """Mark a document as deleted.
+    def delete_document(self, document_id: str, owner_id: str) -> bool:
+        """Mark a document as deleted if it belongs to the owner.
 
         The associated FAISS vectors are not removed; the document is only
         marked so that retrieval and chat ignore it.
 
         Args:
             document_id: The document identifier.
+            owner_id: The expected owner of the document.
 
         Returns:
-            True if the document was found and marked deleted, otherwise False.
+            True if the document was found, owned by the caller, and marked
+            deleted, otherwise False.
         """
         document = self._documents.get(document_id)
-        if document is None or document.deleted:
+        if (
+            document is None
+            or document.deleted
+            or document.owner_id != owner_id
+        ):
             return False
         self._documents[document_id] = document.model_copy(
             update={"deleted": True}

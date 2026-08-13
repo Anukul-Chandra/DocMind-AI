@@ -4,12 +4,14 @@ from uuid import uuid4
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, status
 
 from app.api.dependencies import (
+    get_current_user,
     get_document_repository,
     get_document_service,
 )
 from app.core.config import settings
 from app.models.responses import DeleteResult, SuccessResponse, UploadResult
 from app.repositories.interfaces import DocumentRepository
+from app.services.auth import User
 from app.services.document import DocumentIndexError, DocumentService
 from app.services.document_registry import Document
 from app.services.vectorstore.workspace import DEFAULT_WORKSPACE
@@ -24,14 +26,16 @@ router = APIRouter(prefix="/documents", tags=["documents"])
 )
 async def upload_document(
     file: UploadFile,
+    current_user: User = Depends(get_current_user),
     document_service: DocumentService = Depends(get_document_service),
     document_repository: DocumentRepository = Depends(get_document_repository),
     workspace_id: str = Query(default=DEFAULT_WORKSPACE),
 ) -> SuccessResponse[UploadResult]:
-    """Upload and automatically index a PDF document.
+    """Upload and automatically index a PDF document for the user.
 
     Args:
         file: The uploaded PDF file.
+        current_user: The authenticated user who owns the document.
         document_service: The service that indexes the uploaded PDF.
         document_repository: Persists the indexed document for management.
         workspace_id: The workspace the document belongs to.
@@ -79,6 +83,7 @@ async def upload_document(
         workspace_id=workspace_id,
         filename=result.filename,
         chunk_count=result.total_chunks,
+        owner_id=current_user.user_id,
         document_id=document_id,
     )
 
@@ -96,37 +101,46 @@ async def upload_document(
 
 @router.get("", response_model=SuccessResponse[list[Document]])
 def list_documents(
+    current_user: User = Depends(get_current_user),
     document_repository: DocumentRepository = Depends(get_document_repository),
 ) -> SuccessResponse[list[Document]]:
-    """Return all indexed documents.
+    """Return the documents owned by the authenticated user.
 
     Args:
+        current_user: The authenticated user.
         document_repository: The repository of indexed documents.
 
     Returns:
-        A success envelope with all registered documents.
+        A success envelope with the user's documents.
     """
-    return SuccessResponse(data=document_repository.list_documents())
+    return SuccessResponse(
+        data=document_repository.list_documents(owner_id=current_user.user_id)
+    )
 
 
 @router.get("/{document_id}", response_model=SuccessResponse[Document])
 def get_document(
     document_id: str,
+    current_user: User = Depends(get_current_user),
     document_repository: DocumentRepository = Depends(get_document_repository),
 ) -> SuccessResponse[Document]:
-    """Return a single indexed document.
+    """Return a single indexed document owned by the user.
 
     Args:
         document_id: The document identifier.
+        current_user: The authenticated user.
         document_repository: The repository of indexed documents.
 
     Returns:
         A success envelope with the matching document.
 
     Raises:
-        HTTPException: If the document does not exist.
+        HTTPException: If the document does not exist or belongs to another
+            user. The response does not reveal which case occurred.
     """
-    document = document_repository.get_document(document_id)
+    document = document_repository.get_document(
+        document_id, owner_id=current_user.user_id
+    )
     if document is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -138,23 +152,29 @@ def get_document(
 @router.delete("/{document_id}", response_model=SuccessResponse[DeleteResult])
 def delete_document(
     document_id: str,
+    current_user: User = Depends(get_current_user),
     document_repository: DocumentRepository = Depends(get_document_repository),
 ) -> SuccessResponse[DeleteResult]:
-    """Mark a document as deleted so retrieval and chat ignore it.
+    """Mark a document owned by the user as deleted.
 
     The FAISS vectors are not removed; only the registry entry is marked.
 
     Args:
         document_id: The document identifier.
+        current_user: The authenticated user.
         document_repository: The repository of indexed documents.
 
     Returns:
         A success envelope describing the deletion outcome.
 
     Raises:
-        HTTPException: If the document does not exist or is already deleted.
+        HTTPException: If the document does not exist, is already deleted, or
+            belongs to another user. The response does not reveal which case
+            occurred.
     """
-    if not document_repository.delete_document(document_id):
+    if not document_repository.delete_document(
+        document_id, owner_id=current_user.user_id
+    ):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Document not found or already deleted.",
