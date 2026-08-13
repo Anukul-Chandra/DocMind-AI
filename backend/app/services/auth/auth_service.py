@@ -11,6 +11,22 @@ from app.services.auth.jwt_service import (
 from app.services.auth.password import PasswordService
 
 
+def normalize_email(email: str) -> str:
+    """Return a canonical form of an email address.
+
+    Email addresses are case-insensitive by convention, so leading/trailing
+    whitespace is trimmed and the address is lowercased. This ensures
+    ``User@example.com`` and ``user@example.com`` resolve to the same account.
+
+    Args:
+        email: The raw email address.
+
+    Returns:
+        The trimmed, lowercased email address.
+    """
+    return email.strip().lower()
+
+
 @dataclass(frozen=True)
 class User:
     """A registered user account in the authentication domain.
@@ -101,6 +117,10 @@ class InvalidCredentialsError(AuthenticationError):
     """Raised when the supplied credentials do not match a known user."""
 
 
+class EmailAlreadyRegisteredError(AuthenticationError):
+    """Raised when a user tries to register an email that is already in use."""
+
+
 class AuthService:
     """Authenticate users and issue access and refresh token pairs.
 
@@ -126,6 +146,38 @@ class AuthService:
         self._passwords = passwords
         self._tokens = tokens
 
+    def register(self, email: str, password: str) -> User:
+        """Register a new active user with a hashed password.
+
+        The email is normalized before it is compared or stored, the password
+        is hashed with the password service, and the user is persisted through
+        the repository. Only the hash is ever stored.
+
+        Args:
+            email: The user's email address.
+            password: The plaintext password to hash. Never stored verbatim.
+
+        Returns:
+            The newly created user.
+
+        Raises:
+            EmailAlreadyRegisteredError: If the email is already registered.
+        """
+        normalized = normalize_email(email)
+        if self._users.get_by_email(normalized) is not None:
+            raise EmailAlreadyRegisteredError(
+                f"Email already registered: {normalized}"
+            )
+        password_hash = self._passwords.hash(password)
+        try:
+            return self._users.create(
+                email=normalized,
+                password_hash=password_hash,
+                is_active=True,
+            )
+        except ValueError as exc:
+            raise EmailAlreadyRegisteredError(str(exc)) from exc
+
     def authenticate(self, email: str, password: str) -> TokenPair:
         """Authenticate a user by email and password.
 
@@ -140,7 +192,7 @@ class AuthService:
             InvalidCredentialsError: If the email is unknown or the password
                 does not match.
         """
-        user = self._users.get_by_email(email)
+        user = self._users.get_by_email(normalize_email(email))
         if user is None or not self._passwords.verify(password, user.password_hash):
             raise InvalidCredentialsError("Invalid email or password.")
         return self.create_tokens_for_user(user)
