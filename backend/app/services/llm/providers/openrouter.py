@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import AsyncIterator
 
 import httpx
@@ -10,9 +11,43 @@ from app.services.llm.providers.base import (
     BaseProvider,
     InvalidResponseError,
     ProviderError,
+    RateLimitError,
 )
 
+logger = logging.getLogger(__name__)
+
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+
+#: HTTP status codes treated as transient, model-specific failures. These are
+#: the only APIError codes that trigger model rotation; everything else is
+#: considered permanent and re-raised immediately.
+_RECOVERABLE_STATUS_CODES: frozenset[int] = frozenset({404, 408, 429})
+
+
+def _is_recoverable_error(exc: ProviderError) -> bool:
+    """Decide whether an OpenRouter error is transient enough to rotate models.
+
+    Only transient failures (rate limiting, temporary/server failures,
+    timeouts, model unavailability) advance the model pool. Permanent
+    authentication and configuration errors are re-raised without rotating.
+
+    Args:
+        exc: The provider error raised by a single model attempt.
+
+    Returns:
+        True if the error is recoverable on the next model, False otherwise.
+    """
+    if isinstance(exc, AuthenticationError):
+        return False
+    if isinstance(exc, RateLimitError):
+        return True
+    if isinstance(exc, InvalidResponseError):
+        return False
+    if isinstance(exc, APIError):
+        if exc.status_code is None:
+            return True
+        return exc.status_code >= 500 or exc.status_code in _RECOVERABLE_STATUS_CODES
+    return True
 
 
 class OpenRouterProvider(BaseProvider):
@@ -58,9 +93,83 @@ class OpenRouterProvider(BaseProvider):
         temperature: float = 0.0,
         max_tokens: int = 1000,
     ) -> str:
-        """Generate a response using the current model from the pool.
+        """Generate a response, rotating through the pool on recoverable errors.
+
+        The current model is tried first. If it fails with a transient,
+        recoverable error (rate limit, temporary server failure, timeout, or
+        model unavailability), the failure is recorded, ModelPoolManager is
+        advanced, and the request is retried with the next model. Each
+        available model is attempted at most once per request. If every model
+        fails, the last ProviderError is re-raised so ProviderManager can fall
+        back to the next provider. Non-recoverable errors (authentication,
+        configuration) are re-raised immediately without rotating.
 
         Args:
+            prompt: The user prompt to send to OpenRouter.
+            system_prompt: An optional system prompt guiding the model.
+            temperature: Sampling temperature for the model.
+            max_tokens: Maximum number of tokens to generate.
+
+        Returns:
+            The generated text from the first model that succeeds.
+
+        Raises:
+            ProviderError: If the request fails at the network level or every
+                model in the pool fails.
+            AuthenticationError: If the API key is rejected.
+            APIError: If OpenRouter returns a permanent HTTP error.
+            InvalidResponseError: If the response is invalid.
+        """
+        last_error: ProviderError | None = None
+        while True:
+            model = self._model_pool.get_current_model()
+            try:
+                return await self._generate_once(
+                    model,
+                    prompt,
+                    system_prompt=system_prompt,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                )
+            except ProviderError as exc:
+                last_error = exc
+                if not _is_recoverable_error(exc):
+                    logger.warning(
+                        "OpenRouter model %s failed: %s", model, exc
+                    )
+                    raise
+                logger.warning(
+                    "OpenRouter model %s failed (recoverable); rotating: %s",
+                    model,
+                    exc,
+                )
+                try:
+                    self._model_pool.move_next()
+                except RuntimeError:
+                    break
+
+        if last_error is not None:
+            logger.warning(
+                "All OpenRouter models failed; handing off to next provider"
+            )
+            raise last_error
+        raise ProviderError("No available OpenRouter models.")
+
+    async def _generate_once(
+        self,
+        model: str,
+        prompt: str,
+        system_prompt: str | None = None,
+        temperature: float = 0.0,
+        max_tokens: int = 1000,
+    ) -> str:
+        """Send a single request to OpenRouter using the given model.
+
+        This performs exactly one HTTP attempt and does not rotate the pool;
+        rotation is managed by the caller.
+
+        Args:
+            model: The model id to attempt.
             prompt: The user prompt to send to OpenRouter.
             system_prompt: An optional system prompt guiding the model.
             temperature: Sampling temperature for the model.
@@ -72,11 +181,10 @@ class OpenRouterProvider(BaseProvider):
         Raises:
             ProviderError: If the request fails at the network level.
             AuthenticationError: If the API key is rejected.
-            APIError: If OpenRouter returns an HTTP error.
+            RateLimitError: If OpenRouter rate limits the request.
+            APIError: If OpenRouter returns a permanent HTTP error.
             InvalidResponseError: If the response is invalid.
         """
-        model = self._model_pool.get_current_model()
-
         messages: list[dict] = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
@@ -109,6 +217,10 @@ class OpenRouterProvider(BaseProvider):
         if response.status_code in (401, 403):
             raise AuthenticationError(
                 "OpenRouter authentication failed; check your API key."
+            )
+        if response.status_code == 429:
+            raise RateLimitError(
+                "OpenRouter rate limit exceeded."
             )
         if response.status_code != 200:
             raise APIError(
