@@ -67,6 +67,7 @@ async def upload_document(
             str(saved_path),
             workspace_id=workspace_id,
             document_id=document_id,
+            owner_id=current_user.user_id,
         )
     except DocumentIndexError as exc:
         raise HTTPException(

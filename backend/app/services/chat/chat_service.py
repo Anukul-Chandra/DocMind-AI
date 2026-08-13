@@ -36,11 +36,19 @@ class ChatService:
         self._prompt_builder = prompt_builder
         self._provider_manager = provider_manager
 
-    async def chat(self, question: str) -> LLMResponse:
-        """Answer a question using the retrieved document context.
+    async def chat(self, question: str, owner_id: str = "") -> LLMResponse:
+        """Answer a question using the retrieved owner-scoped document context.
+
+        The caller (the API layer) is responsible for authentication and for
+        passing the authenticated user's ``owner_id``. This service performs
+        no authentication itself; retrieval is scoped to the given owner so a
+        chunk owned by another user can never enter the prompt.
 
         Args:
             question: The user's question text.
+            owner_id: The user id that owns the retrievable chunks. Empty for
+                the backward-compatible ownerless path; the API layer always
+                passes an authenticated user's id.
 
         Returns:
             The LLM response containing the answer and provenance metadata.
@@ -48,6 +56,6 @@ class ChatService:
         Raises:
             LLMUnavailableError: If every configured provider fails.
         """
-        contexts = self._retriever.retrieve(question)
+        contexts = self._retriever.retrieve(question, owner_id=owner_id)
         rag_prompt = self._prompt_builder.build_prompt(question, contexts)
         return await self._provider_manager.generate(rag_prompt.text)
