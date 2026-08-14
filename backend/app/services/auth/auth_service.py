@@ -214,7 +214,9 @@ class AuthService:
 
         Raises:
             InvalidCredentialsError: If the refresh token is invalid, expired,
-                or its subject no longer exists.
+                its subject no longer exists, or the account is inactive. The
+                same error is raised for a missing and an inactive user so
+                callers cannot tell which condition failed.
         """
         try:
             user_id = self._tokens.verify_token(refresh_token, "refresh")
@@ -223,8 +225,8 @@ class AuthService:
         except InvalidTokenError as exc:
             raise InvalidCredentialsError("Invalid refresh token.") from exc
         user = self._users.get_by_id(user_id)
-        if user is None:
-            raise InvalidCredentialsError("The user for this token no longer exists.")
+        if user is None or not user.is_active:
+            raise InvalidCredentialsError("Invalid refresh token.")
         return self.create_tokens_for_user(user)
 
     def get_user_from_access_token(self, access_token: str) -> User:
