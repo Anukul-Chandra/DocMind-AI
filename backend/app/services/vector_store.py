@@ -1,9 +1,27 @@
 import os
 import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
 import faiss
+
+
+@dataclass(frozen=True)
+class IndexSnapshot:
+    """An immutable copy of a VectorStore's index state.
+
+    The FAISS index is deep-cloned so it never shares vectors with the live
+    store; the embeddings mirror is stored as immutable tuples to keep the
+    snapshot safe to reuse.
+
+    Attributes:
+        index: A deep clone of the FAISS index (contents and ordering).
+        embeddings: An immutable copy of the raw embedding list.
+    """
+
+    index: object
+    embeddings: tuple[tuple[float, ...], ...]
 
 
 class VectorStore:
@@ -32,6 +50,33 @@ class VectorStore:
         vectors = np.array(embeddings, dtype=np.float32)
         self._index.add(vectors)
         self._embeddings.extend(embeddings)
+
+    def snapshot_state(self) -> IndexSnapshot:
+        """Capture the current index state as an independent snapshot.
+
+        The FAISS index is deep-cloned, so later changes to this store never
+        affect the returned snapshot, and later changes to the snapshot never
+        affect this store.
+
+        Returns:
+            An IndexSnapshot preserving the current contents and ordering.
+        """
+        return IndexSnapshot(
+            index=faiss.clone_index(self._index),
+            embeddings=tuple(tuple(vector) for vector in self._embeddings),
+        )
+
+    def restore_state(self, snapshot: IndexSnapshot) -> None:
+        """Restore a previously captured index state exactly.
+
+        The snapshot is cloned on restore so the original snapshot object is
+        never mutated by subsequent operations on this store.
+
+        Args:
+            snapshot: An IndexSnapshot captured earlier from this store.
+        """
+        self._index = faiss.clone_index(snapshot.index)
+        self._embeddings = [list(vector) for vector in snapshot.embeddings]
 
     def add_documents(self, texts: list[str], filename: str) -> None:
         """Store document chunks mapped to the FAISS index order.

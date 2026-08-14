@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from uuid import uuid4
 
@@ -13,8 +14,11 @@ from app.models.responses import DeleteResult, SuccessResponse, UploadResult
 from app.repositories.interfaces import DocumentRepository
 from app.services.auth import User
 from app.services.document import DocumentIndexError, DocumentService
+from app.services.document.state_snapshot import UploadStateSnapshot
 from app.services.document_registry import Document
 from app.services.vectorstore.workspace import DEFAULT_WORKSPACE
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -61,6 +65,7 @@ async def upload_document(
 
     saved_path = _save_upload(file.filename, content)
     document_id = str(uuid4())
+    snapshot = document_service.capture_state()
 
     try:
         result = await document_service.index_document(
@@ -71,23 +76,32 @@ async def upload_document(
             filename=file.filename,
         )
     except DocumentIndexError as exc:
+        _compensate_failed_upload(document_service, snapshot, saved_path, exc)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Failed to index document: {exc}",
         ) from exc
     except Exception as exc:
+        _compensate_failed_upload(document_service, snapshot, saved_path, exc)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Unexpected error while indexing: {exc}",
         ) from exc
 
-    document = document_repository.register(
-        workspace_id=workspace_id,
-        filename=result.filename,
-        chunk_count=result.total_chunks,
-        owner_id=current_user.user_id,
-        document_id=document_id,
-    )
+    try:
+        document = document_repository.register(
+            workspace_id=workspace_id,
+            filename=result.filename,
+            chunk_count=result.total_chunks,
+            owner_id=current_user.user_id,
+            document_id=document_id,
+        )
+    except Exception as exc:
+        _compensate_failed_upload(document_service, snapshot, saved_path, exc)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to register document: {exc}",
+        ) from exc
 
     return SuccessResponse(
         data=UploadResult(
@@ -187,6 +201,48 @@ def delete_document(
 
 
 _UPLOAD_READ_CHUNK_SIZE = 1024 * 1024
+
+
+def _compensate_failed_upload(
+    document_service: DocumentService,
+    snapshot: UploadStateSnapshot,
+    saved_path: Path,
+    original_exception: BaseException,
+) -> None:
+    """Roll back every side effect of a failed upload request.
+
+    The pre-upload FAISS and metadata state (in-memory and persisted) is
+    restored, the restored FAISS index is persisted atomically, and only the
+    physical PDF created by this request is deleted. Cleanup failures are
+    logged and never replace the original exception, and no file other than
+    ``saved_path`` is ever touched.
+
+    Args:
+        document_service: The service that holds the mutated stores.
+        snapshot: The pre-upload state captured before indexing.
+        saved_path: The physical PDF file created by this request.
+        original_exception: The exception that caused the rollback, used for
+            logging context only.
+    """
+    try:
+        document_service.restore_state(snapshot)
+    except Exception as exc:  # noqa: BLE001 - cleanup must never mask the original error
+        logger.error(
+            "Failed to restore pre-upload state after upload error; "
+            "original error: %r, restore error: %r",
+            original_exception,
+            exc,
+        )
+    try:
+        saved_path.unlink()
+    except OSError as exc:
+        logger.error(
+            "Failed to delete upload file %s after upload error; "
+            "original error: %r, cleanup error: %r",
+            saved_path,
+            original_exception,
+            exc,
+        )
 
 
 async def _read_upload(file: UploadFile) -> bytes:

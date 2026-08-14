@@ -5,6 +5,11 @@ from pathlib import Path
 
 from app.services.document.chunker import Chunker
 from app.services.document.pdf_processor import PDFProcessor
+from app.services.document.state_snapshot import (
+    UploadStateSnapshot,
+    capture_upload_state,
+    restore_upload_state,
+)
 from app.services.embedding import EmbeddingService
 from app.services.text_cleaner import clean_text
 from app.services.vector_store import VectorStore
@@ -70,6 +75,34 @@ class DocumentService:
         self._metadata_store = metadata_store
         self._faiss_index_path = faiss_index_path
         self._metadata_path = metadata_path
+
+    def capture_state(self) -> UploadStateSnapshot:
+        """Capture the pre-indexing state of the stores this service mutates.
+
+        Returns:
+            An UploadStateSnapshot of the current FAISS index, metadata
+            records, and persisted metadata file.
+        """
+        return capture_upload_state(
+            self._vector_store,
+            self._metadata_store,
+            self._metadata_path,
+        )
+
+    def restore_state(self, snapshot: UploadStateSnapshot) -> None:
+        """Restore the stores to a captured pre-indexing state.
+
+        The in-memory FAISS index and metadata records are swapped back, the
+        persisted metadata file is restored byte-exactly, and the restored
+        FAISS index is persisted atomically so the on-disk index matches the
+        restored in-memory state.
+
+        Args:
+            snapshot: The snapshot captured before the indexing attempt.
+        """
+        restore_upload_state(snapshot, self._vector_store, self._metadata_store)
+        if self._faiss_index_path is not None:
+            self._vector_store.save(self._faiss_index_path)
 
     async def index_document(
         self,
