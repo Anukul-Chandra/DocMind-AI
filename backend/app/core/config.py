@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     chunk_size: int = 1000
     chunk_overlap: int = 200
 
+    #: Maximum allowed size in bytes for an uploaded document (default 50 MiB).
+    max_upload_size_bytes: int = 50 * 1024 * 1024
+
     storage_dir: str = str(PROJECT_ROOT / "storage")
     faiss_index_path: str = str(PROJECT_ROOT / "storage" / "faiss" / "index.faiss")
     metadata_path: str = str(PROJECT_ROOT / "storage" / "metadata.json")
