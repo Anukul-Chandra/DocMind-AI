@@ -93,3 +93,24 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes docmind-scan {
+  0% {
+    top: -12%;
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    top: 112%;
+    opacity: 0;
+  }
+}
+
+.docmind-scan {
+  animation: docmind-scan 1.5s ease-in-out infinite;
+}
