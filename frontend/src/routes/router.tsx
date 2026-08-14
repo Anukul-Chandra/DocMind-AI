@@ -2,7 +2,9 @@ import { Navigate, createBrowserRouter } from "react-router-dom";
 
 import { ProtectedShell } from "@/layouts/ProtectedShell";
 import { RootLayout } from "@/layouts/RootLayout";
-import { HomePage } from "@/pages/HomePage";
+import { ChatPage } from "@/pages/ChatPage";
+import { DashboardPage } from "@/pages/DashboardPage";
+import { DocumentsPage } from "@/pages/DocumentsPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { RequireAuth } from "@/routes/RequireAuth";
@@ -22,7 +24,11 @@ export const router = createBrowserRouter([
             <ProtectedShell />
           </RequireAuth>
         ),
-        children: [{ index: true, element: <HomePage /> }],
+        children: [
+          { index: true, element: <DashboardPage /> },
+          { path: "documents", element: <DocumentsPage /> },
+          { path: "chat", element: <ChatPage /> },
+        ],
       },
     ],
   },
