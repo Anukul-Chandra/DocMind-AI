@@ -8,6 +8,7 @@ from app.repositories import (
     DocumentRepository,
     JsonDocumentRepository,
     JsonUserRepository,
+    PostgresDocumentRepository,
     PostgresUserRepository,
 )
 from app.services.auth import (
@@ -69,6 +70,16 @@ def get_document_registry() -> DocumentRegistry:
 
 @lru_cache
 def get_document_repository() -> DocumentRepository:
+    """Return the DocumentRepository selected by the configured persistence backend.
+
+    ``persistence_backend`` of ``"json"`` (the default) uses the JSON-backed
+    registry; ``"postgres"`` uses the SQLAlchemy-backed repository. Callers
+    only ever see the resulting repository, never the backend. Retrieval and
+    indexing infrastructure (FAISS, MetadataStore) is not affected by this
+    selection.
+    """
+    if settings.persistence_backend == "postgres":
+        return PostgresDocumentRepository(get_session_factory())
     return JsonDocumentRepository(get_document_registry())
 
 
