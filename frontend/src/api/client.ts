@@ -1,6 +1,7 @@
 import axios, { AxiosError, type AxiosInstance } from "axios";
 
 import { env } from "@/lib/env";
+import { clearStoredTokens } from "@/lib/auth-storage";
 import type { ApiEnvelope } from "@/types";
 
 export class ApiError extends Error {
@@ -36,6 +37,11 @@ apiClient.interceptors.response.use(
   (error: AxiosError<ApiEnvelope<unknown>>) => {
     if (error.response) {
       const { status, data } = error.response;
+      if (status === 401 && error.config?.url !== "/auth/login") {
+        clearStoredTokens();
+        setAccessToken(null);
+        window.location.assign("/login");
+      }
       throw new ApiError(
         status,
         data?.error?.code ?? `http_${status}`,
