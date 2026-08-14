@@ -56,12 +56,19 @@ FAKE_PDF = b"%PDF-1.4\nfake pdf payload for an ownership test\n"
 class FakeDocumentService:
     """Stands in for DocumentService so uploads skip the embedding pipeline."""
 
+    def capture_state(self):
+        """Return a no-op snapshot (this fake never fails an upload)."""
+
+    def restore_state(self, snapshot) -> None:
+        """No-op restore (this fake never mutates shared state)."""
+
     async def index_document(
         self,
         file_path: str,
         workspace_id: str = "default",
         document_id: str | None = None,
         owner_id: str = "",
+        filename: str | None = None,
     ) -> IndexDocumentResult:
         """Return a canned indexing result.
 
@@ -70,12 +77,13 @@ class FakeDocumentService:
             workspace_id: The workspace id.
             document_id: The document id.
             owner_id: The user id that owns the document.
+            filename: The original uploaded filename.
 
         Returns:
             A minimal indexing result.
         """
         return IndexDocumentResult(
-            filename=Path(file_path).name,
+            filename=filename or Path(file_path).name,
             total_chunks=1,
             total_embeddings=1,
             status="indexed",
