@@ -65,6 +65,26 @@ class MetadataStore:
         """
         return self.documents
 
+    def snapshot_documents(self) -> list[dict]:
+        """Return an independent copy of the stored documents.
+
+        The returned records preserve the current ordering and every field of
+        each record, so they can be restored exactly with
+        :meth:`restore_documents`.
+
+        Returns:
+            A list of copied metadata records.
+        """
+        return [dict(record) for record in self.documents]
+
+    def restore_documents(self, records: list[dict]) -> None:
+        """Replace the stored documents with the given records.
+
+        Args:
+            records: The metadata records to restore, in order.
+        """
+        self.documents = [dict(record) for record in records]
+
     def save(self, path: str) -> None:
         """Persist all metadata to disk as pretty-printed JSON.
 
