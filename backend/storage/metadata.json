@@ -14,5 +14,41 @@
     "chunk_id": 1,
     "document_id": "edad371d-6966-4a25-b1ab-d0afa64401c6",
     "text": "DocMind API lifecycle verification."
+  },
+  {
+    "id": 3,
+    "workspace_id": "default",
+    "filename": "upload_test.pdf",
+    "chunk_id": 1,
+    "document_id": "c009da17-4863-4b8c-89b0-7113b677974a",
+    "owner_id": "d2455f33-b70b-4e81-b8f0-774115a6e38d",
+    "text": "DocMind performs semantic retrieval over indexed PDFs with owner scoping so each user only ever sees their\nown document chunks."
+  },
+  {
+    "id": 4,
+    "workspace_id": "default",
+    "filename": "rag_src.pdf",
+    "chunk_id": 1,
+    "document_id": "fbd3d7ab-b14b-4021-9609-dc178781d474",
+    "owner_id": "d2455f33-b70b-4e81-b8f0-774115a6e38d",
+    "text": "DocMind performs semantic retrieval over indexed PDFs with owner scoping so each user only ever sees their\nown document chunks."
+  },
+  {
+    "id": 5,
+    "workspace_id": "default",
+    "filename": "docmind.pdf",
+    "chunk_id": 1,
+    "document_id": "2d486e5d-c096-47c3-b9c0-d0e39ba2aafb",
+    "owner_id": "1d144828-58ba-45dd-9a48-f8a46b2eb8c9",
+    "text": "DocMind performs semantic retrieval over indexed PDFs with owner scoping so each user only ever sees their\nown document chunks."
+  },
+  {
+    "id": 6,
+    "workspace_id": "default",
+    "filename": "finance.pdf",
+    "chunk_id": 1,
+    "document_id": "40758714-c9c1-40e2-94e5-254cb55a5cfd",
+    "owner_id": "1d144828-58ba-45dd-9a48-f8a46b2eb8c9",
+    "text": "Currency exchange rates follow supply and demand while central banker decisions move the value of the\namerican dollar rapidly."
   }
 ]
