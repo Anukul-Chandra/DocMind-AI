@@ -1,4 +1,4 @@
-import { AlertCircle, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 
 import { ApiError } from "@/api/client";
 import { PageHeader } from "@/components/app/PageHeader";
@@ -6,9 +6,11 @@ import { DocumentCard } from "@/components/documents/DocumentCard";
 import { UploadCard } from "@/components/documents/UploadCard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
 import { useDocuments } from "@/hooks/use-documents";
 
-function SkeletonCard() {
+function DocumentSkeleton() {
   return (
     <Card className="gap-3 py-4">
       <div className="flex items-center gap-3 px-4">
@@ -54,35 +56,28 @@ export function DocumentsPage() {
         {isLoading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[0, 1, 2].map((index) => (
-              <SkeletonCard key={index} />
+              <DocumentSkeleton key={index} />
             ))}
           </div>
         ) : isError ? (
-          <Card className="flex flex-col items-center gap-3 py-10 text-center">
-            <AlertCircle
-              className="size-8 text-destructive"
-              aria-hidden="true"
-            />
-            <p className="max-w-md text-sm text-muted-foreground">
-              {error instanceof ApiError
+          <ErrorState
+            message={
+              error instanceof ApiError
                 ? error.message
-                : "Could not load documents."}
-            </p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => void refetch()}
-            >
-              Try again
-            </Button>
-          </Card>
+                : "Could not load documents."
+            }
+            action={
+              <Button variant="outline" size="sm" onClick={() => void refetch()}>
+                Try again
+              </Button>
+            }
+          />
         ) : documents && documents.length === 0 ? (
-          <Card className="flex flex-col items-center gap-3 py-10 text-center">
-            <FileText className="size-8 text-muted-foreground" aria-hidden="true" />
-            <p className="text-sm text-muted-foreground">
-              No documents yet. Upload your first PDF above.
-            </p>
-          </Card>
+          <EmptyState
+            icon={FileText}
+            title="No documents yet"
+            description="Upload your first PDF above and DocMind will index it for question answering."
+          />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {documents?.map((document) => (

@@ -80,37 +80,47 @@ export function UploadCard() {
     <div className="space-y-3">
       {uploaded && (
         <div
-          className="flex items-center gap-2 rounded-md border bg-emerald-500/10 px-3 py-2 text-sm text-emerald-600"
+          className="flex items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-400"
           role="status"
         >
           <CheckCircle2 className="size-4 shrink-0" aria-hidden="true" />
           <span className="truncate">
-            {uploaded.filename} indexed successfully ({uploaded.chunks} chunks).
+            {uploaded.filename} indexed successfully ({uploaded.chunks}{" "}
+            {uploaded.chunks === 1 ? "chunk" : "chunks"}).
           </span>
         </div>
       )}
       {error && (
         <div
-          className="flex items-center gap-2 rounded-md border bg-destructive/10 px-3 py-2 text-sm text-destructive"
+          className="flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
           role="alert"
         >
           <FileWarning className="size-4 shrink-0" aria-hidden="true" />
-          {error}
+          <span className="min-w-0">{error}</span>
         </div>
       )}
       <div
         {...getRootProps()}
         className={cn(
           "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed bg-card/40 px-6 py-10 text-center transition-colors",
+          "focus-visible:outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
           isDragActive && "border-primary bg-primary/5",
-          isDragReject && "border-destructive",
+          isDragReject && "border-destructive bg-destructive/5",
           upload.isPending && "pointer-events-none opacity-60",
         )}
       >
         <input {...getInputProps()} />
-        <span className="flex size-12 items-center justify-center rounded-full bg-muted">
+        <span
+          className={cn(
+            "flex size-12 items-center justify-center rounded-full bg-muted transition-colors",
+            isDragActive && "bg-primary/10",
+          )}
+        >
           <CloudUpload
-            className="size-6 text-muted-foreground"
+            className={cn(
+              "size-6 text-muted-foreground transition-colors",
+              isDragActive && "text-primary",
+            )}
             aria-hidden="true"
           />
         </span>

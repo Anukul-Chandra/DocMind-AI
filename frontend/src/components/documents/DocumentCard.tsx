@@ -49,7 +49,7 @@ export function DocumentCard({ document }: { document: Document }) {
               "inline-flex items-center rounded-full px-2 py-0.5 font-medium",
               document.deleted
                 ? "bg-muted text-muted-foreground"
-                : "bg-emerald-500/10 text-emerald-600",
+                : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
             )}
           >
             {document.deleted ? "Deleted" : "Indexed"}

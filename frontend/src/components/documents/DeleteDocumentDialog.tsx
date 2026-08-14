@@ -14,8 +14,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useDeleteDocument } from "@/hooks/use-documents";
+import { cn } from "@/lib/utils";
 
 export function DeleteDocumentDialog({ document }: { document: Document }) {
   const [open, setOpen] = useState(false);
@@ -56,7 +57,14 @@ export function DeleteDocumentDialog({ document }: { document: Document }) {
             retrieval. This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && (
+          <div
+            className="flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+            role="alert"
+          >
+            {error}
+          </div>
+        )}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={deleteMutation.isPending}>
             Cancel
@@ -67,6 +75,7 @@ export function DeleteDocumentDialog({ document }: { document: Document }) {
               void handleConfirm();
             }}
             disabled={deleteMutation.isPending}
+            className={cn(buttonVariants({ variant: "destructive" }))}
           >
             {deleteMutation.isPending ? "Deleting…" : "Delete"}
           </AlertDialogAction>
