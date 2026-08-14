@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 
 export function HomePage() {
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-4 p-8">
+    <section className="flex flex-1 flex-col items-center justify-center gap-4 p-8">
       <div className="flex items-center gap-2 text-2xl font-semibold">
         <FileText className="size-6" aria-hidden="true" />
         DocMind AI
       </div>
       <p className="text-sm text-muted-foreground">
-        Phase 8 foundation is up and running.
+        You are signed in. Documents and chat arrive in the next phases.
       </p>
       <div className="flex items-center gap-2">
         <Button>Get started</Button>
@@ -19,6 +19,6 @@ export function HomePage() {
           Powered by RAG
         </Button>
       </div>
-    </main>
+    </section>
   );
 }
