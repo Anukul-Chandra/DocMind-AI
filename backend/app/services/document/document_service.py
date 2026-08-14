@@ -77,6 +77,7 @@ class DocumentService:
         workspace_id: str = DEFAULT_WORKSPACE,
         document_id: str | None = None,
         owner_id: str = "",
+        filename: str | None = None,
     ) -> IndexDocumentResult:
         """Index an uploaded document end to end.
 
@@ -86,6 +87,10 @@ class DocumentService:
             document_id: The identifier of the owning document, or None.
             owner_id: The user id that owns the document chunks. Empty for
                 legacy indexes created before ownership was tracked.
+            filename: Optional display filename recorded in the metadata. When
+                omitted, the base name of ``file_path`` is used. Callers that
+                store uploads under server-generated names pass the original
+                client filename here so it is preserved for display.
 
         Returns:
             A summary with the filename, chunk count, embedding count, and status.
@@ -93,6 +98,7 @@ class DocumentService:
         Raises:
             DocumentIndexError: If the document cannot be extracted or indexed.
         """
+        display_filename = filename or Path(file_path).name
         try:
             text = self._pdf_processor.extract_text(file_path)
             cleaned_text = clean_text(text)
@@ -102,7 +108,7 @@ class DocumentService:
             self._vector_store.add_embeddings(embeddings)
             self._metadata_store.add_documents(
                 chunks,
-                Path(file_path).name,
+                display_filename,
                 workspace_id,
                 document_id,
                 owner_id,
@@ -114,11 +120,11 @@ class DocumentService:
                 self._metadata_store.save(self._metadata_path)
         except Exception as exc:
             raise DocumentIndexError(
-                f"Failed to index document {Path(file_path).name}: {exc}"
+                f"Failed to index document {display_filename}: {exc}"
             ) from exc
 
         return IndexDocumentResult(
-            filename=Path(file_path).name,
+            filename=display_filename,
             total_chunks=len(chunks),
             total_embeddings=len(embeddings),
             status="indexed",

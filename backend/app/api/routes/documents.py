@@ -52,7 +52,7 @@ async def upload_document(
             detail="Only PDF files are supported.",
         )
 
-    content = await file.read()
+    content = await _read_upload(file)
     if not content:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -68,6 +68,7 @@ async def upload_document(
             workspace_id=workspace_id,
             document_id=document_id,
             owner_id=current_user.user_id,
+            filename=file.filename,
         )
     except DocumentIndexError as exc:
         raise HTTPException(
@@ -185,6 +186,55 @@ def delete_document(
     )
 
 
+_UPLOAD_READ_CHUNK_SIZE = 1024 * 1024
+
+
+async def _read_upload(file: UploadFile) -> bytes:
+    """Read an uploaded file into memory with a bounded size limit.
+
+    The file is read in fixed-size chunks so the full payload is never buffered
+    before its size is checked: as soon as the cumulative size exceeds
+    ``settings.max_upload_size_bytes`` the request is rejected without reading
+    any further. A best-effort pre-check on ``UploadFile.size`` (when the
+    framework exposes it) rejects oversized uploads without reading at all.
+
+    Args:
+        file: The uploaded file.
+
+    Returns:
+        The complete file content as bytes.
+
+    Raises:
+        HTTPException: With status 413 if the upload exceeds the configured
+            maximum upload size.
+    """
+    file_size = getattr(file, "size", None)
+    if file_size is not None and file_size > settings.max_upload_size_bytes:
+        raise HTTPException(
+            status_code=status.HTTP_413_CONTENT_TOO_LARGE,
+            detail=(
+                "Upload exceeds the maximum allowed size of "
+                f"{settings.max_upload_size_bytes} bytes."
+            ),
+        )
+
+    content = bytearray()
+    while True:
+        chunk = await file.read(_UPLOAD_READ_CHUNK_SIZE)
+        if not chunk:
+            break
+        content.extend(chunk)
+        if len(content) > settings.max_upload_size_bytes:
+            raise HTTPException(
+                status_code=status.HTTP_413_CONTENT_TOO_LARGE,
+                detail=(
+                    "Upload exceeds the maximum allowed size of "
+                    f"{settings.max_upload_size_bytes} bytes."
+                ),
+            )
+    return bytes(content)
+
+
 def _is_pdf(filename: str | None) -> bool:
     """Check whether a filename has a PDF extension.
 
@@ -200,6 +250,11 @@ def _is_pdf(filename: str | None) -> bool:
 def _save_upload(filename: str, content: bytes) -> Path:
     """Persist the uploaded file into the configured storage directory.
 
+    The physical storage filename is server-generated (a random suffix plus the
+    original extension) so that two users uploading the same client filename
+    never overwrite each other's files. The original ``filename`` is used only
+    to derive the extension, never as the storage name.
+
     Args:
         filename: The original name of the uploaded file.
         content: The raw bytes of the uploaded file.
@@ -213,7 +268,8 @@ def _save_upload(filename: str, content: bytes) -> Path:
     storage_dir = Path(settings.storage_dir)
     try:
         storage_dir.mkdir(parents=True, exist_ok=True)
-        destination = storage_dir / Path(filename).name
+        suffix = Path(filename).suffix.lower()
+        destination = storage_dir / f"{uuid4().hex}{suffix}"
         destination.write_bytes(content)
     except OSError as exc:
         raise HTTPException(
