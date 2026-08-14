@@ -83,7 +83,11 @@ class DocumentRegistry:
             owner_id=owner_id,
         )
         self._documents[document_id] = document
-        self._save()
+        try:
+            self._save()
+        except Exception:
+            self._documents.pop(document_id, None)
+            raise
         return document
 
     def list_documents(self, owner_id: str) -> list[Document]:
