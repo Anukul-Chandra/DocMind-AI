@@ -13,6 +13,15 @@ class VectorStore:
         self._embeddings: list[list[float]] = []
         self.documents: list[dict] = []
 
+    @property
+    def ntotal(self) -> int:
+        """Return the number of vectors currently in the FAISS index.
+
+        Returns:
+            The total count of vectors in the underlying index.
+        """
+        return self._index.ntotal
+
     def add_embeddings(self, embeddings: list[list[float]]) -> None:
         """Add embeddings to the index.
 

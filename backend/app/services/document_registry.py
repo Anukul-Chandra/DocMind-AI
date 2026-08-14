@@ -117,6 +117,18 @@ class DocumentRegistry:
             return None
         return document
 
+    def list_all_documents(self) -> list[Document]:
+        """Return every registered document regardless of owner.
+
+        Audit and consistency tooling uses this to inspect the full registry;
+        the owner-scoped operations remain the only read path for application
+        callers.
+
+        Returns:
+            A list of every registered document.
+        """
+        return list(self._documents.values())
+
     def exists(self, document_id: str) -> bool:
         """Check whether a document identifier is registered.
 

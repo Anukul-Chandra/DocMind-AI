@@ -66,6 +66,19 @@ class DocumentRepository(ABC):
         """
 
     @abstractmethod
+    def list_all_documents(self) -> list[Document]:
+        """Return every registered document regardless of owner.
+
+        This is a dedicated, read-only inventory path for audit and
+        consistency tooling. It does not bypass the ownership scoping of the
+        read/mutate operations above; those remain the only document path for
+        application callers.
+
+        Returns:
+            A list of every registered document.
+        """
+
+    @abstractmethod
     def exists(self, document_id: str) -> bool:
         """Return whether a document identifier is registered.
 
