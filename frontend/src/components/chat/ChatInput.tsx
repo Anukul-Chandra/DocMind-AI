@@ -1,7 +1,8 @@
-import { useState, type KeyboardEvent } from "react";
+import { useRef, useState, type KeyboardEvent } from "react";
 import { Send } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface ChatInputProps {
   onSend: (text: string) => void;
@@ -10,12 +11,18 @@ interface ChatInputProps {
 
 export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const [value, setValue] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   function submit() {
     const text = value.trim();
     if (!text || disabled) return;
     onSend(text);
     setValue("");
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.focus();
+    }
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
@@ -25,12 +32,27 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     }
   }
 
+  function handleChange(value: string) {
+    setValue(value);
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
+    }
+  }
+
   return (
     <div>
-      <div className="flex items-end gap-2 rounded-xl border bg-card p-2 shadow-sm">
+      <div
+        className={cn(
+          "flex items-end gap-2 rounded-xl border bg-card p-2 shadow-sm transition-colors",
+          "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
+        )}
+      >
         <textarea
+          ref={textareaRef}
           value={value}
-          onChange={(event) => setValue(event.target.value)}
+          onChange={(event) => handleChange(event.target.value)}
           onKeyDown={handleKeyDown}
           rows={1}
           placeholder="Ask a question about your documents…"

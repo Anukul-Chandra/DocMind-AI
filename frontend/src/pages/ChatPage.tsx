@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { MessagesSquare } from "lucide-react";
+import { AlertCircle, MessagesSquare } from "lucide-react";
 
 import { ApiError } from "@/api/client";
 import { chatUser } from "@/api/chat";
@@ -32,9 +32,9 @@ function toSources(chunks: RetrieveChunk[]): SourceFile[] {
 
 function EmptyState({ onExample }: { onExample: (text: string) => void }) {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-4 p-8 text-center">
-      <span className="flex size-14 items-center justify-center rounded-full bg-muted">
-        <MessagesSquare className="size-7 text-muted-foreground" aria-hidden="true" />
+    <div className="flex h-full flex-col items-center justify-center gap-5 p-8 text-center">
+      <span className="flex size-14 items-center justify-center rounded-full bg-primary/10">
+        <MessagesSquare className="size-7 text-primary" aria-hidden="true" />
       </span>
       <div className="space-y-1">
         <p className="font-medium">Ask DocMind about your documents</p>
@@ -48,7 +48,7 @@ function EmptyState({ onExample }: { onExample: (text: string) => void }) {
             key={question}
             type="button"
             onClick={() => onExample(question)}
-            className="rounded-full border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="rounded-full border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {question}
           </button>
@@ -98,7 +98,14 @@ export function ChatPage() {
           : undefined;
       setMessages((previous) => [
         ...previous,
-        { id: crypto.randomUUID(), role: "assistant", content: answer, provider, model, sources },
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: answer,
+          provider,
+          model,
+          sources,
+        },
       ]);
     } finally {
       setIsLoading(false);
@@ -106,12 +113,12 @@ export function ChatPage() {
   }
 
   return (
-    <div className="flex min-h-0 w-full flex-1 flex-col">
+    <div className="flex h-full min-h-0 flex-col">
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
         {messages.length === 0 ? (
           <EmptyState onExample={(question) => void handleSend(question)} />
         ) : (
-          <div className="mx-auto mt-auto flex w-full max-w-3xl flex-col gap-4 p-6 lg:p-8">
+          <div className="mx-auto mt-auto flex w-full max-w-3xl flex-col gap-4 p-4 pb-2 sm:p-6 sm:pb-2 lg:p-8 lg:pb-2">
             {messages.map((message) => (
               <ChatMessageBubble key={message.id} message={message} />
             ))}
@@ -130,12 +137,16 @@ export function ChatPage() {
           {error && (
             <div
               role="alert"
-              className="flex items-center gap-2 rounded-md border bg-destructive/10 px-3 py-2 text-sm text-destructive"
+              className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
             >
-              {error}
+              <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+              <span className="min-w-0">{error}</span>
             </div>
           )}
-          <ChatInput onSend={(text) => void handleSend(text)} disabled={isLoading} />
+          <ChatInput
+            onSend={(text) => void handleSend(text)}
+            disabled={isLoading}
+          />
         </div>
       </div>
     </div>
