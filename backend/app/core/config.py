@@ -81,5 +81,29 @@ class Settings(BaseSettings):
                 setattr(self, field, str((PROJECT_ROOT / path).resolve()))
         return self
 
+    @model_validator(mode="after")
+    def _validate_required_settings(self) -> "Settings":
+        """Enforce required configuration at startup.
+
+        Authentication always needs a signing secret: refuse to start with an
+        empty ``JWT_SECRET`` instead of failing obscurely on the first request.
+
+        ``DATABASE_URL`` is only required for the ``postgres`` persistence
+        backend; the default JSON backend runs without it.
+        """
+        if not self.jwt_secret.strip():
+            raise ValueError(
+                "JWT_SECRET is required but was not provided. Set JWT_SECRET "
+                "in the environment or in .env (see .env.example)."
+            )
+        if (
+            self.persistence_backend.strip().lower() == "postgres"
+            and not self.database_url.strip()
+        ):
+            raise ValueError(
+                "DATABASE_URL is required when PERSISTENCE_BACKEND == 'postgres'."
+            )
+        return self
+
 
 settings = Settings()
