@@ -256,12 +256,19 @@ class _FakeDocumentService:
     def _metadata_store(self):
         return app.dependency_overrides[get_metadata_store]()
 
+    def capture_state(self):
+        """Return a no-op snapshot (this fake never fails an upload)."""
+
+    def restore_state(self, snapshot) -> None:
+        """No-op restore (this fake never mutates shared state)."""
+
     async def index_document(
         self,
         file_path: str,
         workspace_id: str = DEFAULT_WORKSPACE,
         document_id: str | None = None,
         owner_id: str = "",
+        filename: str | None = None,
     ):
         from app.services.document import IndexDocumentResult
         from app.services.text_cleaner import clean_text
@@ -282,7 +289,7 @@ class _FakeDocumentService:
             owner_id,
         )
         return IndexDocumentResult(
-            filename=Path(file_path).name,
+            filename=filename or Path(file_path).name,
             total_chunks=len(chunks),
             total_embeddings=len(embeddings),
             status="indexed",
