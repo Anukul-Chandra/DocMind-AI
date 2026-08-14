@@ -40,24 +40,28 @@ function OverviewCard({
   action,
 }: OverviewCardProps) {
   return (
-    <Card>
+    <Card className="gap-5">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Icon className="size-4 text-muted-foreground" aria-hidden="true" />
-          {title}
-        </CardTitle>
+        <div className="flex items-start justify-between gap-3">
+          <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Icon className="size-5" aria-hidden="true" />
+          </span>
+          <Button asChild size="icon" variant="ghost" aria-label={action}>
+            <Link to={to}>
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
+          </Button>
+        </div>
+        <CardTitle className="text-base">{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-1">
         <p className="text-3xl font-semibold tracking-tight">{value}</p>
-        <p className="mt-1 text-sm text-muted-foreground">{hint}</p>
+        <p className="text-sm text-muted-foreground">{hint}</p>
       </CardContent>
       <CardFooter>
         <Button asChild size="sm" variant="outline">
-          <Link to={to}>
-            {action}
-            <ArrowRight className="size-4" aria-hidden="true" />
-          </Link>
+          <Link to={to}>{action}</Link>
         </Button>
       </CardFooter>
     </Card>
@@ -77,10 +81,11 @@ function QuickAction({ icon: Icon, title, description, to }: QuickActionProps) {
       to={to}
       className={cn(
         "group flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm transition-colors",
-        "hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "hover:border-primary/30 hover:bg-accent/40",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
       )}
     >
-      <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+      <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
         <Icon className="size-5" aria-hidden="true" />
       </span>
       <span className="space-y-1">
@@ -96,18 +101,21 @@ function QuickAction({ icon: Icon, title, description, to }: QuickActionProps) {
 export function DashboardPage() {
   return (
     <div className="mx-auto w-full max-w-6xl space-y-8 p-6 lg:p-8">
-      <PageHeader
-        title="Dashboard"
-        description="Upload documents and ask questions about them with DocMind AI."
-      />
+      <div className="space-y-1">
+        <p className="text-sm font-medium text-primary">Welcome back</p>
+        <PageHeader
+          title="Dashboard"
+          description="Upload documents and ask questions about them with DocMind AI."
+        />
+      </div>
 
       <section className="grid gap-4 sm:grid-cols-2">
         <OverviewCard
           icon={FileText}
           title="Documents"
           description="Your indexed PDF library"
-          value="0"
-          hint="No documents yet. Upload a PDF to start."
+          value="—"
+          hint="Upload a PDF to build your knowledge base."
           to="/app/documents"
           action="Open documents"
         />
@@ -115,8 +123,8 @@ export function DashboardPage() {
           icon={MessagesSquare}
           title="Chat & RAG"
           description="Ask questions about your documents"
-          value="0"
-          hint="No conversations yet. Start asking questions."
+          value="—"
+          hint="Start a conversation to get grounded answers."
           to="/app/chat"
           action="Open chat"
         />
