@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { FileSearch } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
@@ -67,7 +68,13 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center p-6">
+    <div className="flex flex-1 flex-col items-center justify-center gap-6 p-6">
+      <div className="flex items-center gap-2">
+        <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
+          <FileSearch className="size-5 text-primary" aria-hidden="true" />
+        </span>
+        <span className="text-lg font-semibold">DocMind AI</span>
+      </div>
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Sign in</CardTitle>
