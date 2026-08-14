@@ -71,6 +71,14 @@ class JsonDocumentRepository(DocumentRepository):
         """
         return self._registry.get_document(document_id, owner_id)
 
+    def list_all_documents(self) -> list[Document]:
+        """Return every registered document regardless of owner.
+
+        Returns:
+            A list of every registered document.
+        """
+        return self._registry.list_all_documents()
+
     def exists(self, document_id: str) -> bool:
         """Return whether a document identifier is registered.
 
