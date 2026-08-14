@@ -50,14 +50,5 @@
     "document_id": "40758714-c9c1-40e2-94e5-254cb55a5cfd",
     "owner_id": "1d144828-58ba-45dd-9a48-f8a46b2eb8c9",
     "text": "Currency exchange rates follow supply and demand while central banker decisions move the value of the\namerican dollar rapidly."
-  },
-  {
-    "id": 7,
-    "workspace_id": "default",
-    "filename": "docmind.pdf",
-    "chunk_id": 1,
-    "document_id": "5aa4e930-ec5b-45e1-9e1a-517e1a6595e0",
-    "owner_id": "7b02ec4d-db97-44c0-af05-aba9ce60e6f1",
-    "text": "DocMind performs semantic retrieval over indexed PDFs with owner scoping so each user only ever sees their\nown document chunks."
   }
 ]
