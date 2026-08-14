@@ -1,4 +1,5 @@
 import os
+import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -68,16 +69,41 @@ class VectorStore:
         return distances.tolist(), indices.tolist()
 
     def save(self, path: str) -> None:
-        """Persist the FAISS index to disk.
+        """Persist the FAISS index to disk atomically.
+
+        The index is written to a unique temporary file in the same directory
+        as the target, fully written and synced, then moved over the target
+        with :func:`os.replace` so a crash or failed write never leaves a
+        partially written ``index.faiss``. If anything fails, the temporary
+        file is removed and the previous target file is left untouched.
 
         Args:
             path: The file path to save the index to.
+
+        Raises:
+            The underlying exception from the failing write step; the target
+            index is never replaced with a partial file.
         """
-        Path(path).parent.mkdir(
-            parents=True,
-            exist_ok=True,
+        target = Path(path)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        fd, tmp_name = tempfile.mkstemp(
+            dir=target.parent,
+            prefix=f".{target.name}.",
+            suffix=".tmp",
         )
-        faiss.write_index(self._index, path)
+        os.close(fd)
+        try:
+            faiss.write_index(self._index, tmp_name)
+            with open(tmp_name, "r+b") as f:
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(tmp_name, target)
+        except BaseException:
+            try:
+                os.unlink(tmp_name)
+            except OSError:
+                pass
+            raise
 
     def load_index(self, path: str) -> None:
         """Load a FAISS index into this store from disk.
