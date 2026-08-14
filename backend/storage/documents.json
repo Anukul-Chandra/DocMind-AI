@@ -5,6 +5,25 @@
     "filename": "lifecycle_test.pdf",
     "uploaded_at": "2026-08-02T10:02:35.244609Z",
     "chunk_count": 1,
-    "deleted": true
+    "deleted": true,
+    "owner_id": ""
+  },
+  {
+    "document_id": "c009da17-4863-4b8c-89b0-7113b677974a",
+    "workspace_id": "default",
+    "filename": "upload_test.pdf",
+    "uploaded_at": "2026-08-14T09:18:24.346776Z",
+    "chunk_count": 1,
+    "deleted": true,
+    "owner_id": "d2455f33-b70b-4e81-b8f0-774115a6e38d"
+  },
+  {
+    "document_id": "fbd3d7ab-b14b-4021-9609-dc178781d474",
+    "workspace_id": "default",
+    "filename": "rag_src.pdf",
+    "uploaded_at": "2026-08-14T09:19:07.660753Z",
+    "chunk_count": 1,
+    "deleted": false,
+    "owner_id": "d2455f33-b70b-4e81-b8f0-774115a6e38d"
   }
 ]
