@@ -42,6 +42,11 @@ class PostgresConversationRepository(ConversationRepository):
                     created_at=datetime.now(timezone.utc),
                 )
             )
+            try:
+                session.commit()
+            except Exception:
+                session.rollback()
+                raise
         return conversation_id
 
     def get_history(self, conversation_id: str) -> list[dict[str, str]]:
@@ -100,3 +105,8 @@ class PostgresConversationRepository(ConversationRepository):
                     created_at=now,
                 )
             )
+            try:
+                session.commit()
+            except Exception:
+                session.rollback()
+                raise
