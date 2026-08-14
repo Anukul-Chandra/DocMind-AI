@@ -52,6 +52,11 @@ class PostgresLogRepository(LogRepository):
                         error_message=entry.error_message,
                     )
                 )
+                try:
+                    session.commit()
+                except Exception:
+                    session.rollback()
+                    raise
         except Exception:
             # Logging is best-effort; never fail the request.
             return
