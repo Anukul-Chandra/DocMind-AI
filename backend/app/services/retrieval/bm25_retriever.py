@@ -72,6 +72,21 @@ class BM25Retriever(Retriever):
         self._avgdl = total / len(documents) if documents else 0.0
         self._built = True
 
+    def _ensure_index(self) -> None:
+        """Rebuild the BM25 index when the stored corpus has changed.
+
+        The index is derived from the shared MetadataStore, which grows as new
+        documents are uploaded. It was previously built only once, so chunks
+        indexed after the first retrieval stayed invisible to BM25 until the
+        backend restarted. Rebuild whenever the number of stored chunks no
+        longer matches the number of indexed chunks so newly uploaded documents
+        become searchable immediately, while keeping the build lazy and cheap on
+        the common path where the corpus is unchanged.
+        """
+        document_count = len(self._metadata_store.get_all_documents())
+        if not self._built or len(self._doc_tokens) != document_count:
+            self._build()
+
     def retrieve(
         self,
         query: str,
@@ -91,8 +106,7 @@ class BM25Retriever(Retriever):
         Returns:
             A list of the top-k matching document chunks, ordered best first.
         """
-        if not self._built:
-            self._build()
+        self._ensure_index()
         query_terms = set(self._tokenize(query))
         if not query_terms:
             return []
