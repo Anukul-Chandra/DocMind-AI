@@ -117,6 +117,16 @@ class TokenResponse(BaseModel):
     token_type: str
 
 
+class RefreshRequest(BaseModel):
+    """Request payload to redeem a refresh token.
+
+    Attributes:
+        refresh_token: The long-lived token issued at login.
+    """
+
+    refresh_token: str = Field(min_length=1)
+
+
 @router.post(
     "/register",
     response_model=SuccessResponse[UserResponse],
@@ -186,6 +196,51 @@ def login(
     """
     try:
         pair = auth_service.authenticate(request.email, request.password)
+    except InvalidCredentialsError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(exc),
+        ) from exc
+    return SuccessResponse(
+        data=TokenResponse(
+            access_token=pair.access_token,
+            refresh_token=pair.refresh_token,
+            token_type=pair.token_type,
+        )
+    )
+
+
+@router.post(
+    "/refresh",
+    response_model=SuccessResponse[TokenResponse],
+    status_code=status.HTTP_200_OK,
+)
+def refresh(
+    request: RefreshRequest,
+    auth_service: AuthService = Depends(get_auth_service),
+) -> SuccessResponse[TokenResponse]:
+    """Redeem a refresh token and issue a new access/refresh token pair.
+
+    All refresh logic lives in AuthService: the token is verified as a refresh
+    token (access tokens are rejected by the token service), expiry and
+    signature are checked, the subject is resolved to a still-active user, and
+    a fresh token pair is issued. The route only delegates and maps refresh
+    failures to the standardized 401 response.
+
+    Args:
+        request: The refresh token payload.
+        auth_service: The AuthService handling the refresh flow.
+
+    Returns:
+        A success envelope with a freshly issued token pair.
+
+    Raises:
+        HTTPException: If the refresh token is invalid, expired, or an access
+            token, or it identifies a missing or inactive user. The same 401
+            is returned in every case.
+    """
+    try:
+        pair = auth_service.refresh(request.refresh_token)
     except InvalidCredentialsError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
