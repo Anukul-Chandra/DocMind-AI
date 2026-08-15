@@ -19,9 +19,6 @@ export class ApiError extends Error {
 export const apiClient: AxiosInstance = axios.create({
   baseURL: env.apiBaseUrl,
   timeout: env.apiTimeoutMs,
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
 export function setAccessToken(token: string | null): void {
