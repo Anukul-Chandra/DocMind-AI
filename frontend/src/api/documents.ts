@@ -9,6 +9,8 @@ export interface Document {
   chunk_count: number;
   deleted: boolean;
   owner_id: string;
+  classification: string;
+  extracted_data?: Record<string, unknown> | null;
 }
 
 export interface UploadResult {
