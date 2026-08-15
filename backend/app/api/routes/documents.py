@@ -77,15 +77,17 @@ async def upload_document(
         )
     except DocumentIndexError as exc:
         _compensate_failed_upload(document_service, snapshot, saved_path, exc)
+        logger.error("Failed to index document upload", exc_info=exc)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to index document: {exc}",
+            detail="The document could not be indexed. Please ensure the PDF is valid.",
         ) from exc
     except Exception as exc:
         _compensate_failed_upload(document_service, snapshot, saved_path, exc)
+        logger.error("Unexpected error while indexing document upload", exc_info=exc)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Unexpected error while indexing: {exc}",
+            detail="An unexpected error occurred while processing the document.",
         ) from exc
 
     try:
@@ -105,9 +107,10 @@ async def upload_document(
         )
     except Exception as exc:
         _compensate_failed_upload(document_service, snapshot, saved_path, exc)
+        logger.error("Failed to register indexed document", exc_info=exc)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to register document: {exc}",
+            detail="The document was indexed but could not be saved.",
         ) from exc
 
     return SuccessResponse(
@@ -335,8 +338,9 @@ def _save_upload(filename: str, content: bytes) -> Path:
         destination = storage_dir / f"{uuid4().hex}{suffix}"
         destination.write_bytes(content)
     except OSError as exc:
+        logger.error("Failed to save uploaded file to %s", destination, exc_info=exc)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to save uploaded file: {exc}",
+            detail="The uploaded file could not be saved.",
         ) from exc
     return destination
