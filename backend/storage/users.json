@@ -14,5 +14,13 @@
     "created_at": "2026-08-14T09:17:56.316857+00:00",
     "updated_at": "2026-08-14T09:17:56.316857+00:00",
     "is_active": true
+  },
+  {
+    "id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "email": "anukul16900@gmail.com",
+    "password_hash": "scrypt$16384$8$1$71519fb88c271b4aa9a74b1992146efa$e5432f2162f07aafdf25fb48d9429907d28b4a261215997f0b53e53c08f227a7",
+    "created_at": "2026-08-15T05:10:55.446970+00:00",
+    "updated_at": "2026-08-15T05:10:55.446970+00:00",
+    "is_active": true
   }
 ]
