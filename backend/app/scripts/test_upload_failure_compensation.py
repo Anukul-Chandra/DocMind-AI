@@ -424,9 +424,14 @@ def main() -> int:
             check(
                 "F. original exception preserved despite cleanup failure",
                 resp.status_code == 400
-                and "simulated extraction failure"
-                in resp.json()["error"]["message"],
+                and "could not be indexed" in resp.json()["error"]["message"],
                 f"status={resp.status_code}",
+            )
+            body_text = str(resp.json())
+            check(
+                "F. internal exception details are not exposed",
+                "simulated extraction failure" not in body_text
+                and "file locked" not in body_text,
             )
             after = _state(vector_store, metadata_store, faiss_path, metadata_path, repo)
             check(

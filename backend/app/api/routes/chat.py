@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
@@ -5,6 +7,8 @@ from app.api.dependencies import get_chat_service, get_current_user
 from app.services.auth import User
 from app.services.chat.chat_service import ChatService
 from app.services.llm.provider_manager import LLMUnavailableError
+
+logger = logging.getLogger(__name__)
 
 
 class ChatRequest(BaseModel):
@@ -64,9 +68,10 @@ async def chat(
             owner_id=current_user.user_id,
         )
     except LLMUnavailableError as exc:
+        logger.error("All LLM providers failed for chat request", exc_info=exc)
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"All LLM providers failed: {exc}",
+            detail="The AI service is temporarily unavailable. Please try again later.",
         ) from exc
     return ChatResponse(
         provider=response.provider,
