@@ -41,6 +41,10 @@ class PostgresLogRepository(LogRepository):
                     db.RequestLogEntry(
                         request_id=entry.request_id,
                         timestamp=timestamp,
+                        method=entry.method,
+                        path=entry.path,
+                        status_code=entry.status_code,
+                        user_id=entry.user_id,
                         workspace_id=entry.workspace_id,
                         conversation_id=entry.conversation_id,
                         provider=entry.provider,
