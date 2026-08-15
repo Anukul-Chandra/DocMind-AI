@@ -21,6 +21,8 @@ class Document(BaseModel):
         deleted: Whether the document has been marked as deleted.
         owner_id: The user id that owns the document. Empty for legacy
             documents registered before ownership was tracked.
+        classification: The document type, or ``unknown``.
+        extracted_data: Structured data extracted from the document, or None.
     """
 
     document_id: str
@@ -31,6 +33,7 @@ class Document(BaseModel):
     deleted: bool = False
     owner_id: str = ""
     classification: str = "unknown"
+    extracted_data: dict | None = None
 
 
 class DocumentRegistry:
@@ -62,6 +65,7 @@ class DocumentRegistry:
         owner_id: str,
         document_id: str | None = None,
         classification: str = "unknown",
+        extracted_data: dict | None = None,
     ) -> Document:
         """Register a new indexed document owned by a user.
 
@@ -72,6 +76,8 @@ class DocumentRegistry:
             owner_id: The user id that owns the document.
             document_id: An explicit identifier, or None to generate one.
             classification: The document type, or ``unknown``.
+            extracted_data: Structured data extracted from the document, or
+                None.
 
         Returns:
             The registered document.
@@ -85,6 +91,7 @@ class DocumentRegistry:
             chunk_count=chunk_count,
             owner_id=owner_id,
             classification=classification,
+            extracted_data=extracted_data,
         )
         self._documents[document_id] = document
         try:

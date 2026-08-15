@@ -89,6 +89,11 @@ async def upload_document(
         ) from exc
 
     try:
+        extracted_data = (
+            result.extraction.extracted
+            if result.extraction is not None
+            else None
+        )
         document = document_repository.register(
             workspace_id=workspace_id,
             filename=result.filename,
@@ -96,6 +101,7 @@ async def upload_document(
             owner_id=current_user.user_id,
             document_id=document_id,
             classification=result.classification,
+            extracted_data=extracted_data,
         )
     except Exception as exc:
         _compensate_failed_upload(document_service, snapshot, saved_path, exc)
