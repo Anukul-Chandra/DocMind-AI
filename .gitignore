@@ -30,3 +30,10 @@ Thumbs.db
 # Before making this repository public,
 # add .env back to .gitignore and remove it from Git history if necessary.
 .env.local
+
+# Runtime storage artifacts (backend/storage/)
+# backend/storage/ holds the app's runtime state and test byproducts.
+# Daily request logs are written here, and uploads are saved as 32-hex-char
+# uuid4 filenames (e.g. 0db6ac3fe33a4153ac45214bb29f0ed3.pdf).
+backend/storage/logs/
+backend/storage/????????????????????????????????.pdf
