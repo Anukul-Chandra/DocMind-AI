@@ -3,14 +3,17 @@ import { RouterProvider } from "react-router-dom";
 
 import { AuthProvider } from "@/app/auth-provider";
 import { queryClient } from "@/lib/query-client";
+import { ThemeProvider } from "@/lib/theme";
 import { router } from "@/routes/router";
 
 export function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <RouterProvider router={router} />
-      </AuthProvider>
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <RouterProvider router={router} />
+        </AuthProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }

@@ -46,7 +46,7 @@ export function ProtectedShell() {
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-3 top-3 z-20 text-white hover:bg-white/20 hover:text-white lg:hidden"
+            className="absolute right-3 top-3 z-20 text-foreground hover:bg-accent hover:text-foreground lg:hidden"
             onClick={() => setSidebarOpen(false)}
             aria-label="Close navigation"
           >

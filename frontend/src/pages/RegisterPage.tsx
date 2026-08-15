@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
 
 const registerSchema = z
@@ -68,7 +69,10 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-6 p-6">
+    <div className="relative flex flex-1 flex-col items-center justify-center gap-6 p-6">
+      <div className="absolute right-4 top-4">
+        <ThemeToggle />
+      </div>
       <div className="flex items-center gap-2">
         <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
           <FileSearch className="size-5 text-primary" aria-hidden="true" />
