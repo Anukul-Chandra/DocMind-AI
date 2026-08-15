@@ -37,6 +37,21 @@ class Settings(BaseSettings):
     jwt_access_ttl_seconds: int = 900
     jwt_refresh_ttl_seconds: int = 604800
 
+    #: Comma-separated list of browser origins allowed to call the API.
+    #: Empty disallows all cross-origin browser requests (same-origin still works).
+    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
+    #: Whether the CORS response advertises that credentials are supported.
+    cors_allow_credentials: bool = True
+
+    #: Master switch for the in-memory rate limiter.
+    rate_limit_enabled: bool = True
+    #: Maximum requests per client IP per minute outside /auth.
+    rate_limit_per_minute: int = 300
+    #: Maximum requests per client IP per minute on /auth endpoints.
+    rate_limit_auth_per_minute: int = 60
+    #: Trust X-Forwarded-For for the client IP when behind a reverse proxy.
+    rate_limit_trust_proxy_headers: bool = False
+
     embedding_model: str = "all-MiniLM-L6-v2"
 
     llm_provider: str = ""
@@ -104,6 +119,22 @@ class Settings(BaseSettings):
                 "DATABASE_URL is required when PERSISTENCE_BACKEND == 'postgres'."
             )
         return self
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        """Parse the comma-separated CORS_ORIGINS value into an origin list.
+
+        Blank entries and surrounding whitespace are ignored so the value can
+        be written naturally in a .env file.
+
+        Returns:
+            A list of origin strings, or an empty list when CORS is disabled.
+        """
+        return [
+            origin.strip()
+            for origin in self.cors_origins.split(",")
+            if origin.strip()
+        ]
 
 
 settings = Settings()
