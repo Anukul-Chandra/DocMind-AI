@@ -8,6 +8,7 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import { documentTypeLabel } from "@/lib/document-types";
 import { cn } from "@/lib/utils";
 
 export function formatUploadDate(iso: string): string {
@@ -43,16 +44,21 @@ export function DocumentCard({ document }: { document: Document }) {
         <div className="flex items-center justify-between text-xs">
           <span className="text-muted-foreground">
             {document.chunk_count} chunks
+            {document.deleted && (
+              <span className="ml-2 text-destructive">· Deleted</span>
+            )}
           </span>
           <span
             className={cn(
               "inline-flex items-center rounded-full px-2 py-0.5 font-medium",
               document.deleted
                 ? "bg-muted text-muted-foreground"
-                : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+                : document.classification === "unknown"
+                  ? "bg-muted text-muted-foreground"
+                  : "bg-primary/10 text-primary",
             )}
           >
-            {document.deleted ? "Deleted" : "Indexed"}
+            {documentTypeLabel(document.classification)}
           </span>
         </div>
       </CardContent>
