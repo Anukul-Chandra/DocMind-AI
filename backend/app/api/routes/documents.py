@@ -95,6 +95,7 @@ async def upload_document(
             chunk_count=result.total_chunks,
             owner_id=current_user.user_id,
             document_id=document_id,
+            classification=result.classification,
         )
     except Exception as exc:
         _compensate_failed_upload(document_service, snapshot, saved_path, exc)

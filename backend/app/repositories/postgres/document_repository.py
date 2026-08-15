@@ -35,6 +35,7 @@ class PostgresDocumentRepository(DocumentRepository):
         chunk_count: int,
         owner_id: str,
         document_id: str | None = None,
+        classification: str = "unknown",
     ) -> Document:
         """Register a new indexed document owned by a user.
 
@@ -44,6 +45,10 @@ class PostgresDocumentRepository(DocumentRepository):
             chunk_count: The number of chunks indexed for the document.
             owner_id: The user id that owns the document.
             document_id: An explicit identifier, or None to generate one.
+            classification: The document type, or ``unknown``. Accepted for
+                interface compatibility but not persisted: the ``documents``
+                table schema is out of scope, so documents read back through
+                this backend report ``unknown``.
 
         Returns:
             The registered document.

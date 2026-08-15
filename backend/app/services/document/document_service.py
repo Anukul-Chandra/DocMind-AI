@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 
+from app.services.document.classifier import DocumentClassifier, UNKNOWN
 from app.services.document.chunker import Chunker
 from app.services.document.pdf_processor import PDFProcessor
 from app.services.document.state_snapshot import (
@@ -36,6 +37,7 @@ class IndexDocumentResult:
     total_chunks: int
     total_embeddings: int
     status: str
+    classification: str = UNKNOWN
 
 
 class DocumentService:
@@ -56,6 +58,7 @@ class DocumentService:
         metadata_store: MetadataStore,
         faiss_index_path: str | None = None,
         metadata_path: str | None = None,
+        classifier: DocumentClassifier | None = None,
     ) -> None:
         """Initialize the document service with its collaborators.
 
@@ -67,6 +70,9 @@ class DocumentService:
             metadata_store: Stores the chunk metadata.
             faiss_index_path: Optional path to persist the FAISS index to.
             metadata_path: Optional path to persist the chunk metadata to.
+            classifier: Optional document-type classifier applied to the
+                extracted text. When omitted, documents are classified as
+                ``unknown``.
         """
         self._pdf_processor = pdf_processor
         self._chunker = chunker
@@ -75,6 +81,7 @@ class DocumentService:
         self._metadata_store = metadata_store
         self._faiss_index_path = faiss_index_path
         self._metadata_path = metadata_path
+        self._classifier = classifier
 
     def capture_state(self) -> UploadStateSnapshot:
         """Capture the pre-indexing state of the stores this service mutates.
@@ -126,7 +133,8 @@ class DocumentService:
                 client filename here so it is preserved for display.
 
         Returns:
-            A summary with the filename, chunk count, embedding count, and status.
+            A summary with the filename, chunk count, embedding count, status,
+            and document classification.
 
         Raises:
             DocumentIndexError: If the document cannot be extracted or indexed.
@@ -135,6 +143,11 @@ class DocumentService:
         try:
             text = self._pdf_processor.extract_text(file_path)
             cleaned_text = clean_text(text)
+            classification = (
+                self._classifier.classify(cleaned_text)
+                if self._classifier is not None
+                else UNKNOWN
+            )
             chunks = self._chunker.chunk(cleaned_text)
 
             embeddings = self._embedding_service.generate_embeddings(chunks)
@@ -161,4 +174,5 @@ class DocumentService:
             total_chunks=len(chunks),
             total_embeddings=len(embeddings),
             status="indexed",
+            classification=classification,
         )

@@ -26,6 +26,7 @@ class JsonDocumentRepository(DocumentRepository):
         chunk_count: int,
         owner_id: str,
         document_id: str | None = None,
+        classification: str = "unknown",
     ) -> Document:
         """Register a new indexed document owned by a user.
 
@@ -35,6 +36,7 @@ class JsonDocumentRepository(DocumentRepository):
             chunk_count: The number of chunks indexed for the document.
             owner_id: The user id that owns the document.
             document_id: An explicit identifier, or None to generate one.
+            classification: The document type, or ``unknown``.
 
         Returns:
             The registered document.
@@ -45,6 +47,7 @@ class JsonDocumentRepository(DocumentRepository):
             chunk_count,
             owner_id,
             document_id,
+            classification,
         )
 
     def list_documents(self, owner_id: str) -> list[Document]:
