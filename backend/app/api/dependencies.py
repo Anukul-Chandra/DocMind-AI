@@ -26,6 +26,7 @@ from app.services.document import (
     DocumentService,
     PDFProcessor,
 )
+from app.services.document.extraction import ExtractionService
 from app.services.document_registry import DocumentRegistry
 from app.services.embedding import EmbeddingService
 from app.services.llm.factory import build_provider_manager
@@ -66,6 +67,7 @@ def get_document_service() -> DocumentService:
         faiss_index_path=settings.faiss_index_path,
         metadata_path=settings.metadata_path,
         classifier=DocumentClassifier(),
+        extractor=ExtractionService(build_provider_manager()),
     )
 
 

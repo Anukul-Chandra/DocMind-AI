@@ -5,6 +5,7 @@ from pathlib import Path
 
 from app.services.document.classifier import DocumentClassifier, UNKNOWN
 from app.services.document.chunker import Chunker
+from app.services.document.extraction import ExtractionResult, ExtractionService
 from app.services.document.pdf_processor import PDFProcessor
 from app.services.document.state_snapshot import (
     UploadStateSnapshot,
@@ -31,6 +32,9 @@ class IndexDocumentResult:
         total_chunks: The number of chunks produced and indexed.
         total_embeddings: The number of embeddings generated for the chunks.
         status: The outcome of the indexing operation.
+        classification: The document type, or ``unknown``.
+        extraction: The structured extraction outcome, or None when no
+            extractor is configured.
     """
 
     filename: str
@@ -38,6 +42,7 @@ class IndexDocumentResult:
     total_embeddings: int
     status: str
     classification: str = UNKNOWN
+    extraction: ExtractionResult | None = None
 
 
 class DocumentService:
@@ -59,6 +64,7 @@ class DocumentService:
         faiss_index_path: str | None = None,
         metadata_path: str | None = None,
         classifier: DocumentClassifier | None = None,
+        extractor: ExtractionService | None = None,
     ) -> None:
         """Initialize the document service with its collaborators.
 
@@ -73,6 +79,8 @@ class DocumentService:
             classifier: Optional document-type classifier applied to the
                 extracted text. When omitted, documents are classified as
                 ``unknown``.
+            extractor: Optional structured extraction service applied after
+                classification. When omitted, no structured data is produced.
         """
         self._pdf_processor = pdf_processor
         self._chunker = chunker
@@ -82,6 +90,7 @@ class DocumentService:
         self._faiss_index_path = faiss_index_path
         self._metadata_path = metadata_path
         self._classifier = classifier
+        self._extractor = extractor
 
     def capture_state(self) -> UploadStateSnapshot:
         """Capture the pre-indexing state of the stores this service mutates.
@@ -134,7 +143,7 @@ class DocumentService:
 
         Returns:
             A summary with the filename, chunk count, embedding count, status,
-            and document classification.
+            document classification, and any structured extraction.
 
         Raises:
             DocumentIndexError: If the document cannot be extracted or indexed.
@@ -147,6 +156,11 @@ class DocumentService:
                 self._classifier.classify(cleaned_text)
                 if self._classifier is not None
                 else UNKNOWN
+            )
+            extraction = (
+                await self._extractor.extract(cleaned_text, classification)
+                if self._extractor is not None
+                else None
             )
             chunks = self._chunker.chunk(cleaned_text)
 
@@ -175,4 +189,5 @@ class DocumentService:
             total_embeddings=len(embeddings),
             status="indexed",
             classification=classification,
+            extraction=extraction,
         )

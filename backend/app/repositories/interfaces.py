@@ -28,6 +28,7 @@ class DocumentRepository(ABC):
         owner_id: str,
         document_id: str | None = None,
         classification: str = "unknown",
+        extracted_data: dict | None = None,
     ) -> Document:
         """Register a new indexed document owned by a user.
 
@@ -38,6 +39,8 @@ class DocumentRepository(ABC):
             owner_id: The user id that owns the document.
             document_id: An explicit identifier, or None to generate one.
             classification: The document type, or ``unknown``.
+            extracted_data: Structured data extracted from the document, or
+                None.
 
         Returns:
             The registered document.

@@ -36,6 +36,7 @@ class PostgresDocumentRepository(DocumentRepository):
         owner_id: str,
         document_id: str | None = None,
         classification: str = "unknown",
+        extracted_data: dict | None = None,
     ) -> Document:
         """Register a new indexed document owned by a user.
 
@@ -49,6 +50,9 @@ class PostgresDocumentRepository(DocumentRepository):
                 interface compatibility but not persisted: the ``documents``
                 table schema is out of scope, so documents read back through
                 this backend report ``unknown``.
+            extracted_data: Structured data extracted from the document, or
+                None. Accepted for interface compatibility but not persisted,
+                for the same schema constraint as ``classification``.
 
         Returns:
             The registered document.
