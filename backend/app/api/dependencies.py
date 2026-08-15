@@ -20,7 +20,12 @@ from app.services.auth import (
     UserRepository,
 )
 from app.services.chat.chat_service import ChatService
-from app.services.document import Chunker, DocumentService, PDFProcessor
+from app.services.document import (
+    Chunker,
+    DocumentClassifier,
+    DocumentService,
+    PDFProcessor,
+)
 from app.services.document_registry import DocumentRegistry
 from app.services.embedding import EmbeddingService
 from app.services.llm.factory import build_provider_manager
@@ -60,6 +65,7 @@ def get_document_service() -> DocumentService:
         get_metadata_store(),
         faiss_index_path=settings.faiss_index_path,
         metadata_path=settings.metadata_path,
+        classifier=DocumentClassifier(),
     )
 
 

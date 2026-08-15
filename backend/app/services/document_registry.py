@@ -30,6 +30,7 @@ class Document(BaseModel):
     chunk_count: int
     deleted: bool = False
     owner_id: str = ""
+    classification: str = "unknown"
 
 
 class DocumentRegistry:
@@ -60,6 +61,7 @@ class DocumentRegistry:
         chunk_count: int,
         owner_id: str,
         document_id: str | None = None,
+        classification: str = "unknown",
     ) -> Document:
         """Register a new indexed document owned by a user.
 
@@ -69,6 +71,7 @@ class DocumentRegistry:
             chunk_count: Number of chunks indexed for the document.
             owner_id: The user id that owns the document.
             document_id: An explicit identifier, or None to generate one.
+            classification: The document type, or ``unknown``.
 
         Returns:
             The registered document.
@@ -81,6 +84,7 @@ class DocumentRegistry:
             uploaded_at=datetime.now(timezone.utc),
             chunk_count=chunk_count,
             owner_id=owner_id,
+            classification=classification,
         )
         self._documents[document_id] = document
         try:
