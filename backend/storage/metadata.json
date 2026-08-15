@@ -50,5 +50,68 @@
     "document_id": "40758714-c9c1-40e2-94e5-254cb55a5cfd",
     "owner_id": "1d144828-58ba-45dd-9a48-f8a46b2eb8c9",
     "text": "Currency exchange rates follow supply and demand while central banker decisions move the value of the\namerican dollar rapidly."
+  },
+  {
+    "id": 7,
+    "workspace_id": "default",
+    "filename": "Anukul Chandra-CV.pdf",
+    "chunk_id": 1,
+    "document_id": "f0f67322-b049-4888-a12a-7b35f34ea941",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Anukul Chandra\nAI / ML Engineer\nDhaka, Bangladesh\n\u0083 Phone : +8801957541387\n# Email: anukulchandra5585@gmail.com\n\u00ef LinkedIn: linkedin.com/in/anukul-chandra-5585-diu\n\u00a7 GitHub: github.com/Anukul-Chandra\nProfessional Summary\nComputer Science and Engineering (CSE) graduate with hands-on experience in designing, building, and\ndeploying Generative AI,Automation, Machine learning and NLP solutions for real-world applications. Pro-\nficient in Python, FastAPI, LLM integration, Retrieval-Augmented Generation (RAG), Vector databasesand\nAPI-driven system development.Experienced in developing AI Automation, multimodal AI applications and\nscalable backend services with a strong focus on delivering reliable and production-ready AI solutions.\nTechnical Skills\n\u2022 Programming: Python (Advanced), SQL, Java,\n\u2022 Generative AI & LLM: Retrieval-Augmented Generation (RAG), LLM Integration, LangChain, Hug-\nging Face Hub, Inference Client, Prompt Engineering, Vector Databases (FAISS), Sentence Transformers,"
+  },
+  {
+    "id": 8,
+    "workspace_id": "default",
+    "filename": "Anukul Chandra-CV.pdf",
+    "chunk_id": 2,
+    "document_id": "f0f67322-b049-4888-a12a-7b35f34ea941",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "\u2022 Generative AI & LLM: Retrieval-Augmented Generation (RAG), LLM Integration, LangChain, Hug-\nging Face Hub, Inference Client, Prompt Engineering, Vector Databases (FAISS), Sentence Transformers,\nModel Fine Tuning\n\u2022 AI Automation : N8N, Business Process Automation, CRM Automation, Lead Intelligence Systems,\nSEO Content Automation API Integrations, Email Automation, Social Media Automation\n\u2022 Machine Learning: Supervised & Unsupervised Learning, Regression, Classification, Random Forest,\nSVM, XGBoost, Model Optimization, Cross-Validation,Feature Engineering,Model Evaluation Metrics,\nHyperparameter Tuning\n\u2022 NLP: Tokenization, Stemming, Lemmatization, TF\u2013IDF, Bag of Words (BoW), Named Entity Recogni-\ntion, POS Tagging, Text Classification\n\u2022 Backend & AI Service Development: FastAPI, RESTful APIs, Model Inference Pipelines, API-based\nLLM Deployment, MySQL\n\u2022 Deployment & Tools: VSCode, Jupyter Notebook, Google Colab,Git, GitHub,Docker, Hugging Face\nSpaces, Render Deployment,"
+  },
+  {
+    "id": 9,
+    "workspace_id": "default",
+    "filename": "Anukul Chandra-CV.pdf",
+    "chunk_id": 3,
+    "document_id": "f0f67322-b049-4888-a12a-7b35f34ea941",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "LLM Deployment, MySQL\n\u2022 Deployment & Tools: VSCode, Jupyter Notebook, Google Colab,Git, GitHub,Docker, Hugging Face\nSpaces, Render Deployment,\nProfessional Experience\nAI Engineer\nBetopia\nMarch 2026 \u2013 Present\n\u2022 Designed, developed, and delivered AI-powered automation solutions for real-world business operations\nand client requirements.\n\u2022 Developed intelligent automation workflows using n8n, CRM integrations, reporting automation, and lead\nintelligence systems to reduce manual workload and improve operational efficiency.\n\u2022 Successfully designed 5+ AI Automation projects and delivered to client for business process automation\nsolutions.\n\u2022 Currently Builting LLM-powered applications using RAG architectures, vector databases, semantic search,\nand API integrations.\nAlso I developed 10+ AI projects during academic and professional training, including RAG systems,\nMultimodal AI Systems, recommendation systems, NLP applications."
+  },
+  {
+    "id": 10,
+    "workspace_id": "default",
+    "filename": "Anukul Chandra-CV.pdf",
+    "chunk_id": 4,
+    "document_id": "f0f67322-b049-4888-a12a-7b35f34ea941",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Projects\n\u2022 Medico AI 2.0 \u2014 Multimodal LLM Medical Assistant 2\nBuilt a multimodal AI medical assistant combining computer vision, speech recognition, and large language\nmodels (LLMs). Integrated Groq Llama 4 Scout, Whisper Large V3, and TTS systems to enable medical\nimage analysis, voice-based consultations, symptom assessment, and intelligent healthcare assistance.\n\u2022 Mini AI Assistant 2\nBuilt a production-ready AI assistant with persistent conversation memory, intelligent tool routing,\nRetrieval-Augmented Generation (RAG), and FAISS-powered semantic search.\nDesigned a modular\nFastAPI backend supporting configurable OpenAI, Gemini, Groq, and Hugging Face LLM integration\nfor context-aware document intelligence.\n\u2022 Medico AI \u2013 RAG-based Medical Assistant 2\nDeveloped a professional medical assistant using Retrieval-Augmented Generation (RAG) architecture.\nImplemented FAISS for efficient vector similarity search and integrated Hugging Face\u2019s Zephyr-7B LLM"
+  },
+  {
+    "id": 11,
+    "workspace_id": "default",
+    "filename": "Anukul Chandra-CV.pdf",
+    "chunk_id": 5,
+    "document_id": "f0f67322-b049-4888-a12a-7b35f34ea941",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Implemented FAISS for efficient vector similarity search and integrated Hugging Face\u2019s Zephyr-7B LLM\nvia Inference Client for precise medical query handling. Built a real-time streaming chat interface using\nStreamlit and Docker containerization for deployment on Hugging Face Spaces. Features include context-\naware answering and source document referencing.\n\u2022 AI-Powered-Social-Media-Automation-System 2\nDeveloped a fully autonomous n8n automation pipeline that runs daily at 6 AM, retrieves products from\nGoogle Drive, generates AI images using Nano Banana, creates cinematic short videos with Veo 3.1, and\nproduces platform-specific captions via GPT-4o. The system automatically cross-posts to Facebook and\nInstagram, logs all activities, and sends status reports via email\u2014requiring zero human intervention.\n\u2022 AI-Powered Email Automation & Lead Intelligence System 2\nDeveloped a fully autonomous AI-driven email intelligence system that reads, understands, and responds"
+  },
+  {
+    "id": 12,
+    "workspace_id": "default",
+    "filename": "Anukul Chandra-CV.pdf",
+    "chunk_id": 6,
+    "document_id": "f0f67322-b049-4888-a12a-7b35f34ea941",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "\u2022 AI-Powered Email Automation & Lead Intelligence System 2\nDeveloped a fully autonomous AI-driven email intelligence system that reads, understands, and responds\nto emails in real time. The system intelligently routes conversations, scores leads, integrates with HubSpot\nCRM, and logs data\u2014significantly reducing manual workload and accelerating response times.\n\u2022 Content-Based Movie Recommendation System (FastAPI)2\nBuilt a content-based recommendation system that suggests top-5 similar movies based on textual\nsimilarity of movie metadata. Used TF\u2013IDF vectorization and cosine similarity to compute relevance\nscores. Exposed the recommendation logic through a FastAPI backend and deployed on Hugging Face to\nenable public API-based inference.\n\u2022 Sentiment Analysis on IMDB Movie Reviews 2\nDeveloped an end-to-end NLP pipeline involving text cleaning and TF\u2013IDF vectorization.\nTrained a\nMultinomial Naive Bayes classifier achieving 90% + accuracy. Deployed on Hugging Face.\nSoft Skills"
+  },
+  {
+    "id": 13,
+    "workspace_id": "default",
+    "filename": "Anukul Chandra-CV.pdf",
+    "chunk_id": 7,
+    "document_id": "f0f67322-b049-4888-a12a-7b35f34ea941",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Developed an end-to-end NLP pipeline involving text cleaning and TF\u2013IDF vectorization.\nTrained a\nMultinomial Naive Bayes classifier achieving 90% + accuracy. Deployed on Hugging Face.\nSoft Skills\nAnalytical Thinking, Attention to Detail, Time Management,Adaptability, Research-Oriented Mindset,\nEducation\nB.Sc. in Computer Science and Engineering\nDaffodil International University (2022 - 2025)\nCertifications\n\u2022 Python with Machine Learning \u2013 Creative IT Institute (A+ Grade)\n\u2022 AI + Prompt Engineering \u2013 Microsoft\nLanguages\nBangla \u2013 Native\nEnglish \u2013 Mid Level\nHindi \u2013 Conversational"
   }
 ]
