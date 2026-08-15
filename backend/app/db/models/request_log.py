@@ -10,7 +10,7 @@ from app.db.models.utils import utcnow
 
 
 class RequestLogEntry(Base):
-    """A structured log entry for a chat request."""
+    """A structured log entry for an API request."""
 
     __tablename__ = "request_logs"
 
@@ -19,6 +19,10 @@ class RequestLogEntry(Base):
     timestamp: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utcnow
     )
+    method: Mapped[str] = mapped_column(String(16), default="")
+    path: Mapped[str] = mapped_column(String(1024), default="")
+    status_code: Mapped[int] = mapped_column(Integer, default=0)
+    user_id: Mapped[str] = mapped_column(String(64), default="")
     workspace_id: Mapped[str] = mapped_column(String(64), default="")
     conversation_id: Mapped[str] = mapped_column(String(64), default="")
     provider: Mapped[str] = mapped_column(String(255), default="")

@@ -1,8 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.dependencies import get_log_repository
 from app.api.errors import register_exception_handlers
 from app.api.middleware.rate_limit import FixedWindowLimiter, RateLimitMiddleware
+from app.api.middleware.request_logging import RequestLogMiddleware
 from app.api.routes import auth_router, chat_router, documents_router, router
 from app.api.retrieve import router as retrieve_router
 from app.core.config import settings
@@ -39,8 +41,19 @@ def _add_security_middleware() -> None:
     )
 
 
+def _add_request_logging_middleware() -> None:
+    """Add request logging outermost so every response (including rate-limit
+    and CORS rejections) is recorded with its status code and duration."""
+    app.add_middleware(
+        RequestLogMiddleware,
+        log_repository=get_log_repository(),
+    )
+
+
 if settings.rate_limit_enabled or settings.cors_origins.strip():
     _add_security_middleware()
+
+_add_request_logging_middleware()
 
 app.include_router(router)
 app.include_router(retrieve_router)

@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, Header, HTTPException, Request, status
 
 from app.core.config import settings
 from app.db.session import get_session_factory
@@ -8,7 +8,10 @@ from app.repositories import (
     DocumentRepository,
     JsonDocumentRepository,
     JsonUserRepository,
+    LogRepository,
+    JsonLogRepository,
     PostgresDocumentRepository,
+    PostgresLogRepository,
     PostgresUserRepository,
 )
 from app.services.auth import (
@@ -31,6 +34,7 @@ from app.services.document_registry import DocumentRegistry
 from app.services.embedding import EmbeddingService
 from app.services.llm.factory import build_provider_manager
 from app.services.llm.prompt_builder import PromptBuilder
+from app.services.logging.request_logger import RequestLogger
 from app.services.retrieval import BM25Retriever, HybridRetriever, Retriever
 from app.services.vector_store import VectorStore
 from app.services.vectorstore.metadata_store import MetadataStore
@@ -123,6 +127,20 @@ def get_auth_service() -> AuthService:
     )
 
 
+@lru_cache
+def get_log_repository() -> LogRepository:
+    """Return the LogRepository selected by the configured persistence backend.
+
+    ``persistence_backend`` of ``"json"`` (the default) appends JSONL files
+    under ``settings.logs_dir``; ``"postgres"`` persists rows into the
+    ``request_logs`` table. Both implementations are best-effort and never
+    raise, so request logging can never fail an API request.
+    """
+    if settings.persistence_backend == "postgres":
+        return PostgresLogRepository(get_session_factory())
+    return JsonLogRepository(RequestLogger(settings.logs_dir))
+
+
 _GENERIC_AUTH_FAILURE = "Invalid or missing authentication token."
 
 
@@ -148,6 +166,7 @@ def _extract_bearer_token(authorization: str | None) -> str | None:
 
 
 def get_current_user(
+    request: Request,
     authorization: str | None = Header(None),
     auth_service: AuthService = Depends(get_auth_service),
 ) -> User:
@@ -160,7 +179,13 @@ def get_current_user(
     token, refresh token, unknown user, inactive user) raises the same generic
     401 response.
 
+    On success the resolved user id is stamped into the request state so the
+    request-logging middleware can associate the request with the user without
+    ever logging the token itself.
+
     Args:
+        request: The current request, used only to expose the resolved user id
+            to observability.
         authorization: The raw Authorization header value.
         auth_service: The AuthService used to verify the token and resolve
             the user.
@@ -178,12 +203,14 @@ def get_current_user(
             detail=_GENERIC_AUTH_FAILURE,
         )
     try:
-        return auth_service.get_user_from_access_token(token)
+        user = auth_service.get_user_from_access_token(token)
     except AuthenticationError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=_GENERIC_AUTH_FAILURE,
         ) from exc
+    request.state.user_id = user.user_id
+    return user
 
 
 @lru_cache
