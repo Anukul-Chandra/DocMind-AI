@@ -3,6 +3,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  color-scheme: light;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
@@ -53,6 +54,7 @@
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -94,6 +96,24 @@
   }
 }
 
+/* Smooth color transitions when switching themes */
+body,
+body *,
+body *::before,
+body *::after {
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.docmind-no-transitions,
+.docmind-no-transitions *,
+.docmind-no-transitions *::before,
+.docmind-no-transitions *::after {
+  transition: none !important;
+}
+
 @keyframes docmind-scan {
   0% {
     top: -12%;
@@ -113,4 +133,19 @@
 
 .docmind-scan {
   animation: docmind-scan 1.5s ease-in-out infinite;
+}
+
+@keyframes docmind-theme-icon {
+  from {
+    transform: rotate(-45deg) scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+.docmind-theme-icon {
+  animation: docmind-theme-icon 0.25s ease-out;
 }

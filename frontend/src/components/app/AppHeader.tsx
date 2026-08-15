@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import { pageTitles } from "@/components/app/nav-items";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
 
 interface AppHeaderProps {
@@ -36,6 +37,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
         <h1 className="truncate text-sm font-semibold">{title}</h1>
       </div>
       <div className="flex items-center gap-1">
+        <ThemeToggle />
         <div className="flex items-center gap-2 rounded-full border py-1 pl-1 pr-3">
           <span className="flex size-7 items-center justify-center rounded-full bg-muted">
             <User className="size-4 text-muted-foreground" aria-hidden="true" />

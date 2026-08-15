@@ -4,6 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DocMind AI</title>
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem("docmind-theme") === "dark") {
+            document.documentElement.classList.add("dark");
+          }
+        } catch (error) {
+          // Ignore storage failures (e.g. private browsing).
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
