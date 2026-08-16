@@ -12,6 +12,7 @@ Usage (from backend/):
 """
 
 import asyncio
+import hashlib
 
 from app.services.chat.chat_service import ChatService
 from app.services.chat.query_router import QueryCategory, QueryRouter
@@ -23,6 +24,41 @@ from app.services.llm.providers.base import BaseProvider
 CONTEXT_TEXT = (
     "Anukul Chandra is an AI / ML Engineer from Dhaka, Bangladesh."
 )
+
+_EMBEDDING_DIM = 512
+
+
+class FakeEmbeddingService:
+    """Deterministic embedding service using hashed character trigrams.
+
+    Mirrors the real ``EmbeddingService`` interface (``generate_embeddings``)
+    while staying deterministic and dependency-free. Whole strings are hashed
+    as character trigrams into a wide bucket space, so typo-laden queries land
+    near their correctly spelled counterparts (most trigrams survive a single
+    typo) while unrelated text stays far from the document/metadata centroids.
+    """
+
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def generate_embeddings(self, texts: list[str]) -> list[list[float]]:
+        self.calls += 1
+        vectors: list[list[float]] = []
+        for text in texts:
+            vector = [0.0] * _EMBEDDING_DIM
+            lowered = text.lower()
+            for index in range(max(0, len(lowered) - 2)):
+                trigram = lowered[index : index + 3]
+                bucket = int(hashlib.md5(trigram.encode()).hexdigest(), 16) % _EMBEDDING_DIM
+                vector[bucket] += 1.0
+            vectors.append(vector)
+        return vectors
+
+
+def build_semantic_router() -> tuple[QueryRouter, FakeEmbeddingService]:
+    """Build a router with the deterministic fake embedding service."""
+    embedding_service = FakeEmbeddingService()
+    return QueryRouter(embedding_service), embedding_service
 
 
 class RecordingRetriever:
@@ -278,6 +314,145 @@ async def test_mixed_uses_rag_flow() -> bool:
     return True
 
 
+async def test_semantic_typo_metadata() -> bool:
+    """Typo-laden metadata questions are routed to METADATA via embeddings."""
+    router, _ = build_semantic_router()
+    typo_queries = [
+        "which dcuments i upload in here?",
+        "how many docs have i uploadd?",
+        "list mi documents plz",
+        "wut documnts r in my account?",
+    ]
+    for question in typo_queries:
+        actual = router.classify(question)
+        if actual is not QueryCategory.METADATA:
+            print(
+                f"FAIL: {question!r} -> {actual.value}, expected "
+                f"{QueryCategory.METADATA.value}"
+            )
+            return False
+    return True
+
+
+async def test_semantic_typo_document() -> bool:
+    """Typo-laden document questions are routed to DOCUMENT via embeddings."""
+    router, _ = build_semantic_router()
+    typo_queries = [
+        "summarize mi resume plz",
+        "what iz in mi cv?",
+        "wats the main topic of my documents?",
+    ]
+    for question in typo_queries:
+        actual = router.classify(question)
+        if actual is not QueryCategory.DOCUMENT:
+            print(
+                f"FAIL: {question!r} -> {actual.value}, expected "
+                f"{QueryCategory.DOCUMENT.value}"
+            )
+            return False
+    return True
+
+
+async def test_semantic_general() -> bool:
+    """Normal general questions remain GENERAL via embeddings."""
+    router, _ = build_semantic_router()
+    general_queries = [
+        "hello there, how are you?",
+        "tell me about deep learning",
+        "what is the weather today",
+        "tell me a joke please",
+    ]
+    for question in general_queries:
+        actual = router.classify(question)
+        if actual is not QueryCategory.GENERAL:
+            print(
+                f"FAIL: {question!r} -> {actual.value}, expected "
+                f"{QueryCategory.GENERAL.value}"
+            )
+            return False
+    return True
+
+
+async def test_deterministic_rules_take_precedence() -> bool:
+    """Deterministic matches win without consulting the embedding service."""
+    router, embedding_service = build_semantic_router()
+
+    cases = [
+        ("list my documents please", QueryCategory.METADATA),
+        ("summarize Anukul-chandra Cv.pdf", QueryCategory.DOCUMENT),
+        ("What is in my CV?", QueryCategory.DOCUMENT),
+        ("What documents have I uploaded?", QueryCategory.METADATA),
+    ]
+    for question, expected in cases:
+        embedding_service.calls = 0
+        actual = router.classify(question)
+        if actual is not expected:
+            print(
+                f"FAIL: {question!r} -> {actual.value}, expected {expected.value}"
+            )
+            return False
+        if embedding_service.calls != 0:
+            print(
+                f"FAIL: deterministic {question!r} still called embeddings "
+                f"({embedding_service.calls} calls)"
+            )
+            return False
+    return True
+
+
+async def test_semantic_ambiguous() -> bool:
+    """Ambiguous questions still resolve to a confident category, not GENERAL."""
+    router, _ = build_semantic_router()
+    ambiguous = [
+        "wats the main topic of my documents?",
+        "give me the lowdown on my docs",
+        "whats in the documnts i got",
+    ]
+    for question in ambiguous:
+        actual = router.classify(question)
+        if actual is QueryCategory.GENERAL:
+            print(f"FAIL: ambiguous {question!r} fell back to GENERAL")
+            return False
+    return True
+
+
+async def test_semantic_low_confidence_is_general() -> bool:
+    """Queries far from every centroid stay GENERAL."""
+    router, _ = build_semantic_router()
+    low_confidence = [
+        "zzzz qqqq xxxx vvvv",
+        "hurricane aetherion economics 42",
+    ]
+    for question in low_confidence:
+        actual = router.classify(question)
+        if actual is not QueryCategory.GENERAL:
+            print(
+                f"FAIL: low-confidence {question!r} -> {actual.value}, "
+                f"expected {QueryCategory.GENERAL.value}"
+            )
+            return False
+    return True
+
+
+async def test_router_without_embeddings_is_deterministic() -> bool:
+    """Without an embedding service the router stays purely deterministic."""
+    router = QueryRouter()
+    cases = [
+        ("which dcuments i upload in here?", QueryCategory.GENERAL),
+        ("Hello", QueryCategory.GENERAL),
+        ("List my documents", QueryCategory.METADATA),
+        ("What is in my CV?", QueryCategory.DOCUMENT),
+    ]
+    for question, expected in cases:
+        actual = router.classify(question)
+        if actual is not expected:
+            print(
+                f"FAIL: {question!r} -> {actual.value}, expected {expected.value}"
+            )
+            return False
+    return True
+
+
 async def main() -> None:
     """Run all routing scenarios and report the overall result."""
     print("=" * 60)
@@ -292,6 +467,13 @@ async def main() -> None:
         ("METADATA: empty state", test_metadata_empty),
         ("DOCUMENT: retrieval + grounded prompt", test_document_uses_rag_flow),
         ("MIXED: retrieval + grounded prompt", test_mixed_uses_rag_flow),
+        ("SEMANTIC: typo metadata -> METADATA", test_semantic_typo_metadata),
+        ("SEMANTIC: typo document -> DOCUMENT", test_semantic_typo_document),
+        ("SEMANTIC: general stays GENERAL", test_semantic_general),
+        ("SEMANTIC: deterministic takes precedence", test_deterministic_rules_take_precedence),
+        ("SEMANTIC: ambiguous stays confident", test_semantic_ambiguous),
+        ("SEMANTIC: low confidence -> GENERAL", test_semantic_low_confidence_is_general),
+        ("ROUTER: no embeddings = deterministic", test_router_without_embeddings_is_deterministic),
     ]
 
     passed = True

@@ -23,6 +23,7 @@ from app.services.auth import (
     UserRepository,
 )
 from app.services.chat.chat_service import ChatService
+from app.services.chat.query_router import QueryRouter
 from app.services.document import (
     Chunker,
     DocumentClassifier,
@@ -236,4 +237,5 @@ def get_chat_service() -> ChatService:
         PromptBuilder(),
         build_provider_manager(),
         document_repository=get_document_repository(),
+        query_router=QueryRouter(get_embedding_service()),
     )
