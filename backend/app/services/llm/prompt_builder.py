@@ -63,6 +63,28 @@ class PromptBuilder:
         ]
         return RAGPrompt(text=text, sources=sources)
 
+    def build_general_prompt(self, question: str) -> RAGPrompt:
+        """Build a plain conversational prompt without document context.
+
+        Used for general queries that do not need document retrieval. Sources
+        are empty because no document context is provided.
+
+        Args:
+            question: The user's question.
+
+        Returns:
+            A RAGPrompt containing the plain prompt and no sources.
+        """
+        text = (
+            "You are a helpful AI assistant.\n\n"
+            "Answer the user's question based on your general knowledge. If "
+            "you do not know the answer, say so rather than guessing.\n\n"
+            "Question:\n\n"
+            f"{question}\n\n"
+            "Answer:"
+        )
+        return RAGPrompt(text=text, sources=[])
+
     @staticmethod
     def _format_history(history: list[dict[str, str]] | None) -> str:
         """Format prior conversation messages for the prompt.

@@ -235,4 +235,5 @@ def get_chat_service() -> ChatService:
         get_retriever(),
         PromptBuilder(),
         build_provider_manager(),
+        document_repository=get_document_repository(),
     )

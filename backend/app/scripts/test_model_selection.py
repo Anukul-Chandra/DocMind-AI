@@ -279,7 +279,7 @@ async def test_rag_answer_not_treated_unavailable() -> bool:
     provider = RecordingProvider()
     service = ChatService(FakeRetriever(), PromptBuilder(), ProviderManager([provider]))
 
-    response = await service.chat("Who is Anukul Chandra?", owner_id="owner-1")
+    response = await service.chat("What is in my CV?", owner_id="owner-1")
 
     if FALLBACK in response.text:
         print(f"FAIL: real answer replaced by fallback: {response.text!r}")
