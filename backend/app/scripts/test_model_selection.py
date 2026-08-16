@@ -19,7 +19,9 @@ Usage (from backend/):
 import asyncio
 import json
 
+from app.core.config import settings
 from app.services.chat.chat_service import ChatService
+from app.services.chat.query_router import QueryRouter
 from app.services.llm.model_catalog import curate_models
 from app.services.llm.model_pool import ModelPoolManager, build_curated_pool
 from app.services.llm.prompt_builder import PromptBuilder
@@ -242,7 +244,12 @@ async def test_failover_intact() -> bool:
 class FakeRetriever:
     """Deterministic retriever returning a context that contains the answer."""
 
-    def retrieve(self, question: str, owner_id: str = "") -> list[dict]:
+    def retrieve(
+        self,
+        question: str,
+        owner_id: str = "",
+        query_embedding: list[float] | None = None,
+    ) -> list[dict]:
         return [
             {
                 "text": "Anukul Chandra is an AI / ML Engineer from Dhaka, Bangladesh.",
@@ -250,6 +257,28 @@ class FakeRetriever:
                 "chunk_id": 1,
             }
         ]
+
+
+class FakeEmbeddingService:
+    """Deterministic embedding service for the test router."""
+
+    def generate_embeddings(self, texts: list[str]) -> list[list[float]]:
+        return [[1.0] for _ in texts]
+
+
+class FakeRelevanceScorer:
+    """Deterministic relevance gate stand-in returning a fixed score."""
+
+    def __init__(self, default: float = 0.0) -> None:
+        self.default = default
+
+    def __call__(
+        self,
+        question: str,
+        owner_id: str,
+        query_embedding: list[float] | None = None,
+    ) -> float:
+        return self.default
 
 
 class RecordingProvider(BaseProvider):
@@ -277,7 +306,13 @@ class RecordingProvider(BaseProvider):
 async def test_rag_answer_not_treated_unavailable() -> bool:
     """Relevant context reaches the LLM and the answer is surfaced, not the fallback."""
     provider = RecordingProvider()
-    service = ChatService(FakeRetriever(), PromptBuilder(), ProviderManager([provider]))
+    router = _document_router()
+    service = ChatService(
+        FakeRetriever(),
+        PromptBuilder(),
+        ProviderManager([provider]),
+        query_router=router,
+    )
 
     response = await service.chat("What is in my CV?", owner_id="owner-1")
 
@@ -291,6 +326,21 @@ async def test_rag_answer_not_treated_unavailable() -> bool:
         print("FAIL: relevant context was not delivered to the LLM")
         return False
     return True
+
+
+def _document_router() -> QueryRouter:
+    """Build a router whose relevance gate always routes to DOCUMENT.
+
+    The RAG flow (not classification) is what this test verifies, so the gate
+    is forced to its relevant branch regardless of the exact wording.
+    """
+    scorer = FakeRelevanceScorer()
+    scorer.default = 0.9
+    return QueryRouter(
+        FakeEmbeddingService(),
+        relevance_scorer=scorer,
+        relevance_threshold=settings.rag_relevance_threshold,
+    )
 
 
 async def main() -> None:
