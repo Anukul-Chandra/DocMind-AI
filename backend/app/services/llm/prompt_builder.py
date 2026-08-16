@@ -42,9 +42,14 @@ class PromptBuilder:
         history_block = self._format_history(history)
         text = (
             "You are a helpful AI assistant.\n\n"
-            "Answer ONLY using the provided context and conversation history.\n\n"
-            "If the answer is not available in the context,\n"
-            'reply:\n\n"I couldn\'t find that information in the uploaded documents."\n\n'
+            "Answer the question using the provided context and conversation "
+            "history when they contain the answer.\n\n"
+            "Base every claim about the uploaded documents strictly on the "
+            "provided context. Do not invent or guess facts about the "
+            "documents.\n\n"
+            "If the context genuinely does not contain enough information to "
+            "answer the question, reply:\n\n"
+            '"I couldn\'t find that information in the uploaded documents."\n\n'
             "Context:\n\n"
             f"{context_block}\n\n"
             f"{history_block}"
