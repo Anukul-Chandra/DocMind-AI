@@ -22,15 +22,15 @@ import { cn } from "@/lib/utils";
 
 function DocumentSkeleton() {
   return (
-    <Card className="gap-3 py-4">
+    <Card className="docmind-skeleton gap-3 border-transparent py-4 shadow-none">
       <div className="flex items-center gap-3 px-4">
-        <span className="size-10 shrink-0 animate-pulse rounded-lg bg-muted" />
+        <span className="size-10 shrink-0 rounded-lg bg-muted" />
         <div className="flex-1 space-y-2">
-          <div className="h-3 w-3/4 animate-pulse rounded bg-muted" />
-          <div className="h-3 w-1/2 animate-pulse rounded bg-muted" />
+          <div className="h-3 w-3/4 rounded bg-muted" />
+          <div className="h-3 w-1/2 rounded bg-muted" />
         </div>
       </div>
-      <div className="h-3 w-1/3 animate-pulse rounded bg-muted px-4" />
+      <div className="h-3 w-1/3 rounded bg-muted px-4" />
     </Card>
   );
 }
@@ -53,7 +53,7 @@ export function DocumentsPage() {
   const hasDocuments = (documents?.length ?? 0) > 0;
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-8 p-6 lg:p-8">
+    <div className="docmind-page mx-auto w-full max-w-6xl space-y-8 p-6 lg:p-8">
       <PageHeader
         title="Documents"
         description="Upload PDFs and DocMind will index them for question answering."
@@ -155,8 +155,14 @@ export function DocumentsPage() {
           />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((document) => (
-              <DocumentCard key={document.document_id} document={document} />
+            {filtered.map((document, index) => (
+              <div
+                key={document.document_id}
+                className="docmind-rise"
+                style={{ animationDelay: `${Math.min(index * 50, 250)}ms` }}
+              >
+                <DocumentCard document={document} />
+              </div>
             ))}
           </div>
         )}
