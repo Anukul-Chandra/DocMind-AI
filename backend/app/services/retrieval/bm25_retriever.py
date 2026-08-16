@@ -10,6 +10,92 @@ from app.services.vectorstore.workspace import DEFAULT_WORKSPACE
 
 TOKEN_PATTERN = re.compile(r"[a-z0-9]+")
 
+#: English stopwords removed from *content* scoring so that queries like
+#: "where did I study?" are scored on "study" instead of matching papers on
+#: "where"/"I". Kept deliberately small and independent from BM25's raw
+#: tokenization, which stays unchanged for retrieval.
+_CONTENT_STOPWORDS: frozenset[str] = frozenset(
+    {
+        "i",
+        "me",
+        "my",
+        "mine",
+        "you",
+        "your",
+        "yours",
+        "a",
+        "an",
+        "the",
+        "and",
+        "or",
+        "but",
+        "if",
+        "then",
+        "than",
+        "so",
+        "of",
+        "to",
+        "in",
+        "on",
+        "at",
+        "for",
+        "with",
+        "by",
+        "from",
+        "as",
+        "is",
+        "am",
+        "are",
+        "was",
+        "were",
+        "be",
+        "been",
+        "being",
+        "do",
+        "does",
+        "did",
+        "have",
+        "has",
+        "had",
+        "having",
+        "what",
+        "which",
+        "where",
+        "when",
+        "who",
+        "whom",
+        "whose",
+        "why",
+        "how",
+        "about",
+        "tell",
+        "please",
+        "can",
+        "could",
+        "would",
+        "should",
+        "will",
+        "would",
+        "shall",
+        "may",
+        "might",
+        "this",
+        "that",
+        "these",
+        "those",
+        "there",
+        "here",
+        "it",
+        "its",
+        "not",
+        "no",
+        "nor",
+        "just",
+        "very",
+        "really",
+    }
+)
+
 
 class BM25Retriever(Retriever):
     """Retrieve document chunks with Okapi BM25 keyword scoring.
@@ -93,6 +179,7 @@ class BM25Retriever(Retriever):
         k: int = 5,
         workspace_id: str = DEFAULT_WORKSPACE,
         owner_id: str = "",
+        query_embedding: list[float] | None = None,
     ) -> list[dict]:
         """Retrieve the top-k chunks by BM25 relevance for the workspace.
 
@@ -102,6 +189,8 @@ class BM25Retriever(Retriever):
             workspace_id: Only chunks belonging to this workspace are returned.
             owner_id: Only chunks owned by this user are returned. Empty for
                 legacy chunks indexed before ownership was tracked.
+            query_embedding: Unused by the keyword retriever; accepted for
+                interface compatibility with semantic retrieval.
 
         Returns:
             A list of the top-k matching document chunks, ordered best first.
@@ -127,6 +216,46 @@ class BM25Retriever(Retriever):
         for _, index in scored[:k]:
             documents.append(self._metadata_store.get_document(index))
         return documents
+
+    def best_score(
+        self,
+        query: str,
+        workspace_id: str = DEFAULT_WORKSPACE,
+        owner_id: str = "",
+    ) -> float:
+        """Return the best owner-scoped BM25 score using content terms only.
+
+        Serves the query router's relevance gate with a cheap lexical signal
+        (the highest Okapi BM25 score among the owner's eligible chunks),
+        independent of the embedding model. Stopwords are excluded so a query
+        like "where did I study?" is scored on its content term "study" rather
+        than on the paper that happens to contain "where"/"I".
+
+        Args:
+            query: The query text to score.
+            workspace_id: Only chunks belonging to this workspace are scored.
+            owner_id: Only chunks owned by this user are scored.
+
+        Returns:
+            The best BM25 score for the owner's eligible chunks, or 0.0 when
+            the query has no content terms or no eligible chunk scores above
+            zero.
+        """
+        self._ensure_index()
+        query_terms = set(self._tokenize(query)) - _CONTENT_STOPWORDS
+        if not query_terms:
+            return 0.0
+        best = 0.0
+        for index, (term_counts, length) in enumerate(
+            zip(self._doc_tokens, self._doc_lengths)
+        ):
+            document = self._metadata_store.get_document(index)
+            if not self.is_eligible(document, workspace_id, owner_id):
+                continue
+            score = self._score(term_counts, length, query_terms)
+            if score > best:
+                best = score
+        return best
 
     def _score(
         self,

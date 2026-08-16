@@ -18,6 +18,7 @@ class Retriever(ABC):
         k: int = 5,
         workspace_id: str = DEFAULT_WORKSPACE,
         owner_id: str = "",
+        query_embedding: list[float] | None = None,
     ) -> list[dict]:
         """Retrieve the most relevant document chunks for a query.
 
@@ -27,6 +28,10 @@ class Retriever(ABC):
             workspace_id: Only chunks belonging to this workspace are returned.
             owner_id: Only chunks owned by this user are returned. Empty for
                 legacy chunks indexed before ownership was tracked.
+            query_embedding: A precomputed embedding of the query, reused to
+                avoid embedding the same text twice when the caller already
+                has it (e.g. from relevance gating). When None, implementations
+                embed the query themselves.
 
         Returns:
             A list of matching document-chunk metadata dicts, ordered by
