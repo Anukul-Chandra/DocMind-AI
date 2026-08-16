@@ -525,6 +525,177 @@ async def test_gate_topic_questions_stay_general() -> bool:
     return True
 
 
+async def test_gate_general_knowledge_generation_stays_general() -> bool:
+    """General-knowledge generation asks stay GENERAL even when the corpus is related.
+
+    The user asks the LLM to produce general content about a topic ("write a
+    paper about machine learning", "explain machine learning", "create a
+    report about AI"). These must not route to RAG merely because an uploaded
+    paper contains related terms, so high semantic and BM25 scores are set to
+    prove the generation-ask veto wins over the relevance gate.
+    """
+    router, embedding_service, scorer, lexical = build_semantic_router()
+    questions = {
+        "write a paper about machine learning": 0.52,
+        "write an explanation of deep learning": 0.50,
+        "explain machine learning": 0.48,
+        "create a report about AI": 0.51,
+        "draft a document on neural networks": 0.49,
+        "compose a paper about reinforcement learning": 0.53,
+        "explain how transformers work": 0.47,
+        "define supervised learning": 0.46,
+        "give an overview of natural language processing": 0.45,
+    }
+    scorer.scores = dict(questions)
+    lexical.scores = {question: 8.0 for question in questions}
+    for question in questions:
+        actual = router.classify(question, owner_id="owner-1")
+        if actual is not QueryCategory.GENERAL:
+            print(
+                f"FAIL: generation ask {question!r} -> {actual.value}, "
+                f"expected {QueryCategory.GENERAL.value}"
+            )
+            return False
+        if embedding_service.calls != 0:
+            print(
+                f"FAIL: generation ask {question!r} consulted the gate "
+                f"({embedding_service.calls} embeddings)"
+            )
+            return False
+    return True
+
+
+async def test_gate_general_ask_respects_document_anchor() -> bool:
+    """Explanation asks naming an existing document still route to RAG."""
+    router, _, scorer, lexical = build_semantic_router()
+    anchored = {
+        "explain the main argument of the paper": 0.30,
+        "explain the monocular depth estimation paper": 0.28,
+        "describe what the report concludes": 0.32,
+        "write a summary of my research paper": 0.34,
+    }
+    scorer.scores = dict(anchored)
+    lexical.scores = {question: 5.0 for question in anchored}
+    for question in anchored:
+        actual = router.classify(question, owner_id="owner-1")
+        if actual is not QueryCategory.DOCUMENT:
+            print(
+                f"FAIL: anchored ask {question!r} -> {actual.value}, "
+                f"expected {QueryCategory.DOCUMENT.value}"
+            )
+            return False
+    return True
+
+
+async def test_metadata_future_upload_stays_general() -> bool:
+    """Advice about files to upload is GENERAL, not METADATA.
+
+    Upload advice ("what files should I upload to github?") refers to files not
+    yet in the collection, so it must never be answered from the document list
+    and must not consult the gates.
+    """
+    router, embedding_service, scorer, lexical = build_semantic_router()
+    questions = [
+        "what files should I upload to github?",
+        "which files should I upload?",
+        "what documents should I upload to google drive?",
+        "which files do I need for my project?",
+        "can you recommend which files to upload?",
+        "which files to upload first?",
+        "how many files should I upload?",
+    ]
+    for question in questions:
+        actual = router.classify(question, owner_id="owner-1")
+        if actual is not QueryCategory.GENERAL:
+            print(
+                f"FAIL: future-upload {question!r} -> {actual.value}, "
+                f"expected {QueryCategory.GENERAL.value}"
+            )
+            return False
+        if embedding_service.calls or scorer.calls or lexical.calls:
+            print(
+                f"FAIL: future-upload {question!r} consulted the gates "
+                f"(embeddings={embedding_service.calls}, "
+                f"semantic={len(scorer.calls)}, lexical={len(lexical.calls)})"
+            )
+            return False
+    return True
+
+
+async def test_metadata_uploaded_files_stay_metadata() -> bool:
+    """Questions about already-uploaded files remain METADATA."""
+    router, embedding_service, scorer, lexical = build_semantic_router()
+    questions = [
+        "what files have I uploaded?",
+        "which files did I upload?",
+        "how many files have I uploaded?",
+        "list my files",
+        "what files do i have?",
+        "which files are in my documents?",
+    ]
+    for question in questions:
+        actual = router.classify(question, owner_id="owner-1")
+        if actual is not QueryCategory.METADATA:
+            print(
+                f"FAIL: uploaded-files {question!r} -> {actual.value}, "
+                f"expected {QueryCategory.METADATA.value}"
+            )
+            return False
+        if embedding_service.calls or scorer.calls or lexical.calls:
+            print(
+                f"FAIL: uploaded-files {question!r} consulted the gates"
+            )
+            return False
+    return True
+
+
+async def test_gate_corrupted_personal_queries_route_rag() -> bool:
+    """Corrupted/paraphrased personal document queries route to RAG.
+
+    Self-attributes are fuzzy-matched, so "universty"/"educaton" still count as
+    personal document facts without per-question patterns.
+    """
+    router, _, scorer, _ = build_semantic_router()
+    questions = {
+        "where did i go to universty?": 0.20,
+        "what was my highest educaton?": 0.22,
+        "tell me about my universty days": 0.19,
+        "which universuty did i attend?": 0.21,
+        "what is my email addres?": 0.25,
+        "which degree did i compleat?": 0.18,
+    }
+    for question, similarity in questions.items():
+        scorer.scores = {question: similarity}
+        actual = router.classify(question, owner_id="owner-1")
+        if actual is not QueryCategory.DOCUMENT:
+            print(
+                f"FAIL: corrupted personal {question!r} -> {actual.value}, "
+                f"expected {QueryCategory.DOCUMENT.value}"
+            )
+            return False
+    return True
+
+
+async def test_gate_corrupted_self_attribute_without_personal_stays_general() -> bool:
+    """A fuzzy self-attribute alone never forces RAG without personal reference."""
+    router, _, scorer, _ = build_semantic_router()
+    scorer.default = 0.10
+    questions = [
+        "where did she go to universty?",
+        "what was the highest educaton in the country?",
+        "which universty is in that city?",
+    ]
+    for question in questions:
+        actual = router.classify(question, owner_id="owner-1")
+        if actual is not QueryCategory.GENERAL:
+            print(
+                f"FAIL: non-personal self-attribute {question!r} -> "
+                f"{actual.value}, expected {QueryCategory.GENERAL.value}"
+            )
+            return False
+    return True
+
+
 async def test_gate_unrelated_general() -> bool:
     """Unrelated general questions stay GENERAL below threshold."""
     router, _, scorer, _ = build_semantic_router()
@@ -787,6 +958,12 @@ async def main() -> None:
         ("GATE: paraphrase/typo -> RAG", test_gate_paraphrase_and_typo),
         ("GATE: document-noun + BM25 rescue", test_gate_document_noun_rescue),
         ("GATE: ML/AI topic questions stay GENERAL", test_gate_topic_questions_stay_general),
+        ("GATE: general-knowledge generation stays GENERAL", test_gate_general_knowledge_generation_stays_general),
+        ("GATE: general ask with document anchor -> RAG", test_gate_general_ask_respects_document_anchor),
+        ("METADATA: future upload advice -> GENERAL", test_metadata_future_upload_stays_general),
+        ("METADATA: uploaded files stay METADATA", test_metadata_uploaded_files_stay_metadata),
+        ("GATE: corrupted personal queries -> RAG", test_gate_corrupted_personal_queries_route_rag),
+        ("GATE: corrupted self-attribute without personal -> GENERAL", test_gate_corrupted_self_attribute_without_personal_stays_general),
         ("GATE: unrelated general -> GENERAL", test_gate_unrelated_general),
         ("GATE: topic threshold boundary", test_gate_topic_threshold_boundary),
         ("GATE: personal floor boundary", test_gate_personal_floor_boundary),
