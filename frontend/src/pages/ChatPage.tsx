@@ -33,8 +33,8 @@ function toSources(chunks: RetrieveChunk[]): SourceFile[] {
 function EmptyState({ onExample }: { onExample: (text: string) => void }) {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-5 p-8 text-center">
-      <span className="flex size-14 items-center justify-center rounded-full bg-primary/10">
-        <MessagesSquare className="size-7 text-primary" aria-hidden="true" />
+      <span className="flex size-14 items-center justify-center rounded-full bg-brand/10">
+        <MessagesSquare className="size-7 text-brand" aria-hidden="true" />
       </span>
       <div className="space-y-1">
         <p className="font-medium">Ask DocMind about your documents</p>
@@ -43,12 +43,13 @@ function EmptyState({ onExample }: { onExample: (text: string) => void }) {
         </p>
       </div>
       <div className="flex flex-wrap items-center justify-center gap-2">
-        {EXAMPLE_QUESTIONS.map((question) => (
+        {EXAMPLE_QUESTIONS.map((question, index) => (
           <button
             key={question}
             type="button"
             onClick={() => onExample(question)}
-            className="rounded-full border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            style={{ animationDelay: `${150 + index * 60}ms` }}
+            className="docmind-rise rounded-full border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-[transform,border-color,background-color,color] hover:-translate-y-0.5 hover:border-brand/30 hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {question}
           </button>
@@ -113,7 +114,7 @@ export function ChatPage() {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    <div className="docmind-page flex h-full min-h-0 flex-col">
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
         {messages.length === 0 ? (
           <EmptyState onExample={(question) => void handleSend(question)} />
