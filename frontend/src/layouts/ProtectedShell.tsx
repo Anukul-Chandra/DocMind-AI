@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 
 export function ProtectedShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     if (!sidebarOpen) return;
@@ -26,7 +27,11 @@ export function ProtectedShell() {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <AppSidebar className="hidden lg:flex" />
+      <AppSidebar
+        className="hidden lg:flex"
+        collapsed={sidebarCollapsed}
+        onToggleCollapsed={() => setSidebarCollapsed((value) => !value)}
+      />
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-50 flex lg:hidden"
@@ -35,12 +40,12 @@ export function ProtectedShell() {
           aria-label="Navigation"
         >
           <div
-            className="absolute inset-0 bg-black/40"
+            className="docmind-drawer-overlay absolute inset-0 bg-black/40"
             onClick={() => setSidebarOpen(false)}
             aria-hidden="true"
           />
           <AppSidebar
-            className="relative z-10 h-full"
+            className="docmind-drawer relative z-10 h-full"
             onNavigate={() => setSidebarOpen(false)}
           />
           <Button

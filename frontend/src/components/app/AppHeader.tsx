@@ -38,9 +38,9 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
       </div>
       <div className="flex items-center gap-1">
         <ThemeToggle />
-        <div className="flex items-center gap-2 rounded-full border py-1 pl-1 pr-3">
-          <span className="flex size-7 items-center justify-center rounded-full bg-muted">
-            <User className="size-4 text-muted-foreground" aria-hidden="true" />
+        <div className="flex items-center gap-2 rounded-full border bg-card/60 py-1 pl-1 pr-3">
+          <span className="flex size-7 items-center justify-center rounded-full bg-brand/10">
+            <User className="size-4 text-brand" aria-hidden="true" />
           </span>
           <span className="hidden text-sm font-medium sm:inline">Account</span>
         </div>
