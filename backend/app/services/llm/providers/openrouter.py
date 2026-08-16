@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 from typing import AsyncIterator
@@ -62,16 +63,26 @@ class OpenRouterProvider(BaseProvider):
         model_pool: ModelPoolManager,
         api_key: str,
         timeout: int = 60,
+        attempt_timeout: float = 30.0,
+        total_timeout: float = 45.0,
     ) -> None:
-        """Initialize the provider with a model pool, API key, and timeout.
+        """Initialize the provider with a model pool, API key, and timeouts.
 
         Args:
             model_pool: The model pool providing the current model.
             api_key: The OpenRouter API key.
-            timeout: Request timeout in seconds.
+            timeout: HTTP client timeout in seconds.
+            attempt_timeout: Per-attempt timeout in seconds. A single model
+                attempt that exceeds this is abandoned and the pool rotates.
+            total_timeout: Total time budget in seconds for the whole
+                OpenRouter pass. Once exceeded, the provider hands off to the
+                next provider via the last recorded error.
         """
         self._model_pool = model_pool
         self._api_key = api_key
+        self._attempt_timeout = attempt_timeout
+        self._total_timeout = total_timeout
+        self._dead_models: set[str] = set()
         self._client = httpx.AsyncClient(
             base_url=OPENROUTER_BASE_URL,
             timeout=timeout,
@@ -104,6 +115,13 @@ class OpenRouterProvider(BaseProvider):
         back to the next provider. Non-recoverable errors (authentication,
         configuration) are re-raised immediately without rotating.
 
+        Every attempt is bounded by ``attempt_timeout`` so a slow or hung
+        model is abandoned quickly. The whole pass is bounded by
+        ``total_timeout`` so OpenRouter cannot consume the entire request
+        budget; when the budget is exhausted, the provider hands off to the
+        next provider. Models that return 404 (no endpoint) are remembered and
+        skipped on subsequent requests.
+
         Args:
             prompt: The user prompt to send to OpenRouter.
             system_prompt: An optional system prompt guiding the model.
@@ -120,11 +138,25 @@ class OpenRouterProvider(BaseProvider):
             APIError: If OpenRouter returns a permanent HTTP error.
             InvalidResponseError: If the response is invalid.
         """
+        loop = asyncio.get_running_loop()
+        deadline = loop.time() + self._total_timeout
         last_error: ProviderError | None = None
         while True:
-            model = self._model_pool.get_current_model()
+            if loop.time() >= deadline:
+                logger.warning(
+                    "OpenRouter total time budget (%ss) exhausted; handing off "
+                    "to next provider",
+                    self._total_timeout,
+                )
+                break
             try:
-                return await self._generate_once(
+                model = self._model_pool.get_current_model()
+                while model in self._dead_models:
+                    model = self._model_pool.move_next()
+            except RuntimeError:
+                break
+            try:
+                return await self._attempt(
                     model,
                     prompt,
                     system_prompt=system_prompt,
@@ -143,6 +175,8 @@ class OpenRouterProvider(BaseProvider):
                     model,
                     exc,
                 )
+                if isinstance(exc, APIError) and exc.status_code == 404:
+                    self._dead_models.add(model)
                 try:
                     self._model_pool.move_next()
                 except RuntimeError:
@@ -154,6 +188,46 @@ class OpenRouterProvider(BaseProvider):
             )
             raise last_error
         raise ProviderError("No available OpenRouter models.")
+
+    async def _attempt(
+        self,
+        model: str,
+        prompt: str,
+        system_prompt: str | None = None,
+        temperature: float = 0.0,
+        max_tokens: int = 1000,
+    ) -> str:
+        """Run a single model attempt, bounded by the per-attempt timeout.
+
+        Args:
+            model: The model id to attempt.
+            prompt: The user prompt to send to OpenRouter.
+            system_prompt: An optional system prompt guiding the model.
+            temperature: Sampling temperature for the model.
+            max_tokens: Maximum number of tokens to generate.
+
+        Returns:
+            The generated text from the model.
+
+        Raises:
+            ProviderError: If the attempt times out or fails.
+        """
+        try:
+            return await asyncio.wait_for(
+                self._generate_once(
+                    model,
+                    prompt,
+                    system_prompt=system_prompt,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                ),
+                timeout=self._attempt_timeout,
+            )
+        except asyncio.TimeoutError as exc:
+            raise ProviderError(
+                f"OpenRouter model {model} timed out after "
+                f"{self._attempt_timeout}s"
+            ) from exc
 
     async def _generate_once(
         self,
