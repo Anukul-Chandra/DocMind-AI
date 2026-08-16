@@ -113,5 +113,1382 @@
     "document_id": "f0f67322-b049-4888-a12a-7b35f34ea941",
     "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
     "text": "Developed an end-to-end NLP pipeline involving text cleaning and TF\u2013IDF vectorization.\nTrained a\nMultinomial Naive Bayes classifier achieving 90% + accuracy. Deployed on Hugging Face.\nSoft Skills\nAnalytical Thinking, Attention to Detail, Time Management,Adaptability, Research-Oriented Mindset,\nEducation\nB.Sc. in Computer Science and Engineering\nDaffodil International University (2022 - 2025)\nCertifications\n\u2022 Python with Machine Learning \u2013 Creative IT Institute (A+ Grade)\n\u2022 AI + Prompt Engineering \u2013 Microsoft\nLanguages\nBangla \u2013 Native\nEnglish \u2013 Mid Level\nHindi \u2013 Conversational"
+  },
+  {
+    "id": 14,
+    "workspace_id": "default",
+    "filename": "a.pdf",
+    "chunk_id": 1,
+    "document_id": "1d6529ee-46ca-4765-845b-026096c0b0af",
+    "owner_id": "b7e660fe-c995-4b5b-a57d-2d983923ab17",
+    "text": "DocMind performs semantic retrieval over indexed PDFs with owner scoping so each user only ever sees th"
+  },
+  {
+    "id": 15,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 1,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Channel-Wise Attention-Based Network for\nSelf-Supervised Monocular Depth Estimation\nJiaxing Yan\nHong Zhao\nPenghui Bu\nYuSheng Jin\nState Key Laboratory for Manufacturing System Engineering,\nSchool of Mechanical Engineering, Xi\u2019an Jiaotong University, China\n{yanjxedu@stu., zhaohong@mail., bph19891027@stu., yushengJ@stu.}xjtu.edu.cn\nAbstract\nSelf-supervised learning has shown very promising re-\nsults for monocular depth estimation. Scene structure and\nlocal details both are signi\ufb01cant clues for high-quality\ndepth estimation. Recent works suffer from the lack of ex-\nplicit modeling of scene structure and proper handling of\ndetails information, which leads to a performance bottle-\nneck and blurry artefacts in predicted results. In this paper,\nwe propose the Channel-wise Attention-based Depth Esti-\nmation Network (CADepth-Net) with two effective contribu-\ntions: 1) The structure perception module employs the self-\nattention mechanism to capture long-range dependencies"
+  },
+  {
+    "id": 16,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 2,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "mation Network (CADepth-Net) with two effective contribu-\ntions: 1) The structure perception module employs the self-\nattention mechanism to capture long-range dependencies\nand aggregates discriminative features in channel dimen-\nsions, explicitly enhances the perception of scene structure,\nobtains the better scene understanding and rich feature rep-\nresentation. 2) The detail emphasis module re-calibrates\nchannel-wise feature maps and selectively emphasizes the\ninformative features, aiming to highlight crucial local de-\ntails information and fuse different level features more ef-\n\ufb01ciently, resulting in more precise and sharper depth pre-\ndiction. Furthermore, the extensive experiments validate\nthe effectiveness of our method and show that our model\nachieves the state-of-the-art results on the KITTI bench-\nmark and Make3D datasets.\n1. Introduction\nAccurate depth estimation from a single image is a fun-\ndamental task in computer vision. High quality depth infor-"
+  },
+  {
+    "id": 17,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 3,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "mark and Make3D datasets.\n1. Introduction\nAccurate depth estimation from a single image is a fun-\ndamental task in computer vision. High quality depth infor-\nmation can provide useful cues for various \ufb01elds, including\nrobotics navigation [4], autonomous driving [33] and aug-\nmented reality [34]. Recently, the fully-supervised meth-\nods [5, 6, 7, 15] for monocular depth estimation have pro-\nduced outstanding results, while they need large numbers\nof accurate ground truth which could only be sparsely col-\nlected from expensive LiDAR sensors [9]. As an attractive\nalternative, self-supervised methods can alleviate this lim-\nMonodepth2 [11]\nPackNet [13]\nOurs\nMonodepth2 [11]\nPackNet [13]\nOurs\nFigure 1. Depth prediction from a single image. Our proposed\nCADepth-Net produces more precise and sharper depth estima-\ntion, especially for thin structures e.g. road signs and pedestrians.\nitation, as they use geometrical constraints on monocular"
+  },
+  {
+    "id": 18,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 4,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "CADepth-Net produces more precise and sharper depth estima-\ntion, especially for thin structures e.g. road signs and pedestrians.\nitation, as they use geometrical constraints on monocular\nvideo [56] or synchronized stereo image pairs [10] as the\nsole source of supervision.\nIn depth estimation, the most important information is\nthe scene structure aiming at accurately obtaining the over-\nall structure and relative depth information in 3D space.\nMost previous works [10, 56] just simply use convolutional\nneural networks to extract semantic features of input images\nand implicitly learn the structural information of the scene.\nHowever, the lack of explicit exploration of the robust rep-\nresentation of 3D scene geometry leads to an incomplete\nperception of overall layout for the complex scenes.\nLocal detail is another critical feature that focuses on ob-\nject boundaries and attempts to generate sharp depth maps.\nMost depth estimation networks are based on the U-Net [37]"
+  },
+  {
+    "id": 19,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 5,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Local detail is another critical feature that focuses on ob-\nject boundaries and attempts to generate sharp depth maps.\nMost depth estimation networks are based on the U-Net [37]\nframework, and the decoder simply leverages concatenation\nand a basic convolution to fuse high-level and low-level fea-\ntures. We found that these operations can not preserve suf-\n\ufb01cient details or precisely recover spatial information, lead-\ning to inef\ufb01cient integration of different levels features and\nblurry artefacts at the depth discontinuous regions.\nTo address the above problems and ef\ufb01ciently handle\narXiv:2112.13047v1 [cs.CV] 24 Dec 2021"
+  },
+  {
+    "id": 20,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 6,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "both the overall structure and local details, we propose a\nnovel Channel-wise Attention-based Depth Estimation Net-\nwork with structure perception module and detail emphasis\nmodule. To better understand the 3D structure of the whole\nscene, we perform an in-depth analysis of semantic infor-\nmation in the monocular depth estimation task and conclude\nthat each high-level feature map can be regarded as a region-\nspeci\ufb01c response. Based on this observation, we provide\nthe structure perception module to capture more contextual\ninformation of scene geometry and enhance the feature rep-\nresentations. Speci\ufb01cally, we \ufb01rst employ the self-attention\nmechanism to capture the long-range dependencies between\nany two channel maps, then each feature map is updated\nvia aggregating features from all channel maps by weighted\nsummation and fuse different local depth responses from\nnon-contiguous regions. To generate sharper object bound-\naries, instead of using the above naive operations, we pro-"
+  },
+  {
+    "id": 21,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 7,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "summation and fuse different local depth responses from\nnon-contiguous regions. To generate sharper object bound-\naries, instead of using the above naive operations, we pro-\npose the detail emphasis module employing channel atten-\ntion mechanism to re-calibrate channel-wise features and\nemphasize the speci\ufb01c semantic information. Speci\ufb01cally,\nwe sequentially adopt the detail emphasis module at differ-\nent scales in the decoding stage to highlight features con-\ntaining crucial local details (e.g. object boundaries informa-\ntion). To summarize our contributions in this paper:\n\u2022 We introduce a novel Channel-wise Attention-based\nDepth Network (CADepth-Net) for self-supervised\nmonocular depth estimation employing two channel-\nwise attention modules to perform the information ag-\ngregation and feature re-calibration respectively.\n\u2022 We propose structure perception module utilizing self-\nattention mechanism to obtain rich context of scene\nstructure and better feature representation."
+  },
+  {
+    "id": 22,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 8,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "\u2022 We propose structure perception module utilizing self-\nattention mechanism to obtain rich context of scene\nstructure and better feature representation.\n\u2022 We carefully design the detail emphasis module with\nchannel attention mechanism to ef\ufb01ciently fuse differ-\nent scale features and emphasize important details for\nsharper depth estimation.\n\u2022 We conduct extensive experiments on KITTI and\nMake3D datasets, demonstrating our model signi\ufb01-\ncantly outperforms existing methods and achieve the\nstate-of-the-art results on KITTI benchmark.\n2. Related Work\n2.1. Supervised Depth Estimation\nEstimating depth from a single image is an inherently\nill-posed problem as pixels in the image can have multiple\nplausible depths. Recently, fully supervised methods had\nshown the capacity of \ufb01tting predictive models to estimate\ndepth from color input images correctly. Eigen et al. [6]\nproduced dense pixel depth estimates by utilizing the multi-\nscale neural networks, one that estimated a coarse global"
+  },
+  {
+    "id": 23,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 9,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "depth from color input images correctly. Eigen et al. [6]\nproduced dense pixel depth estimates by utilizing the multi-\nscale neural networks, one that estimated a coarse global\ndepth prediction and another locally re\ufb01ned prediction pro-\nduced by the \ufb01rst network. Rapidly, various fully super-\nvised methods based on deep learning had been continu-\nously explored [7, 5, 24, 27]. However, all the above meth-\nods required high-quality ground truth depth, which can be\ncostly to obtain.\n2.2. Self-supervised Monocular Depth Estimation\nTo overcome the limitation of supervised approaches,\nself-supervised methods uni\ufb01ed depth estimation and ego-\nmotion estimation into one framework with view synthesis\nas supervision signal. SfMLearner introduced by Zhou et\nal. [56] simultaneously learned depth and ego-motion from\nmonocular video by training a depth estimation network\nalong with a separate pose network. Furthermore, Yin et\nal. [50] decomposed scene motion into rigid and non-rigid"
+  },
+  {
+    "id": 24,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 10,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "monocular video by training a depth estimation network\nalong with a separate pose network. Furthermore, Yin et\nal. [50] decomposed scene motion into rigid and non-rigid\nparts to account for object motion. Wang et al. [44] incorpo-\nrated Direct Visual Odometry to estimate the relative cam-\nera pose. [31] proposed 3D constraints loss to enforce con-\nsistency of the estimated depth and ego-motion across con-\nsecutive frames. Guizilini et al. [13] learned to compress\nand decompress detail-preserving representations by sym-\nmetrical packing and unpacking blocks. Other published\nmethods were based upon edge and normal [48, 49], Com-\npetitive Collaboration [36], semantic segmentation [14, 22]\nand feature representations learning [41]. A state-of-the-\nart framework was Monodepth2 proposed by Godard et\nal. [11], which introduced a minimum re-projection loss to\ndeal with occlusions and auto-masking scheme removing\ninvalid pixels robustly. Our model is based on Monodepth2"
+  },
+  {
+    "id": 25,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 11,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "al. [11], which introduced a minimum re-projection loss to\ndeal with occlusions and auto-masking scheme removing\ninvalid pixels robustly. Our model is based on Monodepth2\nextended with our contributions.\n2.3. Self-attention Mechanism\nSelf-attention mechanism had been widely used to cap-\nture long-range dependencies in various tasks. The Trans-\nformer [43] was the \ufb01rst work that proposed the self-\nattention mechanism to handle long-range dependencies be-\ntween words in machine translation. Wang et al. [45] mod-\neled the spatial-temporal dependencies in video sequences\nand images via aggregating query-speci\ufb01c global context to\neach query position. Zhang et al. [52] incorporated the self-\nattention mechanism into the GAN framework and learned\na better image generator. Fu et al. [8] enhanced the abil-\nity of feature representations for scene segmentation by de-\nsigning two types of attention modules. For the monocular\ndepth estimation task, Johnston et al. [18] captured the con-"
+  },
+  {
+    "id": 26,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 12,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "ity of feature representations for scene segmentation by de-\nsigning two types of attention modules. For the monocular\ndepth estimation task, Johnston et al. [18] captured the con-\ntext of similar disparity values at non-contiguous regions by\nexploring the feature similarity at spatial dimensions. Un-\nlike previous works, we demonstrate that capturing global\ndependencies along the channel dimensions and aggregat-\ning discriminative features will achieve better performance\nfor depth estimation, as each channel map gains more rela-\ntive depth information from the distant regions."
+  },
+  {
+    "id": 27,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 13,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Conv3\u00d73 + Upsample\nStructure Perception Module\nDetails Emphasis Module\nSkip Connection\nUpsample\n2 * Conv3\u00d73 + Sigmoid\n\u2299\n\u2295\n\u2297\n\u2295\nStructure Perception Module\nDetails Emphasis Module\nChannel matrix operation\nreshape\nConvolution operation\n\u2297\n\u2295\n\u2299\nMatrix multiplication \nElement-wise sum \nElement-wise multiplication \nMulti-scale Outputs\nMulti-scale Outputs\nInput Image\nResNet Encoder\nPose Network\n\ud835\udc47\ud835\udc61\u2192\ud835\udc61\u2032\n6DOF Pose\n[\ud835\udc3c\ud835\udc61, \ud835\udc3c\ud835\udc61\u2032]\nreshape\nAttention Map\nWeights Vector\nFigure 2. Overview of Framework. Our proposed CADepth-Net is a fully convolutional U-Net architecture. We \ufb01rst use a ResNet encoder\nto extract semantic features and input them to the Structure Perception Module. We perform the matrix multiplication between input\nfeatures and attention maps to generate aggregated features. The low-resolution feature maps are passed through successive blocks of\nUpConv(upsample + convolution), as well as the Detail Emphasis Module which computes a weight vector to re-calibrate channel-wise"
+  },
+  {
+    "id": 28,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 14,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "UpConv(upsample + convolution), as well as the Detail Emphasis Module which computes a weight vector to re-calibrate channel-wise\nfeatures. Finally, we upsample the predicted disparities at multiple scales to original input resolutions. Besides, the pose network takes\ntemporally adjacent images It, It\u2032 as input and outputs relative pose Tt\u2192t\u2032.\n3. Method\nIn this section, we \ufb01rstly review the training methods for\nself-supervised monocular depth estimation, then introduce\nthe architecture of our Channel-wise Attention-based Net-\nwork, \ufb01nally describe our main contributions, the structure\nperception module and detail emphasis module.\n3.1. Self-Supervised Training\nThe goal of self-supervised monocular depth estimation\nis to predict the depth map from a single RGB image with-\nout ground truth. Speci\ufb01cally, given a single input image\nIt, the depth network predicts its corresponding depth map\nDt, then the pose network takes temporally adjacent images"
+  },
+  {
+    "id": 29,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 15,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "out ground truth. Speci\ufb01cally, given a single input image\nIt, the depth network predicts its corresponding depth map\nDt, then the pose network takes temporally adjacent images\nas input and predicts relative pose Tt\u2192t\u2032 between the target\nimage It and source images It\u2032, t\u2032 \u2208{t\u22121, t+1}, \ufb01nally we\nuse the predicted Dt and Tt\u2192t\u2032 to perform view synthesis\nas the supervisory signal.\nAt training time, both the depth network and pose net-\nwork are optimized jointly by minimizing the per-pixel min-\nimum photometric re-projection error Lp [11]\nLp = min\nt\u2032 pe (It, It\u2032\u2192t) ,\n(1)\nwhere pe() denotes the photometric error which consists of\nL1 and the Structural Similarity (SSIM) [46], It\u2032\u2192t is the\nwarped result from It\u2032 to It as in\npe =\u03b1\n2 (1 \u2212SSIM (It, It\u2032\u2192t))\n+ (1 \u2212\u03b1) \u2225It \u2212It\u2032\u2192t\u22251 ,\n(2)\nIt\u2032\u2192t = It\u2032 \u27e8proj (Dt, Tt\u2192t\u2032, K)\u27e9,\n(3)\nwhere proj() represents the resulting 2D coordinates of the\nprojected depths Dt in It\u2032 and \u27e8\u27e9is the sampling operator.\nWe use the differentiable bilinear sampling mechanism pro-"
+  },
+  {
+    "id": 30,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 16,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "(3)\nwhere proj() represents the resulting 2D coordinates of the\nprojected depths Dt in It\u2032 and \u27e8\u27e9is the sampling operator.\nWe use the differentiable bilinear sampling mechanism pro-\nposed in the STN [17] to sample the source images.\nIn a real-world scenario, situations like stationary camera\nand moving objects will break down the assumptions of a\nmoving camera and a static scene. To handle this issue,\nwe apply auto-masking method [11] to \ufb01lter out stationary\npixels that remain with the same appearance between two\nframes in a sequence. Since the binary mask \u00b5 is computed\nin this form on the forward pass\n\u00b5 =\nh\nmin\nt\u2032 pe (It, It\u2032\u2192t) < min\nt\u2032 pe (It, It\u2032)\ni\n,\n(4)\nwhere [] is the Iverson bracket.\nIn addition, in order to regularize the disparities in\ntexture-less regions, an edges-aware smoothness regulariza-\ntion term Ls is used\nLs = |\u2202xd\u2217\nt | e\u2212|\u2202xIt| + |\u2202yd\u2217\nt | e\u2212|\u2202yIt|,\n(5)\nwhere d\u2217\nt = dt/dt is the mean-normalized inverse depth"
+  },
+  {
+    "id": 31,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 17,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "texture-less regions, an edges-aware smoothness regulariza-\ntion term Ls is used\nLs = |\u2202xd\u2217\nt | e\u2212|\u2202xIt| + |\u2202yd\u2217\nt | e\u2212|\u2202yIt|,\n(5)\nwhere d\u2217\nt = dt/dt is the mean-normalized inverse depth\nfrom [44] to discourage shrinking of the estimated depth.\nThe \ufb01nal loss L is computed as the combination of pho-\ntometric loss Lp and smoothness loss Ls at multiple scales\nL = 1\nS\nS\nX\ni\n\u0000\u00b5Li\np + \u03bbLi\ns\n\u0001\n,\n(6)\nwhere S is the number of scales, and \u03bb is the weighting for\nthe smoothness regularization term."
+  },
+  {
+    "id": 32,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 18,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "\ud835\udc6d\n\u2297\nreshape\n\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\nreshape & \ntranspose\nsoftmax\nmax\n\ud835\udc36\u00d7 \ud835\udc36\n\u2297\nreshape\n\u2295\nreshape\nreshape\n\ud835\udc6c\n\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\n\ud835\udc7a\n\ud835\udc68\n\ud835\udc36\u00d7 \ud835\udc36\n: element-wise subtraction\n\u2297: matrix multiplication\n\u2295: element-wise sum\nFigure 3. Details of the structure perception module.\n3.2. Channel-wise Attention-based Network\nAs shown in Fig. 2, our CADepth-Net is a fully con-\nvolutional U-Net architecture. We adopt a pretrained resid-\nual network as the backbone to extract semantic features.\nThen these features would be fed into the structure percep-\ntion module and generate new features to explicitly enhance\nthe perception of scene structure. Moreover, we gradually\nrecover the spatial resolution at decoder stage, with skip-\nconnection to facilitate the \ufb02ow of gradients and informa-\ntion throughout the model, and sequentially employ our de-\ntail emphasis module to generate sharp edges and \ufb01ner de-\ntails. Finally, we successively upsample the predicted in-\nverse depth maps until original input resolutions using near-"
+  },
+  {
+    "id": 33,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 19,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "tail emphasis module to generate sharp edges and \ufb01ner de-\ntails. Finally, we successively upsample the predicted in-\nverse depth maps until original input resolutions using near-\nest neighbors interpolation at multiple scales, and compute\nthe training loss at this higher input resolution.\n3.3. Structure Perception Module\nIn depth estimation, each high-level feature map can be\nregarded as a region-speci\ufb01c response as shown in Fig. 6\n(b), and different region responses are associated with each\nother.\nIf each channel map captures more different re-\ngion responses from all the other channel maps, as shown\nin Fig. 6 (c), it will obtain more relative depth informa-\ntion from distant regions and signi\ufb01cantly enhance the per-\nception of scene structure. Therefore, we propose a self-\nattention module to model interdependencies between chan-\nnels and aggregate different region responses.\nThe \ufb01rst step is to generate an attention matrix which"
+  },
+  {
+    "id": 34,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 20,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "attention module to model interdependencies between chan-\nnels and aggregate different region responses.\nThe \ufb01rst step is to generate an attention matrix which\nmodels the relationship between any two channel maps. As\nillustrated in Fig. 3, given the feature map F \u2208RC\u00d7H\u00d7W\nproduced by ResNet encoder, we \ufb01rstly reshape F to\nRC\u00d7N, where N = H \u00d7 W is the number of pixels, then\nperform a matrix multiplication between F and the trans-\npose of F to compute the feature similarity S \u2208RC\u00d7C\nSij = Fi \u00b7 F T\nj .\n(7)\nThe similarity between channel maps indicates the spa-\ntial relationship of region responses i.e. any two feature\nmaps have higher similarity means that they also have\nstrong responses to the same region. As we need to fuse\n3x3 Conv\nSigmoid\n1x1 Conv\nRelu\n1x1 Conv\nPooling\n\u2299\n\u2295\n\u00a9: concatenation \u2299: element-wise multiplication \u2295: element-wise sum\n\ud835\udc73\n\ud835\udc7d\n\ud835\udc6f\n\ud835\udc7c\n\ud835\udc76\n\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\n\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\n2\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\n2\ud835\udc36\u00d7 1 \u00d7 1\n2\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\n\u00a9\n2\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\nFigure 4. Design of the detail emphasis module."
+  },
+  {
+    "id": 35,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 21,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Pooling\n\u2299\n\u2295\n\u00a9: concatenation \u2299: element-wise multiplication \u2295: element-wise sum\n\ud835\udc73\n\ud835\udc7d\n\ud835\udc6f\n\ud835\udc7c\n\ud835\udc76\n\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\n\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\n2\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\n2\ud835\udc36\u00d7 1 \u00d7 1\n2\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\n\u00a9\n2\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\nFigure 4. Design of the detail emphasis module.\nmore responses from different regions, we convert the sim-\nilarity S to discrimination D \u2208RC\u00d7C by performing the\nelement-wise subtraction\nDij = maxi(S) \u2212Si,j,\n(8)\nwhere Dij measures the jth channel\u2019s impact on the ith\nchannel. For each channel map, other channels with dis-\ncriminative features (i.e. different region response) will get\nhigher scores Dij during feature aggregation. Then we ap-\nply a softmax layer to obtain the attention map A \u2208RC\u00d7C\nAij =\nexp (Dij)\nPC\nj=1 exp (Dij)\n.\n(9)\nIn addition, we perform a matrix multiplication be-\ntween the transpose of A and F and reshape the result to\nRC\u00d7H\u00d7W . Finally we perform an element-wise sum op-\neration between F and the result to obtain the \ufb01nal output\nE \u2208RC\u00d7H\u00d7W as follows\nEi =\nC\nX\nj=1\n(AijFj) + Fi.\n(10)"
+  },
+  {
+    "id": 36,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 22,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "RC\u00d7H\u00d7W . Finally we perform an element-wise sum op-\neration between F and the result to obtain the \ufb01nal output\nE \u2208RC\u00d7H\u00d7W as follows\nEi =\nC\nX\nj=1\n(AijFj) + Fi.\n(10)\nThe Eq. 10 shows that the \ufb01nal feature of each channel is\nthe weighted sum of the features from all channels and the\noriginal feature. By capturing the long-range dependencies\nbetween feature maps, we obtain the aggregated features\nencoding rich context information of scene structure.\n3.4. Detail Emphasis Module\nThe decoder recovers the resolution by fusing the fol-\nlowing features at different scales: the low-level informa-\ntion from skip-connection encoding rich spatial details, and\nthe high-level information encoding more context informa-\ntion. The simple fusion operations like sum or concatena-\ntion lack the further processing of local details and neglect\nthe semantic gap between different level features, leading to\nblurry artefacts in predicted depth maps. The core of pre-"
+  },
+  {
+    "id": 37,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 23,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "tion lack the further processing of local details and neglect\nthe semantic gap between different level features, leading to\nblurry artefacts in predicted depth maps. The core of pre-\ndicting sharper edges is to properly handle local details, and\nit is easy for network to recover accurate depth predictions"
+  },
+  {
+    "id": 38,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 24,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "if it knows the category and location of features describing\nobject boundaries clearly. Therefore, by using the channel\nattention mechanism that can make network pay attention\nto speci\ufb01c channel features, we propose a detail emphasis\nmodule to emphasize important details and ef\ufb01ciently fuse\nfeatures at different scales.\nSpeci\ufb01cally, we \ufb01rst concatenate the low-level features\nL and the high-level features H, then utilize a convolution\nlayer to obtain U with the batch normalization [16] to bal-\nance the scales of the features\nU = \u03c3 (BN (W1 \u2297f (L, H))) ,\n(11)\nwhere f() denotes concatenation and \u2297denotes the 3 \u00d7 3\nor 1 \u00d7 1 convolution, BN refers to the batch normalization\nand we use the ReLU as the activation function \u03c3().\nNext, we squeeze U to a vector by global average pool-\ning to obtain global context and use two 1 \u00d7 1 convolution\nlayers followed by a sigmoid function to compute a weights\nvector V \u2208R1\u00d71\u00d7C, to recalibrate channel-wise features"
+  },
+  {
+    "id": 39,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 25,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "ing to obtain global context and use two 1 \u00d7 1 convolution\nlayers followed by a sigmoid function to compute a weights\nvector V \u2208R1\u00d71\u00d7C, to recalibrate channel-wise features\nand measure the importance of them in the meantime\nV = \u03b4(W2 \u2297\u03c3(W3 \u2297(\n1\nH \u00d7 W\nH\nX\ni=1\nW\nX\nj=1\nUi,j))),\n(12)\nwhere H and W refer to the height and width of U, and\n\u03b4() denotes the sigmoid function.\nThen we perform the\nelement-wise multiplication between V and U to gener-\nate re-weight features. As the weights scores in V indicate\nthe importance of corresponding channels, i.e. the channel\nmaps containing critical information will get higher scores,\nthis recalibration operation can adaptively emphasize the\ncrucial details at multiple scales for sharp edges (Fig. 7).\nFinally, we sum up U and re-weight features for stability\nO = V \u2299U + U,\n(13)\nwhere \u2299denotes element-wise dot product and O refers to\nthe \ufb01nal outputs. Fig. 4 shows the design of the detail em-\nphasis module, this design recalibrates channel-wise feature"
+  },
+  {
+    "id": 40,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 26,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "O = V \u2299U + U,\n(13)\nwhere \u2299denotes element-wise dot product and O refers to\nthe \ufb01nal outputs. Fig. 4 shows the design of the detail em-\nphasis module, this design recalibrates channel-wise feature\nresponses and produce more precise depth estimation.\n4. Experiments\nIn this section, we show extensive experiments for eval-\nuating the performance of our methods and demonstrate the\neffectiveness of the proposed approaches.\n4.1. Implementation Details\nOur model are implemented based on PyTorch [35],\ntrained for 20 epochs on a single Nvidia 3090 with a batch\nsize of 12 and an input/output resolution of 640 \u00d7 192. We\njointly train both depth network and pose network with the\nAdam Optimizer [20] with \u03b21 = 0.9, \u03b22 = 0.999. The ini-\ntial learning rate is set to 1e\u22124 and decay to 1e\u22125 after 15\nepochs. We set the SSIM weight to \u03b1 = 0.85 and smooth-\nness term weight to \u03bb = 1e \u22123.\nDepthNet. We implement our depth estimation network as\nan encoder-decoder architecture.\nMoreover, we start the"
+  },
+  {
+    "id": 41,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 27,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "epochs. We set the SSIM weight to \u03b1 = 0.85 and smooth-\nness term weight to \u03bb = 1e \u22123.\nDepthNet. We implement our depth estimation network as\nan encoder-decoder architecture.\nMoreover, we start the\nResNet50 encoder with weights pretrained on ImageNet\n[38] as it has been shown to improve accuracy compared to\ntraining from scratch. We set sigmoid follow the output of\nnetwork and convert result \u03c3 to depth with D = 1/(a\u03c3+b),\nwhere use a and b to constrain D between 0.1 and 100 units.\nPoseNet. Our PoseNet is built on ResNet50, modi\ufb01ed to ac-\ncept six channels tensor as input, which allows the adjacent\nframes to feed into the network. The outputs of PoseNet\nis the 6-DoF relative pose consist of translation vectors and\nEuler angles, scaled by a factor of 0.01.\n4.2. KITTI Results\nWe train and evaluate our methods using the KITTI 2015\nstereo data set [9]. We adopt the data split of Eigen et al. [5]\nfor distance to 80m and use pre-processing to remove static"
+  },
+  {
+    "id": 42,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 28,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "4.2. KITTI Results\nWe train and evaluate our methods using the KITTI 2015\nstereo data set [9]. We adopt the data split of Eigen et al. [5]\nfor distance to 80m and use pre-processing to remove static\nframes before training. Ultimately, this results in 39, 810\ntraining monocular triplets, and 4, 424 for validation and\n697 for evaluation. We report results using the per-image\nmedian ground truth scaling during evaluation.\nAs shown in Table 1, our proposed CADepth-Net signif-\nicantly outperforms the existing SoTA self-supervised ap-\nproaches in all metrics. In addition, we score dramatically\nhigher in the hardest accuracy metric \u03b4 < 1.25, which indi-\ncates that our model predicts more accurate and realistically\ndetailed depth estimation than all other competing models.\nFor a fair comparison, we also give the results on various in-\nput resolution and training settings, and our model still im-\nproves the performance at higher image resolutions. Fig. 5"
+  },
+  {
+    "id": 43,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 29,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "For a fair comparison, we also give the results on various in-\nput resolution and training settings, and our model still im-\nproves the performance at higher image resolutions. Fig. 5\nshows that our model produces sharper depth estimation on\nthinner structures e.g. road signs and poles. Moreover, our\nmodel successfully estimates correct depth at the highly re-\n\ufb02ective car roof (6th row), which are the challenging prob-\nlems for previous advanced methods. These improvements\ncan be explained by the better perception of scenes and ob-\njects afforded by the structure perception module, and the\nfurther regularisation provided by detail emphasis module.\nAdditional results can be seen in supplementary material.\n4.3. Make3D result\nTo evaluate the generalization ability of our model on\nthe unseen dataset, we report the quantitative results for\nthe Make3D dataset [39] using our model trained on KITTI\n2015 [9]. Following the same evaluation protocol as [10],"
+  },
+  {
+    "id": 44,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 30,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "the unseen dataset, we report the quantitative results for\nthe Make3D dataset [39] using our model trained on KITTI\n2015 [9]. Following the same evaluation protocol as [10],\nwe test on a center crop of 2 \u00d7 1 ratio and apply median\nscaling. As shown in Table 3, our approach produces supe-\nrior results compared with the other SOTA self-supervised\nmethods. Qualitative results can be seen in Fig. 8, which\nshow that our model generates more accurate and sharper\ndepth estimation on the previously unseen Make3D dataset."
+  },
+  {
+    "id": 45,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 31,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Method\nTrain\nResolution\nAbs Rel\nSq Rel\nRMSE\nRMSE log\n\u03b4 < 1.25\n\u03b4 < 1.252\n\u03b4 < 1.253\nSfMLeaner [56]\u2020\nM\n416 \u00d7 128\n0.183\n1.595\n6.709\n0.270\n0.734\n0.902\n0.959\nGeoNet [50]\u2020\nM\n416 \u00d7 128\n0.149\n1.060\n5.567\n0.226\n0.796\n0.935\n0.975\nDDVO [44]\nM\n416 \u00d7 128\n0.151\n1.257\n5.583\n0.228\n0.810\n0.936\n0.974\nStruct2depth \u2018(M)\u2019 [1]\nM\n416 \u00d7 128\n0.141\n1.026\n5.291\n0.215\n0.816\n0.945\n0.979\nSIGNet [32]\nM\n416 \u00d7 128\n0.133\n0.905\n5.181\n0.208\n0.825\n0.947\n0.981\nSGDepth [22]\nM\n416 \u00d7 128\n0.128\n1.003\n5.085\n0.206\n0.853\n0.951\n0.978\nMonodepth2 [11]\nM\n416 \u00d7 128\n0.128\n1.087\n5.171\n0.204\n0.855\n0.953\n0.978\nCADepth-Net (Ours)\nM\n416 \u00d7 128\n0.116\n0.893\n4.906\n0.192\n0.874\n0.957\n0.981\nDF-Net [57]\nM\n576 \u00d7 160\n0.150\n1.124\n5.507\n0.223\n0.806\n0.933\n0.973\nSGDepth [22]\nM\n640 \u00d7 192\n0.117\n0.907\n4.844\n0.196\n0.875\n0.958\n0.980\nMonodepth2 [11]\nM\n640 \u00d7 192\n0.115\n0.903\n4.863\n0.193\n0.877\n0.959\n0.981\nPackNet-SfM [13]\nM\n640 \u00d7 192\n0.111\n0.785\n4.601\n0.189\n0.878\n0.960\n0.982\nHR-Depth [30]\nM\n640 \u00d7 192\n0.109\n0.792\n4.632\n0.185\n0.884\n0.962\n0.983\nJohnston et al. [18]"
+  },
+  {
+    "id": 46,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 32,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "0.903\n4.863\n0.193\n0.877\n0.959\n0.981\nPackNet-SfM [13]\nM\n640 \u00d7 192\n0.111\n0.785\n4.601\n0.189\n0.878\n0.960\n0.982\nHR-Depth [30]\nM\n640 \u00d7 192\n0.109\n0.792\n4.632\n0.185\n0.884\n0.962\n0.983\nJohnston et al. [18]\nM\n640 \u00d7 192\n0.106\n0.861\n4.699\n0.185\n0.889\n0.962\n0.982\nCADepth-Net (Ours)\nM\n640 \u00d7 192\n0.105\n0.769\n4.535\n0.181\n0.892\n0.964\n0.983\nCC [36]\nM\n832 \u00d7 256\n0.140\n1.070\n5.326\n0.217\n0.826\n0.941\n0.975\nMonodepth2 [11]\nM\n1024 \u00d7 320\n0.115\n0.882\n4.701\n0.190\n0.879\n0.961\n0.982\nTrianFlow [54]\nM\n832 \u00d7 256\n0.113\n0.704\n4.581\n0.184\n0.871\n0.961\n0.984\nHR-Depth [30]\nM\n1024 \u00d7 320\n0.106\n0.755\n4.472\n0.181\n0.892\n0.966\n0.984\nFeatDepth [40]\nM\n1024 \u00d7 320\n0.104\n0.729\n4.481\n0.179\n0.893\n0.965\n0.984\nCADepth-Net (Ours)\nM\n1024 \u00d7 320\n0.102\n0.734\n4.407\n0.178\n0.898\n0.966\n0.984\nDualNet [55]\nM\n1248 \u00d7 384\n0.121\n0.837\n4.945\n0.197\n0.853\n0.955\n0.982\nSGDepth [22]\nM\n1280 \u00d7 384\n0.113\n0.880\n4.695\n0.192\n0.884\n0.961\n0.981\nPackNet-SfM [13]\nM\n1280 \u00d7 384\n0.107\n0.802\n4.538\n0.186\n0.889\n0.962\n0.981\nHR-Depth [30]\nM\n1280 \u00d7 384\n0.104\n0.727\n4.410\n0.179"
+  },
+  {
+    "id": 47,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 33,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "0.982\nSGDepth [22]\nM\n1280 \u00d7 384\n0.113\n0.880\n4.695\n0.192\n0.884\n0.961\n0.981\nPackNet-SfM [13]\nM\n1280 \u00d7 384\n0.107\n0.802\n4.538\n0.186\n0.889\n0.962\n0.981\nHR-Depth [30]\nM\n1280 \u00d7 384\n0.104\n0.727\n4.410\n0.179\n0.894\n0.966\n0.984\nCADepth-Net (Ours)\nM\n1280 \u00d7 384\n0.102\n0.715\n4.312\n0.176\n0.900\n0.968\n0.984\nEPC++ [29]\nMS\n832 \u00d7 256\n0.128\n0.935\n5.011\n0.209\n0.831\n0.945\n0.979\nMonodepth2 [11]\nMS\n640 \u00d7 192\n0.106\n0.818\n4.750\n0.196\n0.874\n0.957\n0.979\nHR-Depth [30]\nMS\n640 \u00d7 192\n0.107\n0.785\n4.612\n0.185\n0.887\n0.962\n0.982\nDepthHints [47]\nMS\n640 \u00d7 192\n0.105\n0.769\n4.627\n0.189\n0.875\n0.959\n0.982\nCADepth-Net (Ours)\nMS\n640 \u00d7 192\n0.102\n0.752\n4.504\n0.181\n0.894\n0.964\n0.983\nMonodepth2 [11]\nMS\n1024 \u00d7 320\n0.106\n0.806\n4.630\n0.193\n0.876\n0.958\n0.980\nHR-Depth [30]\nMS\n1024 \u00d7 320\n0.101\n0.716\n4.395\n0.179\n0.899\n0.966\n0.983\nDepthHints [47]\nMS\n1024 \u00d7 320\n0.098\n0.702\n4.398\n0.183\n0.887\n0.963\n0.983\nFeatDepth [40]\nMS\n1024 \u00d7 320\n0.099\n0.697\n4.427\n0.184\n0.889\n0.963\n0.982\nCADepth-Net (Ours)\nMS\n1024 \u00d7 320\n0.096\n0.694\n4.264\n0.173\n0.908\n0.968\n0.984"
+  },
+  {
+    "id": 48,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 34,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "1024 \u00d7 320\n0.098\n0.702\n4.398\n0.183\n0.887\n0.963\n0.983\nFeatDepth [40]\nMS\n1024 \u00d7 320\n0.099\n0.697\n4.427\n0.184\n0.889\n0.963\n0.982\nCADepth-Net (Ours)\nMS\n1024 \u00d7 320\n0.096\n0.694\n4.264\n0.173\n0.908\n0.968\n0.984\nTable 1. Quantitative results on the KITTI Eigen Split. Comparison of existing methods on KITTI 2015 [9] using the Eigen split for\ndistances up to 80m. All methods in this table are trained on the KITTI dataset without additional datasets or online re\ufb01nement. Best\nresults are in bold, with second-best underlined. For Abs Rel, Sq Rel, RMSE and RMSElog lower is better, and for \u03b4 < 1.25, \u03b4 < 1.252\nand \u03b4 < 1.253 higher is better. In the Train column, S: Self-supervised stereo supervision, M: Self-supervised mono supervision. \u2020 refers\nto the newer results from Github. At test time, we scale the estimated depths with median ground-truth LiDAR information.\n4.4. Structure Perception Module\nTo demonstrate the effectiveness of the structure percep-"
+  },
+  {
+    "id": 49,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 35,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "4.4. Structure Perception Module\nTo demonstrate the effectiveness of the structure percep-\ntion module, Fig. 6 presents a comparison of features be-\nfore and after treatment. For clear visualization, we map the\nchannel maps to the RGB color cube and project them to the\noriginal RGB image. Fig. 6 (b) refers to the high-level fea-\ntures produced by encoder, which mainly indicates region-\nspeci\ufb01c responses and various kinds of structural informa-\ntion of 3D scene, e.g. vanish point, region with same depth\nrange and the area with same color or texture (e.g. sky) .\nAs mentioned earlier, the structure perception module\nproduces the aggregated features (Fig. 6 (c)) by performing\nthe weighted summation of all channel maps. As the atten-\ntion map describes the feature discrimination and the spatial\nrelationship of region responses between channels, by ag-\ngregating discriminative features at channel dimension, we\ncan make each single channel map get rich scene structure"
+  },
+  {
+    "id": 50,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 36,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "relationship of region responses between channels, by ag-\ngregating discriminative features at channel dimension, we\ncan make each single channel map get rich scene structure\nrepresentation and more complete region responses from\nnon-contiguous regions. By doing so, the structure percep-\ntion module obtains rich contextual information of overall\nscene geometry perception, which results in better scene un-\nderstanding and feature representation for depth estimation.\nFig. 6 adequately demonstrates that each channel map\nobtains more extra depth perception from distant regions\ne.g. foreground (1st row) and midground (2nd row). In ad-\ndition, it also particularly emphasizes the vanishing point\nregions, which are naturally a strong cue to understand the\ngeometry of a scene. In the last row, the network originally\nfocuses on foreground objects such as cars and obtains more"
+  },
+  {
+    "id": 51,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 37,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Input\nMonodepth2 [11]\nPackNet [13]\nOur CADepth-Net\nFigure 5. Qualitative results on the KITTI Eigen split. Our model consistently predicts sharper boundaries and \ufb01ne-gained details on\nthinner objects, e.g. trees, pedestrians and signs.\n(a)\n(b)\n(c)\nFigure 6. The visualizations of the structure perception module. (a) Input image. (b) Input feature maps. (c) Corresponding output of\nthe structure perception module. All feature maps are projected onto RGB images for clear visualization. The structure perception module\nexplicitly enhances the perception of scene structure and feature representation.\nrelative depth relationships after adding the vanishing point\ninformation. More visualization results are described in the\nsupplementary material.\n4.5. Detail Emphasis Module\nThe detail emphasis module generates a weights vector\nto re-calibrate channel maps and emphasizes the informa-\ntive features for subsequent transformations. The weights\nscores produced by the sigmoid function are between 0"
+  },
+  {
+    "id": 52,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 38,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "to re-calibrate channel maps and emphasizes the informa-\ntive features for subsequent transformations. The weights\nscores produced by the sigmoid function are between 0\nand 1, indicating the importance of corresponding features,\ni.e. the more important of the channel, the higher score is\nearned. As shown in Fig. 7, we report the top n (n = 10)\nfeature maps with the highest scores to show which features\nthe network focuses on. We observe that our model mainly\nhighlights the crucial low-level features that describe the\nobject boundaries precisely. This observation is consistent\nwith the fact that the decoder mainly uses detail informa-\ntion to recover spatial resolution gradually. In general, the\ndetail emphasis module adaptively selects the informative\nlocal details and helps network handle and locate the ob-\nject edges for sharper depth prediction. More visualization\nresults are provided in the supplementary material."
+  },
+  {
+    "id": 53,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 39,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Backbone\nSPM\nDEM\nPara\nTime\nAbs Rel\nSq Rel\nRMSE\nRMSE\nlog\n\u03b4 <1.25\n\u03b4 <1.252\n\u03b4 < 1.253\nBaseline (MD2 ResNet18 [11])\nR18\n14.84 M\n11.95 ms\n0.115\n0.903\n4.863\n0.193\n0.877\n0.959\n0.981\nBaseline + SPM\nR18\n\u2713\n14.84 M\n12.13 ms\n0.110\n0.843\n4.739\n0.188\n0.883\n0.961\n0.982\nBaseline + DEM\nR18\n\u2713\n18.74 M\n15.44 ms\n0.111\n0.851\n4.746\n0.189\n0.881\n0.961\n0.982\nCADepth-Net ResNet18 (full)\nR18\n\u2713\n\u2713\n18.74 M\n15.77 ms\n0.110\n0.812\n4.686\n0.187\n0.882\n0.962\n0.983\nBaseline (MD2 ResNet50 [11])\nR50\n34.57 M\n22.52 ms\n0.110\n0.831\n4.642\n0.187\n0.883\n0.962\n0.982\nBaseline + SPM\nR50\n\u2713\n34.57 M\n22.80 ms\n0.107\n0.784\n4.589\n0.185\n0.887\n0.963\n0.982\nBaseline + DEM\nR50\n\u2713\n58.34 M\n28.01 ms\n0.107\n0.759\n4.557\n0.183\n0.884\n0.964\n0.983\nCADepth-Net ResNet50 (full)\nR50\n\u2713\n\u2713\n58.34 M\n28.41 ms\n0.105\n0.769\n4.535\n0.181\n0.892\n0.964\n0.983\nTable 2. Ablation Studies. We evaluate the performance of our structure perception module (SPM) and detail emphasis module (DEM)"
+  },
+  {
+    "id": 54,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 40,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "R50\n\u2713\n\u2713\n58.34 M\n28.41 ms\n0.105\n0.769\n4.535\n0.181\n0.892\n0.964\n0.983\nTable 2. Ablation Studies. We evaluate the performance of our structure perception module (SPM) and detail emphasis module (DEM)\ncontributions with Monodepth2 (MD2) [11] as the baseline. R: ResNet, Para: parameters. All models in this table are trained with\nmonocular self-supervised (M) and standard resolution (640 \u00d7 192). The inference time is tested on a single RTX3090 GPU.\n0.965\n0.941\n0.924\n0.896\n0.886\n0.869\n0.869\n0.793\n0.785\n0.780\nStrength of Feature Response \nmin\nmax\n(a)\n(c)\n(b)\nFigure 7. The visualizations of detail emphasis module. (a) Input image. (b) Predicted depth map. (c) Top n (n = 10) feature maps with\nhighest weights score that range in [0, 1]. Detail emphasis module mainly highlights the crucial local details.\nInput\nMD2 (M) [11]\nOurs (M)\nGround truth\nFigure 8. Qualitative Make3D results. All methods were trained\non KITTI using monocular supervision.\n4.6. Ablation Study"
+  },
+  {
+    "id": 55,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 41,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Input\nMD2 (M) [11]\nOurs (M)\nGround truth\nFigure 8. Qualitative Make3D results. All methods were trained\non KITTI using monocular supervision.\n4.6. Ablation Study\nFor further demonstrating the performance improve-\nments of our provided methods, Table 2 and supplemental\nmaterial show the ablation study of our various components\nwith Monodepth2 [11] as the baseline. It shows that all of\nour contributions achieve a steady improvement in almost\nall evaluation measures and obtain a consistent performance\ngain on different backbones, showing the robustness of our\nCADepth-Net to the backbone architecture capacity. Note\nthat the structure perception module shows superior perfor-\nmance on metric \u03b4 < 1.25, with little time cost and no addi-\ntional parameters, demonstrating the improvements bene\ufb01t\nfrom the better scene understanding rather than an increase\nin network complexity. Finally, the combination of all our\nmodules with ResNet50 achieves the best results, with 59M"
+  },
+  {
+    "id": 56,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 42,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "from the better scene understanding rather than an increase\nin network complexity. Finally, the combination of all our\nmodules with ResNet50 achieves the best results, with 59M\nparameters and an inference time of 28ms on an RTX3090\nType\nAbs Rel\nSq Rel\nRMSE\nlog10\nKarsch [19]\nD\n0.428\n5.079\n8.389\n0.149\nLiu [28]\nD\n0.475\n6.562\n10.05\n0.165\nLaina [24]\nD\n0.204\n1.840\n5.683\n0.084\nMonodepth [10]\nS\n0.544\n10.94\n11.760\n0.193\nZhou [56]\nM\n0.383\n5.321\n10.470\n0.478\nDDVO [44]\nM\n0.387\n4.720\n8.090\n0.204\nMonodepth2 [11]\nM\n0.322\n3.589\n7.417\n0.163\nOurs\nM\n0.312\n3.086\n7.066\n0.159\nTable 3. Make3D results. All self-supervised mono (M) results\nbene\ufb01t from median scaling.\nGPU, meets the requirements of real-time applications.\n5. Conclusion\nIn this paper, we introduce a novel architecture named\nchannel-wise attention-based depth estimation network,\nwith two effective components, the structure perception\nmodule and the detail emphasis module. The structure per-"
+  },
+  {
+    "id": 57,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 43,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "channel-wise attention-based depth estimation network,\nwith two effective components, the structure perception\nmodule and the detail emphasis module. The structure per-\nception module aggregates the discriminative features by\ncapturing the long-range dependencies to obtain the con-\ntext of scene structure and rich feature representation. Ad-\nditionally, the detail emphasis module employs the channel\nattention mechanism to highlight objects\u2019 boundaries infor-\nmation and ef\ufb01ciently fuse different level features. Further-\nmore, the experiments demonstrate that our CADepth-Net\nproduces sharper depth estimation and achieves the state-\nof-the-art results on KITTI datasets."
+  },
+  {
+    "id": 58,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 44,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "References\n[1] Vincent Casser, Soeren Pirk, Reza Mahjourian, and Anelia\nAngelova. Depth prediction without the sensors: Leveraging\nstructure for unsupervised learning from monocular videos.\nIn Proceedings of the AAAI conference on arti\ufb01cial intelli-\ngence, volume 33, pages 8001\u20138008, 2019. 6\n[2] Djork-Arn\u00b4e Clevert, Thomas Unterthiner, and Sepp Hochre-\niter. Fast and accurate deep network learning by exponential\nlinear units (elus). arXiv preprint arXiv:1511.07289, 2015.\n12\n[3] Marius Cordts, Mohamed Omran, Sebastian Ramos, Timo\nRehfeld,\nMarkus Enzweiler,\nRodrigo Benenson,\nUwe\nFranke, Stefan Roth, and Bernt Schiele.\nThe cityscapes\ndataset for semantic urban scene understanding. In Proceed-\nings of the IEEE conference on computer vision and pattern\nrecognition, pages 3213\u20133223, 2016. 13\n[4] Guilherme N DeSouza and Avinash C Kak.\nVision for\nmobile robot navigation: A survey. IEEE transactions on\npattern analysis and machine intelligence, 24(2):237\u2013267,\n2002. 1"
+  },
+  {
+    "id": 59,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 45,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "[4] Guilherme N DeSouza and Avinash C Kak.\nVision for\nmobile robot navigation: A survey. IEEE transactions on\npattern analysis and machine intelligence, 24(2):237\u2013267,\n2002. 1\n[5] David Eigen and Rob Fergus. Predicting depth, surface nor-\nmals and semantic labels with a common multi-scale con-\nvolutional architecture. In Proceedings of the IEEE inter-\nnational conference on computer vision, pages 2650\u20132658,\n2015. 1, 2, 5, 12\n[6] David Eigen, Christian Puhrsch, and Rob Fergus. Depth map\nprediction from a single image using a multi-scale deep net-\nwork. arXiv preprint arXiv:1406.2283, 2014. 1, 2\n[7] Huan Fu, Mingming Gong, Chaohui Wang, Kayhan Bat-\nmanghelich, and Dacheng Tao. Deep ordinal regression net-\nwork for monocular depth estimation. In Proceedings of the\nIEEE conference on computer vision and pattern recogni-\ntion, pages 2002\u20132011, 2018. 1, 2, 13\n[8] Jun Fu, Jing Liu, Haijie Tian, Yong Li, Yongjun Bao, Zhiwei\nFang, and Hanqing Lu.\nDual attention network for scene"
+  },
+  {
+    "id": 60,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 46,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "tion, pages 2002\u20132011, 2018. 1, 2, 13\n[8] Jun Fu, Jing Liu, Haijie Tian, Yong Li, Yongjun Bao, Zhiwei\nFang, and Hanqing Lu.\nDual attention network for scene\nsegmentation. In Proceedings of the IEEE/CVF Conference\non Computer Vision and Pattern Recognition, pages 3146\u2013\n3154, 2019. 2\n[9] Andreas Geiger, Philip Lenz, and Raquel Urtasun. Are we\nready for autonomous driving? the kitti vision benchmark\nsuite. In 2012 IEEE conference on computer vision and pat-\ntern recognition, pages 3354\u20133361. IEEE, 2012. 1, 5, 6, 13\n[10] Cl\u00b4ement Godard, Oisin Mac Aodha, and Gabriel J Bros-\ntow.\nUnsupervised monocular depth estimation with left-\nright consistency. In Proceedings of the IEEE conference\non computer vision and pattern recognition, pages 270\u2013279,\n2017. 1, 5, 8, 13\n[11] Cl\u00b4ement Godard, Oisin Mac Aodha, Michael Firman, and\nGabriel J Brostow. Digging into self-supervised monocular\ndepth estimation. In Proceedings of the IEEE/CVF Inter-\nnational Conference on Computer Vision, pages 3828\u20133838,"
+  },
+  {
+    "id": 61,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 47,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Gabriel J Brostow. Digging into self-supervised monocular\ndepth estimation. In Proceedings of the IEEE/CVF Inter-\nnational Conference on Computer Vision, pages 3828\u20133838,\n2019. 1, 2, 3, 6, 7, 8, 13, 15\n[12] Matan Goldman, Tal Hassner, and Shai Avidan. Learn stereo,\ninfer mono: Siamese networks for self-supervised, monocu-\nlar, depth estimation. In Proceedings of the IEEE/CVF Con-\nference on Computer Vision and Pattern Recognition Work-\nshops, pages 0\u20130, 2019. 13\n[13] Vitor Guizilini, Rares Ambrus, Sudeep Pillai, Allan Raven-\ntos, and Adrien Gaidon.\n3d packing for self-supervised\nmonocular depth estimation.\nIn Proceedings of the\nIEEE/CVF Conference on Computer Vision and Pattern\nRecognition, pages 2485\u20132494, 2020. 1, 2, 6, 7, 13, 15\n[14] Vitor Guizilini, Rui Hou, Jie Li, Rares Ambrus, and\nAdrien Gaidon. Semantically-guided representation learn-\ning for self-supervised monocular depth.\narXiv preprint\narXiv:2002.12319, 2020. 2\n[15] Xiaoyang Guo, Hongsheng Li, Shuai Yi, Jimmy Ren, and"
+  },
+  {
+    "id": 62,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 48,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Adrien Gaidon. Semantically-guided representation learn-\ning for self-supervised monocular depth.\narXiv preprint\narXiv:2002.12319, 2020. 2\n[15] Xiaoyang Guo, Hongsheng Li, Shuai Yi, Jimmy Ren, and\nXiaogang Wang.\nLearning monocular depth by distilling\ncross-domain stereo networks. In Proceedings of the Euro-\npean Conference on Computer Vision (ECCV), pages 484\u2013\n500, 2018. 1\n[16] Sergey Ioffe and Christian Szegedy. Batch normalization:\nAccelerating deep network training by reducing internal co-\nvariate shift. In International conference on machine learn-\ning, pages 448\u2013456. PMLR, 2015. 5\n[17] Max Jaderberg, Karen Simonyan, Andrew Zisserman, et al.\nSpatial transformer networks. Advances in neural informa-\ntion processing systems, 28:2017\u20132025, 2015. 3\n[18] Adrian Johnston and Gustavo Carneiro.\nSelf-supervised\nmonocular trained depth estimation using self-attention and\ndiscrete disparity volume. In Proceedings of the IEEE/CVF\nConference on Computer Vision and Pattern Recognition,"
+  },
+  {
+    "id": 63,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 49,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Self-supervised\nmonocular trained depth estimation using self-attention and\ndiscrete disparity volume. In Proceedings of the IEEE/CVF\nConference on Computer Vision and Pattern Recognition,\npages 4756\u20134765, 2020. 2, 6, 13\n[19] Kevin Karsch, Ce Liu, and Sing Bing Kang. Depth transfer:\nDepth extraction from video using non-parametric sampling.\nIEEE transactions on pattern analysis and machine intelli-\ngence, 36(11):2144\u20132158, 2014. 8\n[20] Diederik P Kingma and Jimmy Ba. Adam: A method for\nstochastic optimization.\narXiv preprint arXiv:1412.6980,\n2014. 5\n[21] KITTI\nSingle\nDepth\nEvaluation\nServer.\nhttp://www.cvlibs.net/datasets/kitti/eval depth.php?\nbenchmark=depth prediction. 2017. 12\n[22] Marvin Klingner, Jan-Aike Term\u00a8ohlen, Jonas Mikolajczyk,\nand Tim Fingscheidt. Self-supervised monocular depth es-\ntimation: Solving the dynamic object problem by seman-\ntic guidance. In European Conference on Computer Vision,\npages 582\u2013600. Springer, 2020. 2, 6, 13\n[23] Shu Kong and Charless Fowlkes."
+  },
+  {
+    "id": 64,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 50,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "timation: Solving the dynamic object problem by seman-\ntic guidance. In European Conference on Computer Vision,\npages 582\u2013600. Springer, 2020. 2, 6, 13\n[23] Shu Kong and Charless Fowlkes.\nPixel-wise attentional\ngating for parsimonious pixel labeling.\narXiv preprint\narXiv:1805.01556, 2018. 13\n[24] Iro Laina, Christian Rupprecht, Vasileios Belagiannis, Fed-\nerico Tombari, and Nassir Navab. Deeper depth prediction\nwith fully convolutional residual networks. In 2016 Fourth\ninternational conference on 3D vision (3DV), pages 239\u2013\n248. IEEE, 2016. 2, 8\n[25] Bo Li, Yuchao Dai, and Mingyi He. Monocular depth es-\ntimation with hierarchical fusion of dilated cnns and soft-\nweighted-sum inference. Pattern Recognition, 83:328\u2013339,\n2018. 13\n[26] Ruibo Li, Ke Xian, Chunhua Shen, Zhiguo Cao, Hao Lu, and\nLingxiao Hang. Deep attention-based classi\ufb01cation network\nfor robust depth prediction. In Asian Conference on Com-\nputer Vision, pages 663\u2013678. Springer, 2018. 13"
+  },
+  {
+    "id": 65,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 51,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "[27] Fayao Liu, Chunhua Shen, and Guosheng Lin. Deep con-\nvolutional neural \ufb01elds for depth estimation from a single\nimage. In Proceedings of the IEEE conference on computer\nvision and pattern recognition, pages 5162\u20135170, 2015. 2\n[28] Miaomiao Liu,\nMathieu Salzmann,\nand Xuming He.\nDiscrete-continuous depth estimation from a single image.\nIn Proceedings of the IEEE Conference on Computer Vision\nand Pattern Recognition, pages 716\u2013723, 2014. 8\n[29] Chenxu Luo, Zhenheng Yang, Peng Wang, Yang Wang, Wei\nXu, Ram Nevatia, and Alan Yuille. Every pixel counts++:\nJoint learning of geometry and motion with 3d holistic un-\nderstanding. IEEE transactions on pattern analysis and ma-\nchine intelligence, 42(10):2624\u20132641, 2019. 6, 13\n[30] Xiaoyang Lyu, Liang Liu, Mengmeng Wang, Xin Kong,\nLina Liu, Yong Liu, Xinxin Chen, and Yi Yuan. Hr-depth:\nHigh resolution self-supervised monocular depth estimation.\narXiv preprint arXiv:2012.07356, 2020. 6"
+  },
+  {
+    "id": 66,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 52,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Lina Liu, Yong Liu, Xinxin Chen, and Yi Yuan. Hr-depth:\nHigh resolution self-supervised monocular depth estimation.\narXiv preprint arXiv:2012.07356, 2020. 6\n[31] Reza Mahjourian, Martin Wicke, and Anelia Angelova. Un-\nsupervised learning of depth and ego-motion from monoc-\nular video using 3d geometric constraints. In Proceedings\nof the IEEE Conference on Computer Vision and Pattern\nRecognition, pages 5667\u20135675, 2018. 2, 13\n[32] Yue Meng, Yongxi Lu, Aman Raj, Samuel Sunarjo, Rui Guo,\nTara Javidi, Gaurav Bansal, and Dinesh Bharadia. Signet:\nSemantic instance aided unsupervised 3d geometry percep-\ntion. In Proceedings of the IEEE/CVF Conference on Com-\nputer Vision and Pattern Recognition, pages 9810\u20139820,\n2019. 6\n[33] Moritz Menze and Andreas Geiger. Object scene \ufb02ow for au-\ntonomous vehicles. In Proceedings of the IEEE conference\non computer vision and pattern recognition, pages 3061\u2013\n3070, 2015. 1\n[34] Richard A Newcombe, Steven J Lovegrove, and Andrew J"
+  },
+  {
+    "id": 67,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 53,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "tonomous vehicles. In Proceedings of the IEEE conference\non computer vision and pattern recognition, pages 3061\u2013\n3070, 2015. 1\n[34] Richard A Newcombe, Steven J Lovegrove, and Andrew J\nDavison. Dtam: Dense tracking and mapping in real-time.\nIn 2011 international conference on computer vision, pages\n2320\u20132327. IEEE, 2011. 1\n[35] Adam Paszke, Sam Gross, Soumith Chintala, Gregory\nChanan, Edward Yang, Zachary DeVito, Zeming Lin, Al-\nban Desmaison, Luca Antiga, and Adam Lerer. Automatic\ndifferentiation in PyTorch. In NeurIPS-W, 2017. 5\n[36] Anurag Ranjan, Varun Jampani, Lukas Balles, Kihwan Kim,\nDeqing Sun, Jonas Wulff, and Michael J Black. Competitive\ncollaboration: Joint unsupervised learning of depth, camera\nmotion, optical \ufb02ow and motion segmentation. In Proceed-\nings of the IEEE/CVF Conference on Computer Vision and\nPattern Recognition, pages 12240\u201312249, 2019. 2, 6, 13\n[37] Olaf Ronneberger, Philipp Fischer, and Thomas Brox. U-\nnet: Convolutional networks for biomedical image segmen-"
+  },
+  {
+    "id": 68,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 54,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Pattern Recognition, pages 12240\u201312249, 2019. 2, 6, 13\n[37] Olaf Ronneberger, Philipp Fischer, and Thomas Brox. U-\nnet: Convolutional networks for biomedical image segmen-\ntation. In International Conference on Medical image com-\nputing and computer-assisted intervention, pages 234\u2013241.\nSpringer, 2015. 1\n[38] Olga Russakovsky, Jia Deng, Hao Su, Jonathan Krause, San-\njeev Satheesh, Sean Ma, Zhiheng Huang, Andrej Karpathy,\nAditya Khosla, Michael Bernstein, et al.\nImagenet large\nscale visual recognition challenge. International journal of\ncomputer vision, 115(3):211\u2013252, 2015. 5\n[39] Ashutosh Saxena, Min Sun, and Andrew Y Ng. Make3d:\nLearning 3d scene structure from a single still image. IEEE\ntransactions on pattern analysis and machine intelligence,\n31(5):824\u2013840, 2008. 5, 13\n[40] Chang Shu, Kun Yu, Zhixiang Duan, and Kuiyuan Yang.\nFeature-metric loss for self-supervised learning of depth and\negomotion. In European Conference on Computer Vision,\npages 572\u2013588. Springer, 2020. 6"
+  },
+  {
+    "id": 69,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 55,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Feature-metric loss for self-supervised learning of depth and\negomotion. In European Conference on Computer Vision,\npages 572\u2013588. Springer, 2020. 6\n[41] Jaime Spencer, Richard Bowden, and Simon Had\ufb01eld.\nDefeat-net: General monocular depth via simultaneous un-\nsupervised representation learning.\nIn Proceedings of the\nIEEE/CVF Conference on Computer Vision and Pattern\nRecognition, pages 14402\u201314413, 2020. 2\n[42] Jonas Uhrig, Nick Schneider, Lukas Schneider, Uwe Franke,\nThomas Brox, and Andreas Geiger. Sparsity invariant cnns.\nIn 2017 international conference on 3D Vision (3DV), pages\n11\u201320. IEEE, 2017. 12, 13\n[43] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszko-\nreit, Llion Jones, Aidan N Gomez, Lukasz Kaiser, and Il-\nlia Polosukhin. Attention is all you need. arXiv preprint\narXiv:1706.03762, 2017. 2\n[44] Chaoyang Wang, Jos\u00b4e Miguel Buenaposada, Rui Zhu, and\nSimon Lucey. Learning depth from monocular videos us-\ning direct methods. In Proceedings of the IEEE Conference"
+  },
+  {
+    "id": 70,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 56,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "arXiv:1706.03762, 2017. 2\n[44] Chaoyang Wang, Jos\u00b4e Miguel Buenaposada, Rui Zhu, and\nSimon Lucey. Learning depth from monocular videos us-\ning direct methods. In Proceedings of the IEEE Conference\non Computer Vision and Pattern Recognition, pages 2022\u2013\n2030, 2018. 2, 3, 6, 8, 13\n[45] Xiaolong Wang, Ross Girshick, Abhinav Gupta, and Kaim-\ning He. Non-local neural networks. In Proceedings of the\nIEEE conference on computer vision and pattern recogni-\ntion, pages 7794\u20137803, 2018. 2\n[46] Zhou Wang, Alan C Bovik, Hamid R Sheikh, and Eero P Si-\nmoncelli. Image quality assessment: from error visibility to\nstructural similarity. IEEE transactions on image processing,\n13(4):600\u2013612, 2004. 3\n[47] Jamie Watson, Michael Firman, Gabriel J Brostow, and\nDaniyar Turmukhambetov. Self-supervised monocular depth\nhints. In Proceedings of the IEEE/CVF International Con-\nference on Computer Vision, pages 2162\u20132171, 2019. 6\n[48] Zhenheng Yang, Peng Wang, Yang Wang, Wei Xu, and Ram\nNevatia."
+  },
+  {
+    "id": 71,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 57,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "hints. In Proceedings of the IEEE/CVF International Con-\nference on Computer Vision, pages 2162\u20132171, 2019. 6\n[48] Zhenheng Yang, Peng Wang, Yang Wang, Wei Xu, and Ram\nNevatia.\nLego: Learning edge with geometry all at once\nby watching videos. In Proceedings of the IEEE conference\non computer vision and pattern recognition, pages 225\u2013234,\n2018. 2\n[49] Zhenheng Yang, Peng Wang, Wei Xu, Liang Zhao, and\nRamakant Nevatia.\nUnsupervised learning of geometry\nwith edge-aware depth-normal consistency. arXiv preprint\narXiv:1711.03665, 2017. 2\n[50] Zhichao Yin and Jianping Shi. Geonet: Unsupervised learn-\ning of dense depth, optical \ufb02ow and camera pose. In Pro-\nceedings of the IEEE conference on computer vision and pat-\ntern recognition, pages 1983\u20131992, 2018. 2, 6, 13\n[51] Huangying Zhan, Ravi Garg, Chamara Saroj Weerasekera,\nKejie Li, Harsh Agarwal, and Ian Reid. Unsupervised learn-\ning of monocular depth estimation and visual odometry with"
+  },
+  {
+    "id": 72,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 58,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "[51] Huangying Zhan, Ravi Garg, Chamara Saroj Weerasekera,\nKejie Li, Harsh Agarwal, and Ian Reid. Unsupervised learn-\ning of monocular depth estimation and visual odometry with\ndeep feature reconstruction. In Proceedings of the IEEE con-\nference on computer vision and pattern recognition, pages\n340\u2013349, 2018. 13\n[52] Han Zhang, Ian Goodfellow, Dimitris Metaxas, and Augus-\ntus Odena. Self-attention generative adversarial networks. In"
+  },
+  {
+    "id": 73,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 59,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "International conference on machine learning, pages 7354\u2013\n7363. PMLR, 2019. 2\n[53] Zhenyu Zhang, Chunyan Xu, Jian Yang, Ying Tai, and Liang\nChen. Deep hierarchical guidance and regularization learn-\ning for end-to-end depth estimation. Pattern Recognition,\n83:430\u2013442, 2018. 13\n[54] Wang Zhao, Shaohui Liu, Yezhi Shu, and Yong-Jin Liu. To-\nwards better generalization: Joint depth-pose learning with-\nout posenet. In Proceedings of the IEEE/CVF Conference\non Computer Vision and Pattern Recognition, pages 9151\u2013\n9161, 2020. 6\n[55] Junsheng Zhou, Yuwang Wang, Kaihuai Qin, and Wenjun\nZeng.\nUnsupervised high-resolution depth learning from\nvideos with dual networks. In Proceedings of the IEEE/CVF\nInternational Conference on Computer Vision, pages 6872\u2013\n6881, 2019. 6\n[56] Tinghui Zhou, Matthew Brown, Noah Snavely, and David G\nLowe. Unsupervised learning of depth and ego-motion from\nvideo. In Proceedings of the IEEE conference on computer\nvision and pattern recognition, pages 1851\u20131858, 2017. 1,"
+  },
+  {
+    "id": 74,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 60,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Lowe. Unsupervised learning of depth and ego-motion from\nvideo. In Proceedings of the IEEE conference on computer\nvision and pattern recognition, pages 1851\u20131858, 2017. 1,\n2, 6, 8, 13\n[57] Yuliang Zou, Zelun Luo, and Jia-Bin Huang. Df-net: Un-\nsupervised joint learning of depth and \ufb02ow using cross-task\nconsistency. In Proceedings of the European conference on\ncomputer vision (ECCV), pages 36\u201353, 2018. 6"
+  },
+  {
+    "id": 75,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 61,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Supplementary Material\nThis document provides additional details and results con-\ncerned with paper \u201dChannel-Wise Attention-Based Net-\nwork for Self-Supervised Monocular Depth Estimation\u201d.\nThe supplementary material is organized as follows: Sec-\ntion 1 provides the details of depth estimation network, Sec-\ntion 2 and Section 3 reports the quantitative results on the\nKITTI improved ground truth and online evaluation server,\nSection 4 collects additional ablation experiments, Section\n5 provides the additional qualitative comparisons, and Sec-\ntion 6 shows visualization results of our methods.\nA. Network Architecture\nExcept where note, for all experiments, we use a\nResNet50 encoder with pretrained ImageNet weights for\nboth depth and pose networks. For depth model, the struc-\nture perception module takes the features from encoder as\ninput. In addition, we successively adopt the detail empha-\nsis module at different scales in decoder stage. Note that"
+  },
+  {
+    "id": 76,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 62,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "ture perception module takes the features from encoder as\ninput. In addition, we successively adopt the detail empha-\nsis module at different scales in decoder stage. Note that\nalthough there is no skip-connection at the highest resolu-\ntion, we still use the detail emphasis module for further reg-\nularization. For high resolution input, e.g. 1024 \u00d7 320 and\n1280 \u00d7 384, we employ a lightweight setup, ResNet18 and\n640\u00d7192, for pose encoder at training for memory savings.\nThe depth network architecture is shown in Table 4.\nB. KITTI Improved Ground Truth\nThe evaluation method proposed by Eigen et al. [5] for\nKITTI uses the reprojected LIDAR points to generate the\nground truth depth, but does not handle moving objects\nand occlusions.\n[42] created a set of high-quality depth\nmaps for the KITTI dataset using \ufb01ve consecutive frames\nand stereo pairs to handle moving objects better. This im-\nproved ground truth depth is provided for 652 (or 93%) of"
+  },
+  {
+    "id": 77,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 63,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "maps for the KITTI dataset using \ufb01ve consecutive frames\nand stereo pairs to handle moving objects better. This im-\nproved ground truth depth is provided for 652 (or 93%) of\nthe 697 original test frames contained in the Eigen test split\net al. [5]. We utilize the same error metrics and evaluation\nstrategy as the main paper, and evaluate our model on these\n652 improved ground truth frames without having to retrain\neach method. As shown in Table 5, we observe that our\nCADepth-Net still outperforms all existing advanced meth-\nods on all metrics.\nC. KITTI Evaluation Server Benchmark\nIn Table 6 we report the results of our models on the\nKITTI single image depth prediction benchmark [21] which\nwere computed on the KITTI online evaluation server. We\ntrain a new model on the new split consisting of 72,084\ntraining examples, 6,060 validation, and 500 test with the\nsame training protocols mentioned in the main paper. As\nwe cannot use median scaling for evaluation, we calculate\nDepth network"
+  },
+  {
+    "id": 78,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 64,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "training examples, 6,060 validation, and 500 test with the\nsame training protocols mentioned in the main paper. As\nwe cannot use median scaling for evaluation, we calculate\nDepth network\nlayer\nk\ns\nchns\nres\ninput\nactivation\nconv1\n7\n2\n64\n2\nimage\nRELU\nmaxpool\n3\n2\n64\n4\nconv1\n-\neconv1\n3\n1\n256\n4\nmaxpool\nRELU\neconv2\n3\n2\n512\n8\neconv1\nRELU\neconv3\n3\n2\n1024\n16\neconv2\nRELU\neconv4\n3\n2\n2048\n32\neconv3\nRELU\nspm\n-\n-\n2048\n32\neconv4\n-\nupconv5\n3\n1\n256\n32\nspm\nELU [2]\ndem5\n3\n1\n1280\n16\n\u2191upconv5, econv3\nRELU\niconv5\n3\n1\n256\n16\ndem5\nELU\nupconv4\n3\n1\n128\n16\niconv5\nELU\ndem4\n3\n1\n640\n8\n\u2191upconv4, econv2\nRELU\niconv4\n3\n1\n128\n8\ndem4\nELU\ndisp4\n3\n1\n1\n1\niconv4\nSigmoid\nupconv3\n3\n1\n64\n8\niconv4\nELU\ndem3\n3\n1\n320\n4\n\u2191upconv3, econv1\nRELU\niconv3\n3\n1\n64\n4\ndem3\nELU\ndisp3\n3\n1\n1\n1\niconv3\nSigmoid\nupconv2\n3\n1\n32\n4\niconv3\nELU\ndem2\n3\n1\n96\n2\n\u2191upconv2, conv1\nRELU\niconv2\n3\n1\n32\n2\ndem2\nELU\ndisp2\n3\n1\n1\n1\niconv2\nSigmoid\nupconv1\n3\n1\n16\n2\niconv2\nELU\ndem1\n3\n1\n16\n1\n\u2191upconv1\nRELU\niconv1\n3\n1\n16\n1\ndem1\nELU\ndisp1\n3\n1\n1\n1\niconv1\nSigmoid"
+  },
+  {
+    "id": 79,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 65,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "dem2\n3\n1\n96\n2\n\u2191upconv2, conv1\nRELU\niconv2\n3\n1\n32\n2\ndem2\nELU\ndisp2\n3\n1\n1\n1\niconv2\nSigmoid\nupconv1\n3\n1\n16\n2\niconv2\nELU\ndem1\n3\n1\n16\n1\n\u2191upconv1\nRELU\niconv1\n3\n1\n16\n1\ndem1\nELU\ndisp1\n3\n1\n1\n1\niconv1\nSigmoid\nTable 4. Depth network architecture. For symbols in this table,\nk: kernel size, s: stride, chns: the number of output channels, res:\nthe downscaling factor relative to the input image, input: corre-\nsponds to the input of each layer, activation: activation function.\n\u2191refers to a 2\u00d7 nearest-neighbor upsampling. Encoder blocks are\ndenoted by econv\u2217naming convention. The spm and dem repre-\nsent structure perception module and detail emphasis module.\nFigure 9. Depth Evaluation on KITTI binned at different inter-\nvals, calculated independently by only considering ground-truth\ndepth pixels in that range (0-20m, 20-40m, ...).\nthe scale factor on the 2,000 KITTI training samples which\nhave ground truth depths available. Table 6 shows that our"
+  },
+  {
+    "id": 80,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 66,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "depth pixels in that range (0-20m, 20-40m, ...).\nthe scale factor on the 2,000 KITTI training samples which\nhave ground truth depths available. Table 6 shows that our\nCADepth-Net outperforms the existing self-supervised ap-\nproaches and signi\ufb01cantly reduces the performance gap to"
+  },
+  {
+    "id": 81,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 67,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Method\nTrain\nRes\nDataset\nAbs Rel\nSq Rel\nRMSE\nRMSE log\n\u03b4 < 1.25\n\u03b4 < 1.252\n\u03b4 < 1.253\nSfMLearner [56]\u2020\nM\n416 \u00d7 128\nCS+K\n0.176\n1.532\n6.129\n0.244\n0.758\n0.921\n0.971\nVid2Depth [31]\nM\n416 \u00d7 128\nCS+K\n0.134\n0.983\n5.501\n0.203\n0.827\n0.944\n0.981\nGeoNet [50]\nM\n416 \u00d7 128\nCS+K\n0.132\n0.994\n5.240\n0.193\n0.833\n0.953\n0.985\nDDVO [44]\nM\n416 \u00d7 128\nCS+K\n0.126\n0.866\n4.932\n0.185\n0.851\n0.958\n0.986\nCC [36]\nM\n832 \u00d7 256\nK\n0.123\n0.881\n4.834\n0.181\n0.860\n0.959\n0.985\nEPC++ [29]\nM\n640 \u00d7 192\nK\n0.120\n0.789\n4.755\n0.177\n0.856\n0.961\n0.987\nMonodepth2 [11]\nM\n640 \u00d7 192\nK\n0.090\n0.545\n3.942\n0.137\n0.914\n0.983\n0.995\nJohnston et al. [18]\nM\n640 \u00d7 192\nK\n0.081\n0.484\n3.716\n0.126\n0.927\n0.985\n0.996\nCADepth-Net (Ours)\nM\n640 \u00d7 192\nK\n0.080\n0.442\n3.639\n0.124\n0.927\n0.986\n0.996\nCADepth-Net (Ours)\nM\n1280 \u00d7 384\nK\n0.076\n0.374\n3.280\n0.115\n0.937\n0.990\n0.997\nZhan FullNYU [51]\nD*MS\n608 \u00d7 160\nK\n0.130\n1.520\n5.184\n0.205\n0.859\n0.955\n0.981\nEPC++ [29]\nMS\n640 \u00d7 192\nK\n0.123\n0.754\n4.453\n0.172\n0.863\n0.964\n0.989\nMonodepth2 [11]\nMS\n640 \u00d7 192\nK\n0.080\n0.466\n3.681"
+  },
+  {
+    "id": 82,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 68,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "0.997\nZhan FullNYU [51]\nD*MS\n608 \u00d7 160\nK\n0.130\n1.520\n5.184\n0.205\n0.859\n0.955\n0.981\nEPC++ [29]\nMS\n640 \u00d7 192\nK\n0.123\n0.754\n4.453\n0.172\n0.863\n0.964\n0.989\nMonodepth2 [11]\nMS\n640 \u00d7 192\nK\n0.080\n0.466\n3.681\n0.127\n0.926\n0.985\n0.995\nCADepth-Net (Ours)\nMS\n640 \u00d7 192\nK\n0.076\n0.417\n3.488\n0.120\n0.933\n0.987\n0.996\nCADepth-Net (Ours)\nMS\n1024 \u00d7 320\nK\n0.070\n0.346\n3.168\n0.109\n0.945\n0.991\n0.997\nTable 5. Quantitative results on the KITTI improved ground truth. Comparison of the existing methods to our CADepth-Net on KITTI\n2015 [9] using annotated depth maps from [42]. Best results are in bold, with second best underlined. For Abs Rel, Sq Rel, RMSE and\nRMSElog lower is better, and for \u03b4 < 1.25, \u03b4 < 1.252 and \u03b4 < 1.253 higher is better. In the Train column, S: Self-supervised stereo\nsupervision, M: Self-supervised mono supervision, D*: Auxiliary depth supervision. \u2020 refers to the newer results from github. In Dataset\ncolumn, CS: Cityscapes dataset [3], K: KITTI datasets [9].\nMethod\nTrain\nSILog\nsqErrorRel"
+  },
+  {
+    "id": 83,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 69,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "column, CS: Cityscapes dataset [3], K: KITTI datasets [9].\nMethod\nTrain\nSILog\nsqErrorRel\nabsErrorRel\niRMSE\nDHGRL [53]\nD\n15.47\n4.04\n12.52\n15.72\nCSWS [25]\nD\n14.85\n3.48\n11.84\n16.38\nAPMoE [23]\nD\n14.74\n3.88\n11.74\n15.63\nDABC [26]\nD\n14.49\n4.08\n12.72\n15.53\nDORN [7]\nD\n11.77\n2.23\n8.78\n12.98\nMonodepth [10]\nS\n22.02\n20.58\n17.79\n21.84\nLSIM [12]\nS\n17.92\n6.88\n14.04\n17.62\nMonodepth2 [11]\nM\n15.57\n4.52\n12.98\n16.70\nSGDepth [22]\nM\n15.30\n5.00\n13.29\n15.80\nMonodepth2 [11]\nMS\n15.07\n4.16\n11.64\n15.27\nOurs\nMS\n13.34\n3.33\n10.67\n13.61\nTable 6. Results on KITTI depth prediction benchmark. D\nrefers to ground truth depth supervision, while M and S are monoc-\nular and stereo self-supervision respectively.\nBackbone\nAbs Rel\nSq Rel\nRMSE\n\u03b4 <1.25\nSGDepth [22]\nR18\n0.117\n0.907\n4.844\n0.875\nmonodepth2 [11]\nR18\n0.115\n0.903\n4.863\n0.877\nOurs\nR18\n0.110\n0.812\n4.686\n0.882\nmonodepth2 [11]\nR50\n0.110\n0.831\n4.642\n0.883\nJohnston et al. [18]\nR101\n0.106\n0.861\n4.699\n0.889\nOurs\nR50\n0.105\n0.769\n4.535\n0.892"
+  },
+  {
+    "id": 84,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 70,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "R18\n0.115\n0.903\n4.863\n0.877\nOurs\nR18\n0.110\n0.812\n4.686\n0.882\nmonodepth2 [11]\nR50\n0.110\n0.831\n4.642\n0.883\nJohnston et al. [18]\nR101\n0.106\n0.861\n4.699\n0.889\nOurs\nR50\n0.105\n0.769\n4.535\n0.892\nTable 7. Comparisons of methods with the same backnone on\nthe KITTI Eigen Split. R: ResNet. All models are trained with\nthe same settings.\nthe supervised methods.\nD. Additional Ablation Experiments\nTo further demonstrate the effectiveness of our structure\nperception module, we evaluate the performance of distant\nobjects with the absolute relative error, Fig. 11 shows that\nwe can effectively reduce the error produced by distant ob-\njects. Besides, Fig. 9 reports that our model improves the\naccuracy at all depth intervals, and the performance gap\nconsistently increases when larger distances are considered,\nthanks to the better 3D scene geometric perception intro-\nInput\nMD2 (M) [11]\nOurs (M)\nGround truth\nFigure 10. Qualitative Make3D results. Our CADepth-Net gen-"
+  },
+  {
+    "id": 85,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 71,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "thanks to the better 3D scene geometric perception intro-\nInput\nMD2 (M) [11]\nOurs (M)\nGround truth\nFigure 10. Qualitative Make3D results. Our CADepth-Net gen-\nerates more \ufb01ne-gained details compared to other method.\nduced by the structure perception module. Fig. 12 shows\nthat our method generates more \ufb01ne-gained details and ac-\ncurate object boundaries e.g. pedestrians and thin road signs\nby using detail emphasis module individually. For a fair\ncomparison, Table 7 reports that our model outperforms\nother methods with the same backbone, which means that\nthe gain in performance shown in our experiments is mainly\ndue to the effectiveness of our proposed methods.\nE. Additional Qualitative Comparisons\nWe provide additional qualitative results from the KITTI\ndatasets in Fig.\n13.\nWe can observe that compared to\nexisting baselines e.g.\n[11, 13], our CADepth-Net pro-\nduces higher quality outputs and possesses the clearest bor-\nder overall. We also show additional results from Make3D"
+  },
+  {
+    "id": 86,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 72,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "existing baselines e.g.\n[11, 13], our CADepth-Net pro-\nduces higher quality outputs and possesses the clearest bor-\nder overall. We also show additional results from Make3D\ndatasets [39] in Fig. 10, our methods preserve sharp discon-"
+  },
+  {
+    "id": 87,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 73,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "(a)\n(b)\n(c)\nError\nAbs Rel\n0.0\n0.4\n> 0.8\nFigure 11. Qualitative ablation study of Structure Perception Module (SPM). (a) Input Image. (b) Error maps without SPM. (c) Error\nmaps with SPM. The error induced by distance objects (yellow circles) is improved by the structure perception module.\n(a)\n(b)\n(c)\nFigure 12. Qualitative ablation study of Detail Emphasis Module (DEM). (a) Input image. (b) Predicted depth maps without DEM. (c)\nPredicted depth maps with DEM. Thanks to the detail emphasis module, we could obtain the more precise and sharper depth estimation.\ntinuities in depth prediction results.\nF. Additional Visualization Results\nTo better understand our main contributions, Fig. 14 and\nFig. 15 introduce additional visualization results of inter-\nmediate features. As shown in Fig. 14, each feature map\nobtains more region responses from the distant regions and\naggregates relative depth relationships over 3D scene. By\ndoing so, our model produces better scene understanding"
+  },
+  {
+    "id": 88,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 74,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "obtains more region responses from the distant regions and\naggregates relative depth relationships over 3D scene. By\ndoing so, our model produces better scene understanding\nand rich feature representation.\nFig.\n15 lists the top n\n(n = 8) feature maps with the highest scores in the detail\nemphasis module, and we can see that our model highlights\ncritical local details at multiple scales, by assigning higher\nscores to them."
+  },
+  {
+    "id": 89,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 75,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Input\nMonodepth2 [11]\nPackNet [13]\nOur CADepth-Net\nFigure 13. Qualitative results on the KITTI Eigen split. Our model produces higher quality outputs and possesses the most clear border.\n\n(a)\n(b)\n(c)\nFigure 14. The visualizations of structure perception module. (a) Input Image. (b) Input feature maps. (c) Output feature maps. All\nfeature representation are projected onto original image for clear visualizations. Our structure perception module explicitly enhances the\nscene understanding and feature representation."
+  },
+  {
+    "id": 90,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 76,
+    "document_id": "055e1030-46ca-4feb-bfa5-7aa4fe16f4d9",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "0.964\n0.940\n0.923\n0.898\n0.886\n0.871\n0.870\n0.803\n(a)\n(c)\n(e)\n0.999\n0.999\n0.999\n0.997\n0.997\n0.993\n0.991\n0.990\n0.961\n0.935\n0.917\n0.891\n0.879\n0.865\n0.864\n0.796\n0.999\n0.999\n0.999\n0.997\n0.997\n0.992\n0.990\n0.989\n(f)\n(g)\n(h)\n(b)\n(d)\nFigure 15. The visualizations of detail emphasis module. (a)(b) Input Image. (c)(d) Predicted depth maps. (e) \u223c(h) Top n feature maps\nwith highest weights score. Here n is 8 and the weights value range is between 0 and 1. Speci\ufb01cally, (e)(g) are produced by dem2 (see\nTable 4) and (f)(h) are generated from dem3. The detail emphasis module mainly highlights the crucial local details."
+  },
+  {
+    "id": 91,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 1,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Channel-Wise Attention-Based Network for\nSelf-Supervised Monocular Depth Estimation\nJiaxing Yan\nHong Zhao\nPenghui Bu\nYuSheng Jin\nState Key Laboratory for Manufacturing System Engineering,\nSchool of Mechanical Engineering, Xi\u2019an Jiaotong University, China\n{yanjxedu@stu., zhaohong@mail., bph19891027@stu., yushengJ@stu.}xjtu.edu.cn\nAbstract\nSelf-supervised learning has shown very promising re-\nsults for monocular depth estimation. Scene structure and\nlocal details both are signi\ufb01cant clues for high-quality\ndepth estimation. Recent works suffer from the lack of ex-\nplicit modeling of scene structure and proper handling of\ndetails information, which leads to a performance bottle-\nneck and blurry artefacts in predicted results. In this paper,\nwe propose the Channel-wise Attention-based Depth Esti-\nmation Network (CADepth-Net) with two effective contribu-\ntions: 1) The structure perception module employs the self-\nattention mechanism to capture long-range dependencies"
+  },
+  {
+    "id": 92,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 2,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "mation Network (CADepth-Net) with two effective contribu-\ntions: 1) The structure perception module employs the self-\nattention mechanism to capture long-range dependencies\nand aggregates discriminative features in channel dimen-\nsions, explicitly enhances the perception of scene structure,\nobtains the better scene understanding and rich feature rep-\nresentation. 2) The detail emphasis module re-calibrates\nchannel-wise feature maps and selectively emphasizes the\ninformative features, aiming to highlight crucial local de-\ntails information and fuse different level features more ef-\n\ufb01ciently, resulting in more precise and sharper depth pre-\ndiction. Furthermore, the extensive experiments validate\nthe effectiveness of our method and show that our model\nachieves the state-of-the-art results on the KITTI bench-\nmark and Make3D datasets.\n1. Introduction\nAccurate depth estimation from a single image is a fun-\ndamental task in computer vision. High quality depth infor-"
+  },
+  {
+    "id": 93,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 3,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "mark and Make3D datasets.\n1. Introduction\nAccurate depth estimation from a single image is a fun-\ndamental task in computer vision. High quality depth infor-\nmation can provide useful cues for various \ufb01elds, including\nrobotics navigation [4], autonomous driving [33] and aug-\nmented reality [34]. Recently, the fully-supervised meth-\nods [5, 6, 7, 15] for monocular depth estimation have pro-\nduced outstanding results, while they need large numbers\nof accurate ground truth which could only be sparsely col-\nlected from expensive LiDAR sensors [9]. As an attractive\nalternative, self-supervised methods can alleviate this lim-\nMonodepth2 [11]\nPackNet [13]\nOurs\nMonodepth2 [11]\nPackNet [13]\nOurs\nFigure 1. Depth prediction from a single image. Our proposed\nCADepth-Net produces more precise and sharper depth estima-\ntion, especially for thin structures e.g. road signs and pedestrians.\nitation, as they use geometrical constraints on monocular"
+  },
+  {
+    "id": 94,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 4,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "CADepth-Net produces more precise and sharper depth estima-\ntion, especially for thin structures e.g. road signs and pedestrians.\nitation, as they use geometrical constraints on monocular\nvideo [56] or synchronized stereo image pairs [10] as the\nsole source of supervision.\nIn depth estimation, the most important information is\nthe scene structure aiming at accurately obtaining the over-\nall structure and relative depth information in 3D space.\nMost previous works [10, 56] just simply use convolutional\nneural networks to extract semantic features of input images\nand implicitly learn the structural information of the scene.\nHowever, the lack of explicit exploration of the robust rep-\nresentation of 3D scene geometry leads to an incomplete\nperception of overall layout for the complex scenes.\nLocal detail is another critical feature that focuses on ob-\nject boundaries and attempts to generate sharp depth maps.\nMost depth estimation networks are based on the U-Net [37]"
+  },
+  {
+    "id": 95,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 5,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Local detail is another critical feature that focuses on ob-\nject boundaries and attempts to generate sharp depth maps.\nMost depth estimation networks are based on the U-Net [37]\nframework, and the decoder simply leverages concatenation\nand a basic convolution to fuse high-level and low-level fea-\ntures. We found that these operations can not preserve suf-\n\ufb01cient details or precisely recover spatial information, lead-\ning to inef\ufb01cient integration of different levels features and\nblurry artefacts at the depth discontinuous regions.\nTo address the above problems and ef\ufb01ciently handle\narXiv:2112.13047v1 [cs.CV] 24 Dec 2021"
+  },
+  {
+    "id": 96,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 6,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "both the overall structure and local details, we propose a\nnovel Channel-wise Attention-based Depth Estimation Net-\nwork with structure perception module and detail emphasis\nmodule. To better understand the 3D structure of the whole\nscene, we perform an in-depth analysis of semantic infor-\nmation in the monocular depth estimation task and conclude\nthat each high-level feature map can be regarded as a region-\nspeci\ufb01c response. Based on this observation, we provide\nthe structure perception module to capture more contextual\ninformation of scene geometry and enhance the feature rep-\nresentations. Speci\ufb01cally, we \ufb01rst employ the self-attention\nmechanism to capture the long-range dependencies between\nany two channel maps, then each feature map is updated\nvia aggregating features from all channel maps by weighted\nsummation and fuse different local depth responses from\nnon-contiguous regions. To generate sharper object bound-\naries, instead of using the above naive operations, we pro-"
+  },
+  {
+    "id": 97,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 7,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "summation and fuse different local depth responses from\nnon-contiguous regions. To generate sharper object bound-\naries, instead of using the above naive operations, we pro-\npose the detail emphasis module employing channel atten-\ntion mechanism to re-calibrate channel-wise features and\nemphasize the speci\ufb01c semantic information. Speci\ufb01cally,\nwe sequentially adopt the detail emphasis module at differ-\nent scales in the decoding stage to highlight features con-\ntaining crucial local details (e.g. object boundaries informa-\ntion). To summarize our contributions in this paper:\n\u2022 We introduce a novel Channel-wise Attention-based\nDepth Network (CADepth-Net) for self-supervised\nmonocular depth estimation employing two channel-\nwise attention modules to perform the information ag-\ngregation and feature re-calibration respectively.\n\u2022 We propose structure perception module utilizing self-\nattention mechanism to obtain rich context of scene\nstructure and better feature representation."
+  },
+  {
+    "id": 98,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 8,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "\u2022 We propose structure perception module utilizing self-\nattention mechanism to obtain rich context of scene\nstructure and better feature representation.\n\u2022 We carefully design the detail emphasis module with\nchannel attention mechanism to ef\ufb01ciently fuse differ-\nent scale features and emphasize important details for\nsharper depth estimation.\n\u2022 We conduct extensive experiments on KITTI and\nMake3D datasets, demonstrating our model signi\ufb01-\ncantly outperforms existing methods and achieve the\nstate-of-the-art results on KITTI benchmark.\n2. Related Work\n2.1. Supervised Depth Estimation\nEstimating depth from a single image is an inherently\nill-posed problem as pixels in the image can have multiple\nplausible depths. Recently, fully supervised methods had\nshown the capacity of \ufb01tting predictive models to estimate\ndepth from color input images correctly. Eigen et al. [6]\nproduced dense pixel depth estimates by utilizing the multi-\nscale neural networks, one that estimated a coarse global"
+  },
+  {
+    "id": 99,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 9,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "depth from color input images correctly. Eigen et al. [6]\nproduced dense pixel depth estimates by utilizing the multi-\nscale neural networks, one that estimated a coarse global\ndepth prediction and another locally re\ufb01ned prediction pro-\nduced by the \ufb01rst network. Rapidly, various fully super-\nvised methods based on deep learning had been continu-\nously explored [7, 5, 24, 27]. However, all the above meth-\nods required high-quality ground truth depth, which can be\ncostly to obtain.\n2.2. Self-supervised Monocular Depth Estimation\nTo overcome the limitation of supervised approaches,\nself-supervised methods uni\ufb01ed depth estimation and ego-\nmotion estimation into one framework with view synthesis\nas supervision signal. SfMLearner introduced by Zhou et\nal. [56] simultaneously learned depth and ego-motion from\nmonocular video by training a depth estimation network\nalong with a separate pose network. Furthermore, Yin et\nal. [50] decomposed scene motion into rigid and non-rigid"
+  },
+  {
+    "id": 100,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 10,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "monocular video by training a depth estimation network\nalong with a separate pose network. Furthermore, Yin et\nal. [50] decomposed scene motion into rigid and non-rigid\nparts to account for object motion. Wang et al. [44] incorpo-\nrated Direct Visual Odometry to estimate the relative cam-\nera pose. [31] proposed 3D constraints loss to enforce con-\nsistency of the estimated depth and ego-motion across con-\nsecutive frames. Guizilini et al. [13] learned to compress\nand decompress detail-preserving representations by sym-\nmetrical packing and unpacking blocks. Other published\nmethods were based upon edge and normal [48, 49], Com-\npetitive Collaboration [36], semantic segmentation [14, 22]\nand feature representations learning [41]. A state-of-the-\nart framework was Monodepth2 proposed by Godard et\nal. [11], which introduced a minimum re-projection loss to\ndeal with occlusions and auto-masking scheme removing\ninvalid pixels robustly. Our model is based on Monodepth2"
+  },
+  {
+    "id": 101,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 11,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "al. [11], which introduced a minimum re-projection loss to\ndeal with occlusions and auto-masking scheme removing\ninvalid pixels robustly. Our model is based on Monodepth2\nextended with our contributions.\n2.3. Self-attention Mechanism\nSelf-attention mechanism had been widely used to cap-\nture long-range dependencies in various tasks. The Trans-\nformer [43] was the \ufb01rst work that proposed the self-\nattention mechanism to handle long-range dependencies be-\ntween words in machine translation. Wang et al. [45] mod-\neled the spatial-temporal dependencies in video sequences\nand images via aggregating query-speci\ufb01c global context to\neach query position. Zhang et al. [52] incorporated the self-\nattention mechanism into the GAN framework and learned\na better image generator. Fu et al. [8] enhanced the abil-\nity of feature representations for scene segmentation by de-\nsigning two types of attention modules. For the monocular\ndepth estimation task, Johnston et al. [18] captured the con-"
+  },
+  {
+    "id": 102,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 12,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "ity of feature representations for scene segmentation by de-\nsigning two types of attention modules. For the monocular\ndepth estimation task, Johnston et al. [18] captured the con-\ntext of similar disparity values at non-contiguous regions by\nexploring the feature similarity at spatial dimensions. Un-\nlike previous works, we demonstrate that capturing global\ndependencies along the channel dimensions and aggregat-\ning discriminative features will achieve better performance\nfor depth estimation, as each channel map gains more rela-\ntive depth information from the distant regions."
+  },
+  {
+    "id": 103,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 13,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Conv3\u00d73 + Upsample\nStructure Perception Module\nDetails Emphasis Module\nSkip Connection\nUpsample\n2 * Conv3\u00d73 + Sigmoid\n\u2299\n\u2295\n\u2297\n\u2295\nStructure Perception Module\nDetails Emphasis Module\nChannel matrix operation\nreshape\nConvolution operation\n\u2297\n\u2295\n\u2299\nMatrix multiplication \nElement-wise sum \nElement-wise multiplication \nMulti-scale Outputs\nMulti-scale Outputs\nInput Image\nResNet Encoder\nPose Network\n\ud835\udc47\ud835\udc61\u2192\ud835\udc61\u2032\n6DOF Pose\n[\ud835\udc3c\ud835\udc61, \ud835\udc3c\ud835\udc61\u2032]\nreshape\nAttention Map\nWeights Vector\nFigure 2. Overview of Framework. Our proposed CADepth-Net is a fully convolutional U-Net architecture. We \ufb01rst use a ResNet encoder\nto extract semantic features and input them to the Structure Perception Module. We perform the matrix multiplication between input\nfeatures and attention maps to generate aggregated features. The low-resolution feature maps are passed through successive blocks of\nUpConv(upsample + convolution), as well as the Detail Emphasis Module which computes a weight vector to re-calibrate channel-wise"
+  },
+  {
+    "id": 104,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 14,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "UpConv(upsample + convolution), as well as the Detail Emphasis Module which computes a weight vector to re-calibrate channel-wise\nfeatures. Finally, we upsample the predicted disparities at multiple scales to original input resolutions. Besides, the pose network takes\ntemporally adjacent images It, It\u2032 as input and outputs relative pose Tt\u2192t\u2032.\n3. Method\nIn this section, we \ufb01rstly review the training methods for\nself-supervised monocular depth estimation, then introduce\nthe architecture of our Channel-wise Attention-based Net-\nwork, \ufb01nally describe our main contributions, the structure\nperception module and detail emphasis module.\n3.1. Self-Supervised Training\nThe goal of self-supervised monocular depth estimation\nis to predict the depth map from a single RGB image with-\nout ground truth. Speci\ufb01cally, given a single input image\nIt, the depth network predicts its corresponding depth map\nDt, then the pose network takes temporally adjacent images"
+  },
+  {
+    "id": 105,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 15,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "out ground truth. Speci\ufb01cally, given a single input image\nIt, the depth network predicts its corresponding depth map\nDt, then the pose network takes temporally adjacent images\nas input and predicts relative pose Tt\u2192t\u2032 between the target\nimage It and source images It\u2032, t\u2032 \u2208{t\u22121, t+1}, \ufb01nally we\nuse the predicted Dt and Tt\u2192t\u2032 to perform view synthesis\nas the supervisory signal.\nAt training time, both the depth network and pose net-\nwork are optimized jointly by minimizing the per-pixel min-\nimum photometric re-projection error Lp [11]\nLp = min\nt\u2032 pe (It, It\u2032\u2192t) ,\n(1)\nwhere pe() denotes the photometric error which consists of\nL1 and the Structural Similarity (SSIM) [46], It\u2032\u2192t is the\nwarped result from It\u2032 to It as in\npe =\u03b1\n2 (1 \u2212SSIM (It, It\u2032\u2192t))\n+ (1 \u2212\u03b1) \u2225It \u2212It\u2032\u2192t\u22251 ,\n(2)\nIt\u2032\u2192t = It\u2032 \u27e8proj (Dt, Tt\u2192t\u2032, K)\u27e9,\n(3)\nwhere proj() represents the resulting 2D coordinates of the\nprojected depths Dt in It\u2032 and \u27e8\u27e9is the sampling operator.\nWe use the differentiable bilinear sampling mechanism pro-"
+  },
+  {
+    "id": 106,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 16,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "(3)\nwhere proj() represents the resulting 2D coordinates of the\nprojected depths Dt in It\u2032 and \u27e8\u27e9is the sampling operator.\nWe use the differentiable bilinear sampling mechanism pro-\nposed in the STN [17] to sample the source images.\nIn a real-world scenario, situations like stationary camera\nand moving objects will break down the assumptions of a\nmoving camera and a static scene. To handle this issue,\nwe apply auto-masking method [11] to \ufb01lter out stationary\npixels that remain with the same appearance between two\nframes in a sequence. Since the binary mask \u00b5 is computed\nin this form on the forward pass\n\u00b5 =\nh\nmin\nt\u2032 pe (It, It\u2032\u2192t) < min\nt\u2032 pe (It, It\u2032)\ni\n,\n(4)\nwhere [] is the Iverson bracket.\nIn addition, in order to regularize the disparities in\ntexture-less regions, an edges-aware smoothness regulariza-\ntion term Ls is used\nLs = |\u2202xd\u2217\nt | e\u2212|\u2202xIt| + |\u2202yd\u2217\nt | e\u2212|\u2202yIt|,\n(5)\nwhere d\u2217\nt = dt/dt is the mean-normalized inverse depth"
+  },
+  {
+    "id": 107,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 17,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "texture-less regions, an edges-aware smoothness regulariza-\ntion term Ls is used\nLs = |\u2202xd\u2217\nt | e\u2212|\u2202xIt| + |\u2202yd\u2217\nt | e\u2212|\u2202yIt|,\n(5)\nwhere d\u2217\nt = dt/dt is the mean-normalized inverse depth\nfrom [44] to discourage shrinking of the estimated depth.\nThe \ufb01nal loss L is computed as the combination of pho-\ntometric loss Lp and smoothness loss Ls at multiple scales\nL = 1\nS\nS\nX\ni\n\u0000\u00b5Li\np + \u03bbLi\ns\n\u0001\n,\n(6)\nwhere S is the number of scales, and \u03bb is the weighting for\nthe smoothness regularization term."
+  },
+  {
+    "id": 108,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 18,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "\ud835\udc6d\n\u2297\nreshape\n\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\nreshape & \ntranspose\nsoftmax\nmax\n\ud835\udc36\u00d7 \ud835\udc36\n\u2297\nreshape\n\u2295\nreshape\nreshape\n\ud835\udc6c\n\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\n\ud835\udc7a\n\ud835\udc68\n\ud835\udc36\u00d7 \ud835\udc36\n: element-wise subtraction\n\u2297: matrix multiplication\n\u2295: element-wise sum\nFigure 3. Details of the structure perception module.\n3.2. Channel-wise Attention-based Network\nAs shown in Fig. 2, our CADepth-Net is a fully con-\nvolutional U-Net architecture. We adopt a pretrained resid-\nual network as the backbone to extract semantic features.\nThen these features would be fed into the structure percep-\ntion module and generate new features to explicitly enhance\nthe perception of scene structure. Moreover, we gradually\nrecover the spatial resolution at decoder stage, with skip-\nconnection to facilitate the \ufb02ow of gradients and informa-\ntion throughout the model, and sequentially employ our de-\ntail emphasis module to generate sharp edges and \ufb01ner de-\ntails. Finally, we successively upsample the predicted in-\nverse depth maps until original input resolutions using near-"
+  },
+  {
+    "id": 109,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 19,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "tail emphasis module to generate sharp edges and \ufb01ner de-\ntails. Finally, we successively upsample the predicted in-\nverse depth maps until original input resolutions using near-\nest neighbors interpolation at multiple scales, and compute\nthe training loss at this higher input resolution.\n3.3. Structure Perception Module\nIn depth estimation, each high-level feature map can be\nregarded as a region-speci\ufb01c response as shown in Fig. 6\n(b), and different region responses are associated with each\nother.\nIf each channel map captures more different re-\ngion responses from all the other channel maps, as shown\nin Fig. 6 (c), it will obtain more relative depth informa-\ntion from distant regions and signi\ufb01cantly enhance the per-\nception of scene structure. Therefore, we propose a self-\nattention module to model interdependencies between chan-\nnels and aggregate different region responses.\nThe \ufb01rst step is to generate an attention matrix which"
+  },
+  {
+    "id": 110,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 20,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "attention module to model interdependencies between chan-\nnels and aggregate different region responses.\nThe \ufb01rst step is to generate an attention matrix which\nmodels the relationship between any two channel maps. As\nillustrated in Fig. 3, given the feature map F \u2208RC\u00d7H\u00d7W\nproduced by ResNet encoder, we \ufb01rstly reshape F to\nRC\u00d7N, where N = H \u00d7 W is the number of pixels, then\nperform a matrix multiplication between F and the trans-\npose of F to compute the feature similarity S \u2208RC\u00d7C\nSij = Fi \u00b7 F T\nj .\n(7)\nThe similarity between channel maps indicates the spa-\ntial relationship of region responses i.e. any two feature\nmaps have higher similarity means that they also have\nstrong responses to the same region. As we need to fuse\n3x3 Conv\nSigmoid\n1x1 Conv\nRelu\n1x1 Conv\nPooling\n\u2299\n\u2295\n\u00a9: concatenation \u2299: element-wise multiplication \u2295: element-wise sum\n\ud835\udc73\n\ud835\udc7d\n\ud835\udc6f\n\ud835\udc7c\n\ud835\udc76\n\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\n\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\n2\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\n2\ud835\udc36\u00d7 1 \u00d7 1\n2\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\n\u00a9\n2\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\nFigure 4. Design of the detail emphasis module."
+  },
+  {
+    "id": 111,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 21,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Pooling\n\u2299\n\u2295\n\u00a9: concatenation \u2299: element-wise multiplication \u2295: element-wise sum\n\ud835\udc73\n\ud835\udc7d\n\ud835\udc6f\n\ud835\udc7c\n\ud835\udc76\n\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\n\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\n2\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\n2\ud835\udc36\u00d7 1 \u00d7 1\n2\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\n\u00a9\n2\ud835\udc36\u00d7 \ud835\udc3b\u00d7 \ud835\udc4a\nFigure 4. Design of the detail emphasis module.\nmore responses from different regions, we convert the sim-\nilarity S to discrimination D \u2208RC\u00d7C by performing the\nelement-wise subtraction\nDij = maxi(S) \u2212Si,j,\n(8)\nwhere Dij measures the jth channel\u2019s impact on the ith\nchannel. For each channel map, other channels with dis-\ncriminative features (i.e. different region response) will get\nhigher scores Dij during feature aggregation. Then we ap-\nply a softmax layer to obtain the attention map A \u2208RC\u00d7C\nAij =\nexp (Dij)\nPC\nj=1 exp (Dij)\n.\n(9)\nIn addition, we perform a matrix multiplication be-\ntween the transpose of A and F and reshape the result to\nRC\u00d7H\u00d7W . Finally we perform an element-wise sum op-\neration between F and the result to obtain the \ufb01nal output\nE \u2208RC\u00d7H\u00d7W as follows\nEi =\nC\nX\nj=1\n(AijFj) + Fi.\n(10)"
+  },
+  {
+    "id": 112,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 22,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "RC\u00d7H\u00d7W . Finally we perform an element-wise sum op-\neration between F and the result to obtain the \ufb01nal output\nE \u2208RC\u00d7H\u00d7W as follows\nEi =\nC\nX\nj=1\n(AijFj) + Fi.\n(10)\nThe Eq. 10 shows that the \ufb01nal feature of each channel is\nthe weighted sum of the features from all channels and the\noriginal feature. By capturing the long-range dependencies\nbetween feature maps, we obtain the aggregated features\nencoding rich context information of scene structure.\n3.4. Detail Emphasis Module\nThe decoder recovers the resolution by fusing the fol-\nlowing features at different scales: the low-level informa-\ntion from skip-connection encoding rich spatial details, and\nthe high-level information encoding more context informa-\ntion. The simple fusion operations like sum or concatena-\ntion lack the further processing of local details and neglect\nthe semantic gap between different level features, leading to\nblurry artefacts in predicted depth maps. The core of pre-"
+  },
+  {
+    "id": 113,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 23,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "tion lack the further processing of local details and neglect\nthe semantic gap between different level features, leading to\nblurry artefacts in predicted depth maps. The core of pre-\ndicting sharper edges is to properly handle local details, and\nit is easy for network to recover accurate depth predictions"
+  },
+  {
+    "id": 114,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 24,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "if it knows the category and location of features describing\nobject boundaries clearly. Therefore, by using the channel\nattention mechanism that can make network pay attention\nto speci\ufb01c channel features, we propose a detail emphasis\nmodule to emphasize important details and ef\ufb01ciently fuse\nfeatures at different scales.\nSpeci\ufb01cally, we \ufb01rst concatenate the low-level features\nL and the high-level features H, then utilize a convolution\nlayer to obtain U with the batch normalization [16] to bal-\nance the scales of the features\nU = \u03c3 (BN (W1 \u2297f (L, H))) ,\n(11)\nwhere f() denotes concatenation and \u2297denotes the 3 \u00d7 3\nor 1 \u00d7 1 convolution, BN refers to the batch normalization\nand we use the ReLU as the activation function \u03c3().\nNext, we squeeze U to a vector by global average pool-\ning to obtain global context and use two 1 \u00d7 1 convolution\nlayers followed by a sigmoid function to compute a weights\nvector V \u2208R1\u00d71\u00d7C, to recalibrate channel-wise features"
+  },
+  {
+    "id": 115,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 25,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "ing to obtain global context and use two 1 \u00d7 1 convolution\nlayers followed by a sigmoid function to compute a weights\nvector V \u2208R1\u00d71\u00d7C, to recalibrate channel-wise features\nand measure the importance of them in the meantime\nV = \u03b4(W2 \u2297\u03c3(W3 \u2297(\n1\nH \u00d7 W\nH\nX\ni=1\nW\nX\nj=1\nUi,j))),\n(12)\nwhere H and W refer to the height and width of U, and\n\u03b4() denotes the sigmoid function.\nThen we perform the\nelement-wise multiplication between V and U to gener-\nate re-weight features. As the weights scores in V indicate\nthe importance of corresponding channels, i.e. the channel\nmaps containing critical information will get higher scores,\nthis recalibration operation can adaptively emphasize the\ncrucial details at multiple scales for sharp edges (Fig. 7).\nFinally, we sum up U and re-weight features for stability\nO = V \u2299U + U,\n(13)\nwhere \u2299denotes element-wise dot product and O refers to\nthe \ufb01nal outputs. Fig. 4 shows the design of the detail em-\nphasis module, this design recalibrates channel-wise feature"
+  },
+  {
+    "id": 116,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 26,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "O = V \u2299U + U,\n(13)\nwhere \u2299denotes element-wise dot product and O refers to\nthe \ufb01nal outputs. Fig. 4 shows the design of the detail em-\nphasis module, this design recalibrates channel-wise feature\nresponses and produce more precise depth estimation.\n4. Experiments\nIn this section, we show extensive experiments for eval-\nuating the performance of our methods and demonstrate the\neffectiveness of the proposed approaches.\n4.1. Implementation Details\nOur model are implemented based on PyTorch [35],\ntrained for 20 epochs on a single Nvidia 3090 with a batch\nsize of 12 and an input/output resolution of 640 \u00d7 192. We\njointly train both depth network and pose network with the\nAdam Optimizer [20] with \u03b21 = 0.9, \u03b22 = 0.999. The ini-\ntial learning rate is set to 1e\u22124 and decay to 1e\u22125 after 15\nepochs. We set the SSIM weight to \u03b1 = 0.85 and smooth-\nness term weight to \u03bb = 1e \u22123.\nDepthNet. We implement our depth estimation network as\nan encoder-decoder architecture.\nMoreover, we start the"
+  },
+  {
+    "id": 117,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 27,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "epochs. We set the SSIM weight to \u03b1 = 0.85 and smooth-\nness term weight to \u03bb = 1e \u22123.\nDepthNet. We implement our depth estimation network as\nan encoder-decoder architecture.\nMoreover, we start the\nResNet50 encoder with weights pretrained on ImageNet\n[38] as it has been shown to improve accuracy compared to\ntraining from scratch. We set sigmoid follow the output of\nnetwork and convert result \u03c3 to depth with D = 1/(a\u03c3+b),\nwhere use a and b to constrain D between 0.1 and 100 units.\nPoseNet. Our PoseNet is built on ResNet50, modi\ufb01ed to ac-\ncept six channels tensor as input, which allows the adjacent\nframes to feed into the network. The outputs of PoseNet\nis the 6-DoF relative pose consist of translation vectors and\nEuler angles, scaled by a factor of 0.01.\n4.2. KITTI Results\nWe train and evaluate our methods using the KITTI 2015\nstereo data set [9]. We adopt the data split of Eigen et al. [5]\nfor distance to 80m and use pre-processing to remove static"
+  },
+  {
+    "id": 118,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 28,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "4.2. KITTI Results\nWe train and evaluate our methods using the KITTI 2015\nstereo data set [9]. We adopt the data split of Eigen et al. [5]\nfor distance to 80m and use pre-processing to remove static\nframes before training. Ultimately, this results in 39, 810\ntraining monocular triplets, and 4, 424 for validation and\n697 for evaluation. We report results using the per-image\nmedian ground truth scaling during evaluation.\nAs shown in Table 1, our proposed CADepth-Net signif-\nicantly outperforms the existing SoTA self-supervised ap-\nproaches in all metrics. In addition, we score dramatically\nhigher in the hardest accuracy metric \u03b4 < 1.25, which indi-\ncates that our model predicts more accurate and realistically\ndetailed depth estimation than all other competing models.\nFor a fair comparison, we also give the results on various in-\nput resolution and training settings, and our model still im-\nproves the performance at higher image resolutions. Fig. 5"
+  },
+  {
+    "id": 119,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 29,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "For a fair comparison, we also give the results on various in-\nput resolution and training settings, and our model still im-\nproves the performance at higher image resolutions. Fig. 5\nshows that our model produces sharper depth estimation on\nthinner structures e.g. road signs and poles. Moreover, our\nmodel successfully estimates correct depth at the highly re-\n\ufb02ective car roof (6th row), which are the challenging prob-\nlems for previous advanced methods. These improvements\ncan be explained by the better perception of scenes and ob-\njects afforded by the structure perception module, and the\nfurther regularisation provided by detail emphasis module.\nAdditional results can be seen in supplementary material.\n4.3. Make3D result\nTo evaluate the generalization ability of our model on\nthe unseen dataset, we report the quantitative results for\nthe Make3D dataset [39] using our model trained on KITTI\n2015 [9]. Following the same evaluation protocol as [10],"
+  },
+  {
+    "id": 120,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 30,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "the unseen dataset, we report the quantitative results for\nthe Make3D dataset [39] using our model trained on KITTI\n2015 [9]. Following the same evaluation protocol as [10],\nwe test on a center crop of 2 \u00d7 1 ratio and apply median\nscaling. As shown in Table 3, our approach produces supe-\nrior results compared with the other SOTA self-supervised\nmethods. Qualitative results can be seen in Fig. 8, which\nshow that our model generates more accurate and sharper\ndepth estimation on the previously unseen Make3D dataset."
+  },
+  {
+    "id": 121,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 31,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Method\nTrain\nResolution\nAbs Rel\nSq Rel\nRMSE\nRMSE log\n\u03b4 < 1.25\n\u03b4 < 1.252\n\u03b4 < 1.253\nSfMLeaner [56]\u2020\nM\n416 \u00d7 128\n0.183\n1.595\n6.709\n0.270\n0.734\n0.902\n0.959\nGeoNet [50]\u2020\nM\n416 \u00d7 128\n0.149\n1.060\n5.567\n0.226\n0.796\n0.935\n0.975\nDDVO [44]\nM\n416 \u00d7 128\n0.151\n1.257\n5.583\n0.228\n0.810\n0.936\n0.974\nStruct2depth \u2018(M)\u2019 [1]\nM\n416 \u00d7 128\n0.141\n1.026\n5.291\n0.215\n0.816\n0.945\n0.979\nSIGNet [32]\nM\n416 \u00d7 128\n0.133\n0.905\n5.181\n0.208\n0.825\n0.947\n0.981\nSGDepth [22]\nM\n416 \u00d7 128\n0.128\n1.003\n5.085\n0.206\n0.853\n0.951\n0.978\nMonodepth2 [11]\nM\n416 \u00d7 128\n0.128\n1.087\n5.171\n0.204\n0.855\n0.953\n0.978\nCADepth-Net (Ours)\nM\n416 \u00d7 128\n0.116\n0.893\n4.906\n0.192\n0.874\n0.957\n0.981\nDF-Net [57]\nM\n576 \u00d7 160\n0.150\n1.124\n5.507\n0.223\n0.806\n0.933\n0.973\nSGDepth [22]\nM\n640 \u00d7 192\n0.117\n0.907\n4.844\n0.196\n0.875\n0.958\n0.980\nMonodepth2 [11]\nM\n640 \u00d7 192\n0.115\n0.903\n4.863\n0.193\n0.877\n0.959\n0.981\nPackNet-SfM [13]\nM\n640 \u00d7 192\n0.111\n0.785\n4.601\n0.189\n0.878\n0.960\n0.982\nHR-Depth [30]\nM\n640 \u00d7 192\n0.109\n0.792\n4.632\n0.185\n0.884\n0.962\n0.983\nJohnston et al. [18]"
+  },
+  {
+    "id": 122,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 32,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "0.903\n4.863\n0.193\n0.877\n0.959\n0.981\nPackNet-SfM [13]\nM\n640 \u00d7 192\n0.111\n0.785\n4.601\n0.189\n0.878\n0.960\n0.982\nHR-Depth [30]\nM\n640 \u00d7 192\n0.109\n0.792\n4.632\n0.185\n0.884\n0.962\n0.983\nJohnston et al. [18]\nM\n640 \u00d7 192\n0.106\n0.861\n4.699\n0.185\n0.889\n0.962\n0.982\nCADepth-Net (Ours)\nM\n640 \u00d7 192\n0.105\n0.769\n4.535\n0.181\n0.892\n0.964\n0.983\nCC [36]\nM\n832 \u00d7 256\n0.140\n1.070\n5.326\n0.217\n0.826\n0.941\n0.975\nMonodepth2 [11]\nM\n1024 \u00d7 320\n0.115\n0.882\n4.701\n0.190\n0.879\n0.961\n0.982\nTrianFlow [54]\nM\n832 \u00d7 256\n0.113\n0.704\n4.581\n0.184\n0.871\n0.961\n0.984\nHR-Depth [30]\nM\n1024 \u00d7 320\n0.106\n0.755\n4.472\n0.181\n0.892\n0.966\n0.984\nFeatDepth [40]\nM\n1024 \u00d7 320\n0.104\n0.729\n4.481\n0.179\n0.893\n0.965\n0.984\nCADepth-Net (Ours)\nM\n1024 \u00d7 320\n0.102\n0.734\n4.407\n0.178\n0.898\n0.966\n0.984\nDualNet [55]\nM\n1248 \u00d7 384\n0.121\n0.837\n4.945\n0.197\n0.853\n0.955\n0.982\nSGDepth [22]\nM\n1280 \u00d7 384\n0.113\n0.880\n4.695\n0.192\n0.884\n0.961\n0.981\nPackNet-SfM [13]\nM\n1280 \u00d7 384\n0.107\n0.802\n4.538\n0.186\n0.889\n0.962\n0.981\nHR-Depth [30]\nM\n1280 \u00d7 384\n0.104\n0.727\n4.410\n0.179"
+  },
+  {
+    "id": 123,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 33,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "0.982\nSGDepth [22]\nM\n1280 \u00d7 384\n0.113\n0.880\n4.695\n0.192\n0.884\n0.961\n0.981\nPackNet-SfM [13]\nM\n1280 \u00d7 384\n0.107\n0.802\n4.538\n0.186\n0.889\n0.962\n0.981\nHR-Depth [30]\nM\n1280 \u00d7 384\n0.104\n0.727\n4.410\n0.179\n0.894\n0.966\n0.984\nCADepth-Net (Ours)\nM\n1280 \u00d7 384\n0.102\n0.715\n4.312\n0.176\n0.900\n0.968\n0.984\nEPC++ [29]\nMS\n832 \u00d7 256\n0.128\n0.935\n5.011\n0.209\n0.831\n0.945\n0.979\nMonodepth2 [11]\nMS\n640 \u00d7 192\n0.106\n0.818\n4.750\n0.196\n0.874\n0.957\n0.979\nHR-Depth [30]\nMS\n640 \u00d7 192\n0.107\n0.785\n4.612\n0.185\n0.887\n0.962\n0.982\nDepthHints [47]\nMS\n640 \u00d7 192\n0.105\n0.769\n4.627\n0.189\n0.875\n0.959\n0.982\nCADepth-Net (Ours)\nMS\n640 \u00d7 192\n0.102\n0.752\n4.504\n0.181\n0.894\n0.964\n0.983\nMonodepth2 [11]\nMS\n1024 \u00d7 320\n0.106\n0.806\n4.630\n0.193\n0.876\n0.958\n0.980\nHR-Depth [30]\nMS\n1024 \u00d7 320\n0.101\n0.716\n4.395\n0.179\n0.899\n0.966\n0.983\nDepthHints [47]\nMS\n1024 \u00d7 320\n0.098\n0.702\n4.398\n0.183\n0.887\n0.963\n0.983\nFeatDepth [40]\nMS\n1024 \u00d7 320\n0.099\n0.697\n4.427\n0.184\n0.889\n0.963\n0.982\nCADepth-Net (Ours)\nMS\n1024 \u00d7 320\n0.096\n0.694\n4.264\n0.173\n0.908\n0.968\n0.984"
+  },
+  {
+    "id": 124,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 34,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "1024 \u00d7 320\n0.098\n0.702\n4.398\n0.183\n0.887\n0.963\n0.983\nFeatDepth [40]\nMS\n1024 \u00d7 320\n0.099\n0.697\n4.427\n0.184\n0.889\n0.963\n0.982\nCADepth-Net (Ours)\nMS\n1024 \u00d7 320\n0.096\n0.694\n4.264\n0.173\n0.908\n0.968\n0.984\nTable 1. Quantitative results on the KITTI Eigen Split. Comparison of existing methods on KITTI 2015 [9] using the Eigen split for\ndistances up to 80m. All methods in this table are trained on the KITTI dataset without additional datasets or online re\ufb01nement. Best\nresults are in bold, with second-best underlined. For Abs Rel, Sq Rel, RMSE and RMSElog lower is better, and for \u03b4 < 1.25, \u03b4 < 1.252\nand \u03b4 < 1.253 higher is better. In the Train column, S: Self-supervised stereo supervision, M: Self-supervised mono supervision. \u2020 refers\nto the newer results from Github. At test time, we scale the estimated depths with median ground-truth LiDAR information.\n4.4. Structure Perception Module\nTo demonstrate the effectiveness of the structure percep-"
+  },
+  {
+    "id": 125,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 35,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "4.4. Structure Perception Module\nTo demonstrate the effectiveness of the structure percep-\ntion module, Fig. 6 presents a comparison of features be-\nfore and after treatment. For clear visualization, we map the\nchannel maps to the RGB color cube and project them to the\noriginal RGB image. Fig. 6 (b) refers to the high-level fea-\ntures produced by encoder, which mainly indicates region-\nspeci\ufb01c responses and various kinds of structural informa-\ntion of 3D scene, e.g. vanish point, region with same depth\nrange and the area with same color or texture (e.g. sky) .\nAs mentioned earlier, the structure perception module\nproduces the aggregated features (Fig. 6 (c)) by performing\nthe weighted summation of all channel maps. As the atten-\ntion map describes the feature discrimination and the spatial\nrelationship of region responses between channels, by ag-\ngregating discriminative features at channel dimension, we\ncan make each single channel map get rich scene structure"
+  },
+  {
+    "id": 126,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 36,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "relationship of region responses between channels, by ag-\ngregating discriminative features at channel dimension, we\ncan make each single channel map get rich scene structure\nrepresentation and more complete region responses from\nnon-contiguous regions. By doing so, the structure percep-\ntion module obtains rich contextual information of overall\nscene geometry perception, which results in better scene un-\nderstanding and feature representation for depth estimation.\nFig. 6 adequately demonstrates that each channel map\nobtains more extra depth perception from distant regions\ne.g. foreground (1st row) and midground (2nd row). In ad-\ndition, it also particularly emphasizes the vanishing point\nregions, which are naturally a strong cue to understand the\ngeometry of a scene. In the last row, the network originally\nfocuses on foreground objects such as cars and obtains more"
+  },
+  {
+    "id": 127,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 37,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Input\nMonodepth2 [11]\nPackNet [13]\nOur CADepth-Net\nFigure 5. Qualitative results on the KITTI Eigen split. Our model consistently predicts sharper boundaries and \ufb01ne-gained details on\nthinner objects, e.g. trees, pedestrians and signs.\n(a)\n(b)\n(c)\nFigure 6. The visualizations of the structure perception module. (a) Input image. (b) Input feature maps. (c) Corresponding output of\nthe structure perception module. All feature maps are projected onto RGB images for clear visualization. The structure perception module\nexplicitly enhances the perception of scene structure and feature representation.\nrelative depth relationships after adding the vanishing point\ninformation. More visualization results are described in the\nsupplementary material.\n4.5. Detail Emphasis Module\nThe detail emphasis module generates a weights vector\nto re-calibrate channel maps and emphasizes the informa-\ntive features for subsequent transformations. The weights\nscores produced by the sigmoid function are between 0"
+  },
+  {
+    "id": 128,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 38,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "to re-calibrate channel maps and emphasizes the informa-\ntive features for subsequent transformations. The weights\nscores produced by the sigmoid function are between 0\nand 1, indicating the importance of corresponding features,\ni.e. the more important of the channel, the higher score is\nearned. As shown in Fig. 7, we report the top n (n = 10)\nfeature maps with the highest scores to show which features\nthe network focuses on. We observe that our model mainly\nhighlights the crucial low-level features that describe the\nobject boundaries precisely. This observation is consistent\nwith the fact that the decoder mainly uses detail informa-\ntion to recover spatial resolution gradually. In general, the\ndetail emphasis module adaptively selects the informative\nlocal details and helps network handle and locate the ob-\nject edges for sharper depth prediction. More visualization\nresults are provided in the supplementary material."
+  },
+  {
+    "id": 129,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 39,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Backbone\nSPM\nDEM\nPara\nTime\nAbs Rel\nSq Rel\nRMSE\nRMSE\nlog\n\u03b4 <1.25\n\u03b4 <1.252\n\u03b4 < 1.253\nBaseline (MD2 ResNet18 [11])\nR18\n14.84 M\n11.95 ms\n0.115\n0.903\n4.863\n0.193\n0.877\n0.959\n0.981\nBaseline + SPM\nR18\n\u2713\n14.84 M\n12.13 ms\n0.110\n0.843\n4.739\n0.188\n0.883\n0.961\n0.982\nBaseline + DEM\nR18\n\u2713\n18.74 M\n15.44 ms\n0.111\n0.851\n4.746\n0.189\n0.881\n0.961\n0.982\nCADepth-Net ResNet18 (full)\nR18\n\u2713\n\u2713\n18.74 M\n15.77 ms\n0.110\n0.812\n4.686\n0.187\n0.882\n0.962\n0.983\nBaseline (MD2 ResNet50 [11])\nR50\n34.57 M\n22.52 ms\n0.110\n0.831\n4.642\n0.187\n0.883\n0.962\n0.982\nBaseline + SPM\nR50\n\u2713\n34.57 M\n22.80 ms\n0.107\n0.784\n4.589\n0.185\n0.887\n0.963\n0.982\nBaseline + DEM\nR50\n\u2713\n58.34 M\n28.01 ms\n0.107\n0.759\n4.557\n0.183\n0.884\n0.964\n0.983\nCADepth-Net ResNet50 (full)\nR50\n\u2713\n\u2713\n58.34 M\n28.41 ms\n0.105\n0.769\n4.535\n0.181\n0.892\n0.964\n0.983\nTable 2. Ablation Studies. We evaluate the performance of our structure perception module (SPM) and detail emphasis module (DEM)"
+  },
+  {
+    "id": 130,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 40,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "R50\n\u2713\n\u2713\n58.34 M\n28.41 ms\n0.105\n0.769\n4.535\n0.181\n0.892\n0.964\n0.983\nTable 2. Ablation Studies. We evaluate the performance of our structure perception module (SPM) and detail emphasis module (DEM)\ncontributions with Monodepth2 (MD2) [11] as the baseline. R: ResNet, Para: parameters. All models in this table are trained with\nmonocular self-supervised (M) and standard resolution (640 \u00d7 192). The inference time is tested on a single RTX3090 GPU.\n0.965\n0.941\n0.924\n0.896\n0.886\n0.869\n0.869\n0.793\n0.785\n0.780\nStrength of Feature Response \nmin\nmax\n(a)\n(c)\n(b)\nFigure 7. The visualizations of detail emphasis module. (a) Input image. (b) Predicted depth map. (c) Top n (n = 10) feature maps with\nhighest weights score that range in [0, 1]. Detail emphasis module mainly highlights the crucial local details.\nInput\nMD2 (M) [11]\nOurs (M)\nGround truth\nFigure 8. Qualitative Make3D results. All methods were trained\non KITTI using monocular supervision.\n4.6. Ablation Study"
+  },
+  {
+    "id": 131,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 41,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Input\nMD2 (M) [11]\nOurs (M)\nGround truth\nFigure 8. Qualitative Make3D results. All methods were trained\non KITTI using monocular supervision.\n4.6. Ablation Study\nFor further demonstrating the performance improve-\nments of our provided methods, Table 2 and supplemental\nmaterial show the ablation study of our various components\nwith Monodepth2 [11] as the baseline. It shows that all of\nour contributions achieve a steady improvement in almost\nall evaluation measures and obtain a consistent performance\ngain on different backbones, showing the robustness of our\nCADepth-Net to the backbone architecture capacity. Note\nthat the structure perception module shows superior perfor-\nmance on metric \u03b4 < 1.25, with little time cost and no addi-\ntional parameters, demonstrating the improvements bene\ufb01t\nfrom the better scene understanding rather than an increase\nin network complexity. Finally, the combination of all our\nmodules with ResNet50 achieves the best results, with 59M"
+  },
+  {
+    "id": 132,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 42,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "from the better scene understanding rather than an increase\nin network complexity. Finally, the combination of all our\nmodules with ResNet50 achieves the best results, with 59M\nparameters and an inference time of 28ms on an RTX3090\nType\nAbs Rel\nSq Rel\nRMSE\nlog10\nKarsch [19]\nD\n0.428\n5.079\n8.389\n0.149\nLiu [28]\nD\n0.475\n6.562\n10.05\n0.165\nLaina [24]\nD\n0.204\n1.840\n5.683\n0.084\nMonodepth [10]\nS\n0.544\n10.94\n11.760\n0.193\nZhou [56]\nM\n0.383\n5.321\n10.470\n0.478\nDDVO [44]\nM\n0.387\n4.720\n8.090\n0.204\nMonodepth2 [11]\nM\n0.322\n3.589\n7.417\n0.163\nOurs\nM\n0.312\n3.086\n7.066\n0.159\nTable 3. Make3D results. All self-supervised mono (M) results\nbene\ufb01t from median scaling.\nGPU, meets the requirements of real-time applications.\n5. Conclusion\nIn this paper, we introduce a novel architecture named\nchannel-wise attention-based depth estimation network,\nwith two effective components, the structure perception\nmodule and the detail emphasis module. The structure per-"
+  },
+  {
+    "id": 133,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 43,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "channel-wise attention-based depth estimation network,\nwith two effective components, the structure perception\nmodule and the detail emphasis module. The structure per-\nception module aggregates the discriminative features by\ncapturing the long-range dependencies to obtain the con-\ntext of scene structure and rich feature representation. Ad-\nditionally, the detail emphasis module employs the channel\nattention mechanism to highlight objects\u2019 boundaries infor-\nmation and ef\ufb01ciently fuse different level features. Further-\nmore, the experiments demonstrate that our CADepth-Net\nproduces sharper depth estimation and achieves the state-\nof-the-art results on KITTI datasets."
+  },
+  {
+    "id": 134,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 44,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "References\n[1] Vincent Casser, Soeren Pirk, Reza Mahjourian, and Anelia\nAngelova. Depth prediction without the sensors: Leveraging\nstructure for unsupervised learning from monocular videos.\nIn Proceedings of the AAAI conference on arti\ufb01cial intelli-\ngence, volume 33, pages 8001\u20138008, 2019. 6\n[2] Djork-Arn\u00b4e Clevert, Thomas Unterthiner, and Sepp Hochre-\niter. Fast and accurate deep network learning by exponential\nlinear units (elus). arXiv preprint arXiv:1511.07289, 2015.\n12\n[3] Marius Cordts, Mohamed Omran, Sebastian Ramos, Timo\nRehfeld,\nMarkus Enzweiler,\nRodrigo Benenson,\nUwe\nFranke, Stefan Roth, and Bernt Schiele.\nThe cityscapes\ndataset for semantic urban scene understanding. In Proceed-\nings of the IEEE conference on computer vision and pattern\nrecognition, pages 3213\u20133223, 2016. 13\n[4] Guilherme N DeSouza and Avinash C Kak.\nVision for\nmobile robot navigation: A survey. IEEE transactions on\npattern analysis and machine intelligence, 24(2):237\u2013267,\n2002. 1"
+  },
+  {
+    "id": 135,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 45,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "[4] Guilherme N DeSouza and Avinash C Kak.\nVision for\nmobile robot navigation: A survey. IEEE transactions on\npattern analysis and machine intelligence, 24(2):237\u2013267,\n2002. 1\n[5] David Eigen and Rob Fergus. Predicting depth, surface nor-\nmals and semantic labels with a common multi-scale con-\nvolutional architecture. In Proceedings of the IEEE inter-\nnational conference on computer vision, pages 2650\u20132658,\n2015. 1, 2, 5, 12\n[6] David Eigen, Christian Puhrsch, and Rob Fergus. Depth map\nprediction from a single image using a multi-scale deep net-\nwork. arXiv preprint arXiv:1406.2283, 2014. 1, 2\n[7] Huan Fu, Mingming Gong, Chaohui Wang, Kayhan Bat-\nmanghelich, and Dacheng Tao. Deep ordinal regression net-\nwork for monocular depth estimation. In Proceedings of the\nIEEE conference on computer vision and pattern recogni-\ntion, pages 2002\u20132011, 2018. 1, 2, 13\n[8] Jun Fu, Jing Liu, Haijie Tian, Yong Li, Yongjun Bao, Zhiwei\nFang, and Hanqing Lu.\nDual attention network for scene"
+  },
+  {
+    "id": 136,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 46,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "tion, pages 2002\u20132011, 2018. 1, 2, 13\n[8] Jun Fu, Jing Liu, Haijie Tian, Yong Li, Yongjun Bao, Zhiwei\nFang, and Hanqing Lu.\nDual attention network for scene\nsegmentation. In Proceedings of the IEEE/CVF Conference\non Computer Vision and Pattern Recognition, pages 3146\u2013\n3154, 2019. 2\n[9] Andreas Geiger, Philip Lenz, and Raquel Urtasun. Are we\nready for autonomous driving? the kitti vision benchmark\nsuite. In 2012 IEEE conference on computer vision and pat-\ntern recognition, pages 3354\u20133361. IEEE, 2012. 1, 5, 6, 13\n[10] Cl\u00b4ement Godard, Oisin Mac Aodha, and Gabriel J Bros-\ntow.\nUnsupervised monocular depth estimation with left-\nright consistency. In Proceedings of the IEEE conference\non computer vision and pattern recognition, pages 270\u2013279,\n2017. 1, 5, 8, 13\n[11] Cl\u00b4ement Godard, Oisin Mac Aodha, Michael Firman, and\nGabriel J Brostow. Digging into self-supervised monocular\ndepth estimation. In Proceedings of the IEEE/CVF Inter-\nnational Conference on Computer Vision, pages 3828\u20133838,"
+  },
+  {
+    "id": 137,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 47,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Gabriel J Brostow. Digging into self-supervised monocular\ndepth estimation. In Proceedings of the IEEE/CVF Inter-\nnational Conference on Computer Vision, pages 3828\u20133838,\n2019. 1, 2, 3, 6, 7, 8, 13, 15\n[12] Matan Goldman, Tal Hassner, and Shai Avidan. Learn stereo,\ninfer mono: Siamese networks for self-supervised, monocu-\nlar, depth estimation. In Proceedings of the IEEE/CVF Con-\nference on Computer Vision and Pattern Recognition Work-\nshops, pages 0\u20130, 2019. 13\n[13] Vitor Guizilini, Rares Ambrus, Sudeep Pillai, Allan Raven-\ntos, and Adrien Gaidon.\n3d packing for self-supervised\nmonocular depth estimation.\nIn Proceedings of the\nIEEE/CVF Conference on Computer Vision and Pattern\nRecognition, pages 2485\u20132494, 2020. 1, 2, 6, 7, 13, 15\n[14] Vitor Guizilini, Rui Hou, Jie Li, Rares Ambrus, and\nAdrien Gaidon. Semantically-guided representation learn-\ning for self-supervised monocular depth.\narXiv preprint\narXiv:2002.12319, 2020. 2\n[15] Xiaoyang Guo, Hongsheng Li, Shuai Yi, Jimmy Ren, and"
+  },
+  {
+    "id": 138,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 48,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Adrien Gaidon. Semantically-guided representation learn-\ning for self-supervised monocular depth.\narXiv preprint\narXiv:2002.12319, 2020. 2\n[15] Xiaoyang Guo, Hongsheng Li, Shuai Yi, Jimmy Ren, and\nXiaogang Wang.\nLearning monocular depth by distilling\ncross-domain stereo networks. In Proceedings of the Euro-\npean Conference on Computer Vision (ECCV), pages 484\u2013\n500, 2018. 1\n[16] Sergey Ioffe and Christian Szegedy. Batch normalization:\nAccelerating deep network training by reducing internal co-\nvariate shift. In International conference on machine learn-\ning, pages 448\u2013456. PMLR, 2015. 5\n[17] Max Jaderberg, Karen Simonyan, Andrew Zisserman, et al.\nSpatial transformer networks. Advances in neural informa-\ntion processing systems, 28:2017\u20132025, 2015. 3\n[18] Adrian Johnston and Gustavo Carneiro.\nSelf-supervised\nmonocular trained depth estimation using self-attention and\ndiscrete disparity volume. In Proceedings of the IEEE/CVF\nConference on Computer Vision and Pattern Recognition,"
+  },
+  {
+    "id": 139,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 49,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Self-supervised\nmonocular trained depth estimation using self-attention and\ndiscrete disparity volume. In Proceedings of the IEEE/CVF\nConference on Computer Vision and Pattern Recognition,\npages 4756\u20134765, 2020. 2, 6, 13\n[19] Kevin Karsch, Ce Liu, and Sing Bing Kang. Depth transfer:\nDepth extraction from video using non-parametric sampling.\nIEEE transactions on pattern analysis and machine intelli-\ngence, 36(11):2144\u20132158, 2014. 8\n[20] Diederik P Kingma and Jimmy Ba. Adam: A method for\nstochastic optimization.\narXiv preprint arXiv:1412.6980,\n2014. 5\n[21] KITTI\nSingle\nDepth\nEvaluation\nServer.\nhttp://www.cvlibs.net/datasets/kitti/eval depth.php?\nbenchmark=depth prediction. 2017. 12\n[22] Marvin Klingner, Jan-Aike Term\u00a8ohlen, Jonas Mikolajczyk,\nand Tim Fingscheidt. Self-supervised monocular depth es-\ntimation: Solving the dynamic object problem by seman-\ntic guidance. In European Conference on Computer Vision,\npages 582\u2013600. Springer, 2020. 2, 6, 13\n[23] Shu Kong and Charless Fowlkes."
+  },
+  {
+    "id": 140,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 50,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "timation: Solving the dynamic object problem by seman-\ntic guidance. In European Conference on Computer Vision,\npages 582\u2013600. Springer, 2020. 2, 6, 13\n[23] Shu Kong and Charless Fowlkes.\nPixel-wise attentional\ngating for parsimonious pixel labeling.\narXiv preprint\narXiv:1805.01556, 2018. 13\n[24] Iro Laina, Christian Rupprecht, Vasileios Belagiannis, Fed-\nerico Tombari, and Nassir Navab. Deeper depth prediction\nwith fully convolutional residual networks. In 2016 Fourth\ninternational conference on 3D vision (3DV), pages 239\u2013\n248. IEEE, 2016. 2, 8\n[25] Bo Li, Yuchao Dai, and Mingyi He. Monocular depth es-\ntimation with hierarchical fusion of dilated cnns and soft-\nweighted-sum inference. Pattern Recognition, 83:328\u2013339,\n2018. 13\n[26] Ruibo Li, Ke Xian, Chunhua Shen, Zhiguo Cao, Hao Lu, and\nLingxiao Hang. Deep attention-based classi\ufb01cation network\nfor robust depth prediction. In Asian Conference on Com-\nputer Vision, pages 663\u2013678. Springer, 2018. 13"
+  },
+  {
+    "id": 141,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 51,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "[27] Fayao Liu, Chunhua Shen, and Guosheng Lin. Deep con-\nvolutional neural \ufb01elds for depth estimation from a single\nimage. In Proceedings of the IEEE conference on computer\nvision and pattern recognition, pages 5162\u20135170, 2015. 2\n[28] Miaomiao Liu,\nMathieu Salzmann,\nand Xuming He.\nDiscrete-continuous depth estimation from a single image.\nIn Proceedings of the IEEE Conference on Computer Vision\nand Pattern Recognition, pages 716\u2013723, 2014. 8\n[29] Chenxu Luo, Zhenheng Yang, Peng Wang, Yang Wang, Wei\nXu, Ram Nevatia, and Alan Yuille. Every pixel counts++:\nJoint learning of geometry and motion with 3d holistic un-\nderstanding. IEEE transactions on pattern analysis and ma-\nchine intelligence, 42(10):2624\u20132641, 2019. 6, 13\n[30] Xiaoyang Lyu, Liang Liu, Mengmeng Wang, Xin Kong,\nLina Liu, Yong Liu, Xinxin Chen, and Yi Yuan. Hr-depth:\nHigh resolution self-supervised monocular depth estimation.\narXiv preprint arXiv:2012.07356, 2020. 6"
+  },
+  {
+    "id": 142,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 52,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Lina Liu, Yong Liu, Xinxin Chen, and Yi Yuan. Hr-depth:\nHigh resolution self-supervised monocular depth estimation.\narXiv preprint arXiv:2012.07356, 2020. 6\n[31] Reza Mahjourian, Martin Wicke, and Anelia Angelova. Un-\nsupervised learning of depth and ego-motion from monoc-\nular video using 3d geometric constraints. In Proceedings\nof the IEEE Conference on Computer Vision and Pattern\nRecognition, pages 5667\u20135675, 2018. 2, 13\n[32] Yue Meng, Yongxi Lu, Aman Raj, Samuel Sunarjo, Rui Guo,\nTara Javidi, Gaurav Bansal, and Dinesh Bharadia. Signet:\nSemantic instance aided unsupervised 3d geometry percep-\ntion. In Proceedings of the IEEE/CVF Conference on Com-\nputer Vision and Pattern Recognition, pages 9810\u20139820,\n2019. 6\n[33] Moritz Menze and Andreas Geiger. Object scene \ufb02ow for au-\ntonomous vehicles. In Proceedings of the IEEE conference\non computer vision and pattern recognition, pages 3061\u2013\n3070, 2015. 1\n[34] Richard A Newcombe, Steven J Lovegrove, and Andrew J"
+  },
+  {
+    "id": 143,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 53,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "tonomous vehicles. In Proceedings of the IEEE conference\non computer vision and pattern recognition, pages 3061\u2013\n3070, 2015. 1\n[34] Richard A Newcombe, Steven J Lovegrove, and Andrew J\nDavison. Dtam: Dense tracking and mapping in real-time.\nIn 2011 international conference on computer vision, pages\n2320\u20132327. IEEE, 2011. 1\n[35] Adam Paszke, Sam Gross, Soumith Chintala, Gregory\nChanan, Edward Yang, Zachary DeVito, Zeming Lin, Al-\nban Desmaison, Luca Antiga, and Adam Lerer. Automatic\ndifferentiation in PyTorch. In NeurIPS-W, 2017. 5\n[36] Anurag Ranjan, Varun Jampani, Lukas Balles, Kihwan Kim,\nDeqing Sun, Jonas Wulff, and Michael J Black. Competitive\ncollaboration: Joint unsupervised learning of depth, camera\nmotion, optical \ufb02ow and motion segmentation. In Proceed-\nings of the IEEE/CVF Conference on Computer Vision and\nPattern Recognition, pages 12240\u201312249, 2019. 2, 6, 13\n[37] Olaf Ronneberger, Philipp Fischer, and Thomas Brox. U-\nnet: Convolutional networks for biomedical image segmen-"
+  },
+  {
+    "id": 144,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 54,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Pattern Recognition, pages 12240\u201312249, 2019. 2, 6, 13\n[37] Olaf Ronneberger, Philipp Fischer, and Thomas Brox. U-\nnet: Convolutional networks for biomedical image segmen-\ntation. In International Conference on Medical image com-\nputing and computer-assisted intervention, pages 234\u2013241.\nSpringer, 2015. 1\n[38] Olga Russakovsky, Jia Deng, Hao Su, Jonathan Krause, San-\njeev Satheesh, Sean Ma, Zhiheng Huang, Andrej Karpathy,\nAditya Khosla, Michael Bernstein, et al.\nImagenet large\nscale visual recognition challenge. International journal of\ncomputer vision, 115(3):211\u2013252, 2015. 5\n[39] Ashutosh Saxena, Min Sun, and Andrew Y Ng. Make3d:\nLearning 3d scene structure from a single still image. IEEE\ntransactions on pattern analysis and machine intelligence,\n31(5):824\u2013840, 2008. 5, 13\n[40] Chang Shu, Kun Yu, Zhixiang Duan, and Kuiyuan Yang.\nFeature-metric loss for self-supervised learning of depth and\negomotion. In European Conference on Computer Vision,\npages 572\u2013588. Springer, 2020. 6"
+  },
+  {
+    "id": 145,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 55,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Feature-metric loss for self-supervised learning of depth and\negomotion. In European Conference on Computer Vision,\npages 572\u2013588. Springer, 2020. 6\n[41] Jaime Spencer, Richard Bowden, and Simon Had\ufb01eld.\nDefeat-net: General monocular depth via simultaneous un-\nsupervised representation learning.\nIn Proceedings of the\nIEEE/CVF Conference on Computer Vision and Pattern\nRecognition, pages 14402\u201314413, 2020. 2\n[42] Jonas Uhrig, Nick Schneider, Lukas Schneider, Uwe Franke,\nThomas Brox, and Andreas Geiger. Sparsity invariant cnns.\nIn 2017 international conference on 3D Vision (3DV), pages\n11\u201320. IEEE, 2017. 12, 13\n[43] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszko-\nreit, Llion Jones, Aidan N Gomez, Lukasz Kaiser, and Il-\nlia Polosukhin. Attention is all you need. arXiv preprint\narXiv:1706.03762, 2017. 2\n[44] Chaoyang Wang, Jos\u00b4e Miguel Buenaposada, Rui Zhu, and\nSimon Lucey. Learning depth from monocular videos us-\ning direct methods. In Proceedings of the IEEE Conference"
+  },
+  {
+    "id": 146,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 56,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "arXiv:1706.03762, 2017. 2\n[44] Chaoyang Wang, Jos\u00b4e Miguel Buenaposada, Rui Zhu, and\nSimon Lucey. Learning depth from monocular videos us-\ning direct methods. In Proceedings of the IEEE Conference\non Computer Vision and Pattern Recognition, pages 2022\u2013\n2030, 2018. 2, 3, 6, 8, 13\n[45] Xiaolong Wang, Ross Girshick, Abhinav Gupta, and Kaim-\ning He. Non-local neural networks. In Proceedings of the\nIEEE conference on computer vision and pattern recogni-\ntion, pages 7794\u20137803, 2018. 2\n[46] Zhou Wang, Alan C Bovik, Hamid R Sheikh, and Eero P Si-\nmoncelli. Image quality assessment: from error visibility to\nstructural similarity. IEEE transactions on image processing,\n13(4):600\u2013612, 2004. 3\n[47] Jamie Watson, Michael Firman, Gabriel J Brostow, and\nDaniyar Turmukhambetov. Self-supervised monocular depth\nhints. In Proceedings of the IEEE/CVF International Con-\nference on Computer Vision, pages 2162\u20132171, 2019. 6\n[48] Zhenheng Yang, Peng Wang, Yang Wang, Wei Xu, and Ram\nNevatia."
+  },
+  {
+    "id": 147,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 57,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "hints. In Proceedings of the IEEE/CVF International Con-\nference on Computer Vision, pages 2162\u20132171, 2019. 6\n[48] Zhenheng Yang, Peng Wang, Yang Wang, Wei Xu, and Ram\nNevatia.\nLego: Learning edge with geometry all at once\nby watching videos. In Proceedings of the IEEE conference\non computer vision and pattern recognition, pages 225\u2013234,\n2018. 2\n[49] Zhenheng Yang, Peng Wang, Wei Xu, Liang Zhao, and\nRamakant Nevatia.\nUnsupervised learning of geometry\nwith edge-aware depth-normal consistency. arXiv preprint\narXiv:1711.03665, 2017. 2\n[50] Zhichao Yin and Jianping Shi. Geonet: Unsupervised learn-\ning of dense depth, optical \ufb02ow and camera pose. In Pro-\nceedings of the IEEE conference on computer vision and pat-\ntern recognition, pages 1983\u20131992, 2018. 2, 6, 13\n[51] Huangying Zhan, Ravi Garg, Chamara Saroj Weerasekera,\nKejie Li, Harsh Agarwal, and Ian Reid. Unsupervised learn-\ning of monocular depth estimation and visual odometry with"
+  },
+  {
+    "id": 148,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 58,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "[51] Huangying Zhan, Ravi Garg, Chamara Saroj Weerasekera,\nKejie Li, Harsh Agarwal, and Ian Reid. Unsupervised learn-\ning of monocular depth estimation and visual odometry with\ndeep feature reconstruction. In Proceedings of the IEEE con-\nference on computer vision and pattern recognition, pages\n340\u2013349, 2018. 13\n[52] Han Zhang, Ian Goodfellow, Dimitris Metaxas, and Augus-\ntus Odena. Self-attention generative adversarial networks. In"
+  },
+  {
+    "id": 149,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 59,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "International conference on machine learning, pages 7354\u2013\n7363. PMLR, 2019. 2\n[53] Zhenyu Zhang, Chunyan Xu, Jian Yang, Ying Tai, and Liang\nChen. Deep hierarchical guidance and regularization learn-\ning for end-to-end depth estimation. Pattern Recognition,\n83:430\u2013442, 2018. 13\n[54] Wang Zhao, Shaohui Liu, Yezhi Shu, and Yong-Jin Liu. To-\nwards better generalization: Joint depth-pose learning with-\nout posenet. In Proceedings of the IEEE/CVF Conference\non Computer Vision and Pattern Recognition, pages 9151\u2013\n9161, 2020. 6\n[55] Junsheng Zhou, Yuwang Wang, Kaihuai Qin, and Wenjun\nZeng.\nUnsupervised high-resolution depth learning from\nvideos with dual networks. In Proceedings of the IEEE/CVF\nInternational Conference on Computer Vision, pages 6872\u2013\n6881, 2019. 6\n[56] Tinghui Zhou, Matthew Brown, Noah Snavely, and David G\nLowe. Unsupervised learning of depth and ego-motion from\nvideo. In Proceedings of the IEEE conference on computer\nvision and pattern recognition, pages 1851\u20131858, 2017. 1,"
+  },
+  {
+    "id": 150,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 60,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Lowe. Unsupervised learning of depth and ego-motion from\nvideo. In Proceedings of the IEEE conference on computer\nvision and pattern recognition, pages 1851\u20131858, 2017. 1,\n2, 6, 8, 13\n[57] Yuliang Zou, Zelun Luo, and Jia-Bin Huang. Df-net: Un-\nsupervised joint learning of depth and \ufb02ow using cross-task\nconsistency. In Proceedings of the European conference on\ncomputer vision (ECCV), pages 36\u201353, 2018. 6"
+  },
+  {
+    "id": 151,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 61,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Supplementary Material\nThis document provides additional details and results con-\ncerned with paper \u201dChannel-Wise Attention-Based Net-\nwork for Self-Supervised Monocular Depth Estimation\u201d.\nThe supplementary material is organized as follows: Sec-\ntion 1 provides the details of depth estimation network, Sec-\ntion 2 and Section 3 reports the quantitative results on the\nKITTI improved ground truth and online evaluation server,\nSection 4 collects additional ablation experiments, Section\n5 provides the additional qualitative comparisons, and Sec-\ntion 6 shows visualization results of our methods.\nA. Network Architecture\nExcept where note, for all experiments, we use a\nResNet50 encoder with pretrained ImageNet weights for\nboth depth and pose networks. For depth model, the struc-\nture perception module takes the features from encoder as\ninput. In addition, we successively adopt the detail empha-\nsis module at different scales in decoder stage. Note that"
+  },
+  {
+    "id": 152,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 62,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "ture perception module takes the features from encoder as\ninput. In addition, we successively adopt the detail empha-\nsis module at different scales in decoder stage. Note that\nalthough there is no skip-connection at the highest resolu-\ntion, we still use the detail emphasis module for further reg-\nularization. For high resolution input, e.g. 1024 \u00d7 320 and\n1280 \u00d7 384, we employ a lightweight setup, ResNet18 and\n640\u00d7192, for pose encoder at training for memory savings.\nThe depth network architecture is shown in Table 4.\nB. KITTI Improved Ground Truth\nThe evaluation method proposed by Eigen et al. [5] for\nKITTI uses the reprojected LIDAR points to generate the\nground truth depth, but does not handle moving objects\nand occlusions.\n[42] created a set of high-quality depth\nmaps for the KITTI dataset using \ufb01ve consecutive frames\nand stereo pairs to handle moving objects better. This im-\nproved ground truth depth is provided for 652 (or 93%) of"
+  },
+  {
+    "id": 153,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 63,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "maps for the KITTI dataset using \ufb01ve consecutive frames\nand stereo pairs to handle moving objects better. This im-\nproved ground truth depth is provided for 652 (or 93%) of\nthe 697 original test frames contained in the Eigen test split\net al. [5]. We utilize the same error metrics and evaluation\nstrategy as the main paper, and evaluate our model on these\n652 improved ground truth frames without having to retrain\neach method. As shown in Table 5, we observe that our\nCADepth-Net still outperforms all existing advanced meth-\nods on all metrics.\nC. KITTI Evaluation Server Benchmark\nIn Table 6 we report the results of our models on the\nKITTI single image depth prediction benchmark [21] which\nwere computed on the KITTI online evaluation server. We\ntrain a new model on the new split consisting of 72,084\ntraining examples, 6,060 validation, and 500 test with the\nsame training protocols mentioned in the main paper. As\nwe cannot use median scaling for evaluation, we calculate\nDepth network"
+  },
+  {
+    "id": 154,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 64,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "training examples, 6,060 validation, and 500 test with the\nsame training protocols mentioned in the main paper. As\nwe cannot use median scaling for evaluation, we calculate\nDepth network\nlayer\nk\ns\nchns\nres\ninput\nactivation\nconv1\n7\n2\n64\n2\nimage\nRELU\nmaxpool\n3\n2\n64\n4\nconv1\n-\neconv1\n3\n1\n256\n4\nmaxpool\nRELU\neconv2\n3\n2\n512\n8\neconv1\nRELU\neconv3\n3\n2\n1024\n16\neconv2\nRELU\neconv4\n3\n2\n2048\n32\neconv3\nRELU\nspm\n-\n-\n2048\n32\neconv4\n-\nupconv5\n3\n1\n256\n32\nspm\nELU [2]\ndem5\n3\n1\n1280\n16\n\u2191upconv5, econv3\nRELU\niconv5\n3\n1\n256\n16\ndem5\nELU\nupconv4\n3\n1\n128\n16\niconv5\nELU\ndem4\n3\n1\n640\n8\n\u2191upconv4, econv2\nRELU\niconv4\n3\n1\n128\n8\ndem4\nELU\ndisp4\n3\n1\n1\n1\niconv4\nSigmoid\nupconv3\n3\n1\n64\n8\niconv4\nELU\ndem3\n3\n1\n320\n4\n\u2191upconv3, econv1\nRELU\niconv3\n3\n1\n64\n4\ndem3\nELU\ndisp3\n3\n1\n1\n1\niconv3\nSigmoid\nupconv2\n3\n1\n32\n4\niconv3\nELU\ndem2\n3\n1\n96\n2\n\u2191upconv2, conv1\nRELU\niconv2\n3\n1\n32\n2\ndem2\nELU\ndisp2\n3\n1\n1\n1\niconv2\nSigmoid\nupconv1\n3\n1\n16\n2\niconv2\nELU\ndem1\n3\n1\n16\n1\n\u2191upconv1\nRELU\niconv1\n3\n1\n16\n1\ndem1\nELU\ndisp1\n3\n1\n1\n1\niconv1\nSigmoid"
+  },
+  {
+    "id": 155,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 65,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "dem2\n3\n1\n96\n2\n\u2191upconv2, conv1\nRELU\niconv2\n3\n1\n32\n2\ndem2\nELU\ndisp2\n3\n1\n1\n1\niconv2\nSigmoid\nupconv1\n3\n1\n16\n2\niconv2\nELU\ndem1\n3\n1\n16\n1\n\u2191upconv1\nRELU\niconv1\n3\n1\n16\n1\ndem1\nELU\ndisp1\n3\n1\n1\n1\niconv1\nSigmoid\nTable 4. Depth network architecture. For symbols in this table,\nk: kernel size, s: stride, chns: the number of output channels, res:\nthe downscaling factor relative to the input image, input: corre-\nsponds to the input of each layer, activation: activation function.\n\u2191refers to a 2\u00d7 nearest-neighbor upsampling. Encoder blocks are\ndenoted by econv\u2217naming convention. The spm and dem repre-\nsent structure perception module and detail emphasis module.\nFigure 9. Depth Evaluation on KITTI binned at different inter-\nvals, calculated independently by only considering ground-truth\ndepth pixels in that range (0-20m, 20-40m, ...).\nthe scale factor on the 2,000 KITTI training samples which\nhave ground truth depths available. Table 6 shows that our"
+  },
+  {
+    "id": 156,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 66,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "depth pixels in that range (0-20m, 20-40m, ...).\nthe scale factor on the 2,000 KITTI training samples which\nhave ground truth depths available. Table 6 shows that our\nCADepth-Net outperforms the existing self-supervised ap-\nproaches and signi\ufb01cantly reduces the performance gap to"
+  },
+  {
+    "id": 157,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 67,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Method\nTrain\nRes\nDataset\nAbs Rel\nSq Rel\nRMSE\nRMSE log\n\u03b4 < 1.25\n\u03b4 < 1.252\n\u03b4 < 1.253\nSfMLearner [56]\u2020\nM\n416 \u00d7 128\nCS+K\n0.176\n1.532\n6.129\n0.244\n0.758\n0.921\n0.971\nVid2Depth [31]\nM\n416 \u00d7 128\nCS+K\n0.134\n0.983\n5.501\n0.203\n0.827\n0.944\n0.981\nGeoNet [50]\nM\n416 \u00d7 128\nCS+K\n0.132\n0.994\n5.240\n0.193\n0.833\n0.953\n0.985\nDDVO [44]\nM\n416 \u00d7 128\nCS+K\n0.126\n0.866\n4.932\n0.185\n0.851\n0.958\n0.986\nCC [36]\nM\n832 \u00d7 256\nK\n0.123\n0.881\n4.834\n0.181\n0.860\n0.959\n0.985\nEPC++ [29]\nM\n640 \u00d7 192\nK\n0.120\n0.789\n4.755\n0.177\n0.856\n0.961\n0.987\nMonodepth2 [11]\nM\n640 \u00d7 192\nK\n0.090\n0.545\n3.942\n0.137\n0.914\n0.983\n0.995\nJohnston et al. [18]\nM\n640 \u00d7 192\nK\n0.081\n0.484\n3.716\n0.126\n0.927\n0.985\n0.996\nCADepth-Net (Ours)\nM\n640 \u00d7 192\nK\n0.080\n0.442\n3.639\n0.124\n0.927\n0.986\n0.996\nCADepth-Net (Ours)\nM\n1280 \u00d7 384\nK\n0.076\n0.374\n3.280\n0.115\n0.937\n0.990\n0.997\nZhan FullNYU [51]\nD*MS\n608 \u00d7 160\nK\n0.130\n1.520\n5.184\n0.205\n0.859\n0.955\n0.981\nEPC++ [29]\nMS\n640 \u00d7 192\nK\n0.123\n0.754\n4.453\n0.172\n0.863\n0.964\n0.989\nMonodepth2 [11]\nMS\n640 \u00d7 192\nK\n0.080\n0.466\n3.681"
+  },
+  {
+    "id": 158,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 68,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "0.997\nZhan FullNYU [51]\nD*MS\n608 \u00d7 160\nK\n0.130\n1.520\n5.184\n0.205\n0.859\n0.955\n0.981\nEPC++ [29]\nMS\n640 \u00d7 192\nK\n0.123\n0.754\n4.453\n0.172\n0.863\n0.964\n0.989\nMonodepth2 [11]\nMS\n640 \u00d7 192\nK\n0.080\n0.466\n3.681\n0.127\n0.926\n0.985\n0.995\nCADepth-Net (Ours)\nMS\n640 \u00d7 192\nK\n0.076\n0.417\n3.488\n0.120\n0.933\n0.987\n0.996\nCADepth-Net (Ours)\nMS\n1024 \u00d7 320\nK\n0.070\n0.346\n3.168\n0.109\n0.945\n0.991\n0.997\nTable 5. Quantitative results on the KITTI improved ground truth. Comparison of the existing methods to our CADepth-Net on KITTI\n2015 [9] using annotated depth maps from [42]. Best results are in bold, with second best underlined. For Abs Rel, Sq Rel, RMSE and\nRMSElog lower is better, and for \u03b4 < 1.25, \u03b4 < 1.252 and \u03b4 < 1.253 higher is better. In the Train column, S: Self-supervised stereo\nsupervision, M: Self-supervised mono supervision, D*: Auxiliary depth supervision. \u2020 refers to the newer results from github. In Dataset\ncolumn, CS: Cityscapes dataset [3], K: KITTI datasets [9].\nMethod\nTrain\nSILog\nsqErrorRel"
+  },
+  {
+    "id": 159,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 69,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "column, CS: Cityscapes dataset [3], K: KITTI datasets [9].\nMethod\nTrain\nSILog\nsqErrorRel\nabsErrorRel\niRMSE\nDHGRL [53]\nD\n15.47\n4.04\n12.52\n15.72\nCSWS [25]\nD\n14.85\n3.48\n11.84\n16.38\nAPMoE [23]\nD\n14.74\n3.88\n11.74\n15.63\nDABC [26]\nD\n14.49\n4.08\n12.72\n15.53\nDORN [7]\nD\n11.77\n2.23\n8.78\n12.98\nMonodepth [10]\nS\n22.02\n20.58\n17.79\n21.84\nLSIM [12]\nS\n17.92\n6.88\n14.04\n17.62\nMonodepth2 [11]\nM\n15.57\n4.52\n12.98\n16.70\nSGDepth [22]\nM\n15.30\n5.00\n13.29\n15.80\nMonodepth2 [11]\nMS\n15.07\n4.16\n11.64\n15.27\nOurs\nMS\n13.34\n3.33\n10.67\n13.61\nTable 6. Results on KITTI depth prediction benchmark. D\nrefers to ground truth depth supervision, while M and S are monoc-\nular and stereo self-supervision respectively.\nBackbone\nAbs Rel\nSq Rel\nRMSE\n\u03b4 <1.25\nSGDepth [22]\nR18\n0.117\n0.907\n4.844\n0.875\nmonodepth2 [11]\nR18\n0.115\n0.903\n4.863\n0.877\nOurs\nR18\n0.110\n0.812\n4.686\n0.882\nmonodepth2 [11]\nR50\n0.110\n0.831\n4.642\n0.883\nJohnston et al. [18]\nR101\n0.106\n0.861\n4.699\n0.889\nOurs\nR50\n0.105\n0.769\n4.535\n0.892"
+  },
+  {
+    "id": 160,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 70,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "R18\n0.115\n0.903\n4.863\n0.877\nOurs\nR18\n0.110\n0.812\n4.686\n0.882\nmonodepth2 [11]\nR50\n0.110\n0.831\n4.642\n0.883\nJohnston et al. [18]\nR101\n0.106\n0.861\n4.699\n0.889\nOurs\nR50\n0.105\n0.769\n4.535\n0.892\nTable 7. Comparisons of methods with the same backnone on\nthe KITTI Eigen Split. R: ResNet. All models are trained with\nthe same settings.\nthe supervised methods.\nD. Additional Ablation Experiments\nTo further demonstrate the effectiveness of our structure\nperception module, we evaluate the performance of distant\nobjects with the absolute relative error, Fig. 11 shows that\nwe can effectively reduce the error produced by distant ob-\njects. Besides, Fig. 9 reports that our model improves the\naccuracy at all depth intervals, and the performance gap\nconsistently increases when larger distances are considered,\nthanks to the better 3D scene geometric perception intro-\nInput\nMD2 (M) [11]\nOurs (M)\nGround truth\nFigure 10. Qualitative Make3D results. Our CADepth-Net gen-"
+  },
+  {
+    "id": 161,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 71,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "thanks to the better 3D scene geometric perception intro-\nInput\nMD2 (M) [11]\nOurs (M)\nGround truth\nFigure 10. Qualitative Make3D results. Our CADepth-Net gen-\nerates more \ufb01ne-gained details compared to other method.\nduced by the structure perception module. Fig. 12 shows\nthat our method generates more \ufb01ne-gained details and ac-\ncurate object boundaries e.g. pedestrians and thin road signs\nby using detail emphasis module individually. For a fair\ncomparison, Table 7 reports that our model outperforms\nother methods with the same backbone, which means that\nthe gain in performance shown in our experiments is mainly\ndue to the effectiveness of our proposed methods.\nE. Additional Qualitative Comparisons\nWe provide additional qualitative results from the KITTI\ndatasets in Fig.\n13.\nWe can observe that compared to\nexisting baselines e.g.\n[11, 13], our CADepth-Net pro-\nduces higher quality outputs and possesses the clearest bor-\nder overall. We also show additional results from Make3D"
+  },
+  {
+    "id": 162,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 72,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "existing baselines e.g.\n[11, 13], our CADepth-Net pro-\nduces higher quality outputs and possesses the clearest bor-\nder overall. We also show additional results from Make3D\ndatasets [39] in Fig. 10, our methods preserve sharp discon-"
+  },
+  {
+    "id": 163,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 73,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "(a)\n(b)\n(c)\nError\nAbs Rel\n0.0\n0.4\n> 0.8\nFigure 11. Qualitative ablation study of Structure Perception Module (SPM). (a) Input Image. (b) Error maps without SPM. (c) Error\nmaps with SPM. The error induced by distance objects (yellow circles) is improved by the structure perception module.\n(a)\n(b)\n(c)\nFigure 12. Qualitative ablation study of Detail Emphasis Module (DEM). (a) Input image. (b) Predicted depth maps without DEM. (c)\nPredicted depth maps with DEM. Thanks to the detail emphasis module, we could obtain the more precise and sharper depth estimation.\ntinuities in depth prediction results.\nF. Additional Visualization Results\nTo better understand our main contributions, Fig. 14 and\nFig. 15 introduce additional visualization results of inter-\nmediate features. As shown in Fig. 14, each feature map\nobtains more region responses from the distant regions and\naggregates relative depth relationships over 3D scene. By\ndoing so, our model produces better scene understanding"
+  },
+  {
+    "id": 164,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 74,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "obtains more region responses from the distant regions and\naggregates relative depth relationships over 3D scene. By\ndoing so, our model produces better scene understanding\nand rich feature representation.\nFig.\n15 lists the top n\n(n = 8) feature maps with the highest scores in the detail\nemphasis module, and we can see that our model highlights\ncritical local details at multiple scales, by assigning higher\nscores to them."
+  },
+  {
+    "id": 165,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 75,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "Input\nMonodepth2 [11]\nPackNet [13]\nOur CADepth-Net\nFigure 13. Qualitative results on the KITTI Eigen split. Our model produces higher quality outputs and possesses the most clear border.\n\n(a)\n(b)\n(c)\nFigure 14. The visualizations of structure perception module. (a) Input Image. (b) Input feature maps. (c) Output feature maps. All\nfeature representation are projected onto original image for clear visualizations. Our structure perception module explicitly enhances the\nscene understanding and feature representation."
+  },
+  {
+    "id": 166,
+    "workspace_id": "default",
+    "filename": "2112.13047v1.pdf",
+    "chunk_id": 76,
+    "document_id": "1ece0f70-a529-42b2-a198-6735f28d4708",
+    "owner_id": "03a8daec-5018-4ee1-83a0-ca083c67439a",
+    "text": "0.964\n0.940\n0.923\n0.898\n0.886\n0.871\n0.870\n0.803\n(a)\n(c)\n(e)\n0.999\n0.999\n0.999\n0.997\n0.997\n0.993\n0.991\n0.990\n0.961\n0.935\n0.917\n0.891\n0.879\n0.865\n0.864\n0.796\n0.999\n0.999\n0.999\n0.997\n0.997\n0.992\n0.990\n0.989\n(f)\n(g)\n(h)\n(b)\n(d)\nFigure 15. The visualizations of detail emphasis module. (a)(b) Input Image. (c)(d) Predicted depth maps. (e) \u223c(h) Top n feature maps\nwith highest weights score. Here n is 8 and the weights value range is between 0 and 1. Speci\ufb01cally, (e)(g) are produced by dem2 (see\nTable 4) and (f)(h) are generated from dem3. The detail emphasis module mainly highlights the crucial local details."
   }
 ]
