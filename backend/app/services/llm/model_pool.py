@@ -1,3 +1,32 @@
+from app.services.llm.model_catalog import curate_models
+
+
+def build_curated_pool(
+    model_ids: list[str],
+    preferred: list[str] | None = None,
+) -> list[str]:
+    """Build a curated model pool, ordering preferred models first.
+
+    Unsuitable models (code/mini/tiny/embedding specialists) are excluded via
+    :func:`curate_models`. The remaining models are deduplicated and ordered so
+    that ``preferred`` models (trusted general-purpose defaults) lead the pool,
+    ensuring capable models are tried first while the full curated set remains
+    available for rotation.
+
+    Args:
+        model_ids: Candidate OpenRouter model ids.
+        preferred: Model ids to place first, in preference order.
+
+    Returns:
+        The curated pool as an ordered, deduplicated list.
+    """
+    curated = curate_models(model_ids)
+    preferred = preferred or []
+    leading = [model_id for model_id in preferred if model_id in curated]
+    trailing = [model_id for model_id in curated if model_id not in leading]
+    return leading + trailing
+
+
 class ModelPoolManager:
     """Manage a rotating pool of OpenRouter models."""
 

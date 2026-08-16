@@ -1,10 +1,70 @@
 import logging
+import re
 
 from openai import OpenAI
 
 logger = logging.getLogger(__name__)
 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+
+#: Exact name tokens that mark a model as unsuitable for general
+#: conversational/RAG use: code-specialized variants, tiny-capacity tiers,
+#: and embedding/reranker specialists.
+UNSUITABLE_MODEL_TOKENS: frozenset[str] = frozenset(
+    {
+        "code",
+        "coder",
+        "coding",
+        "mini",
+        "tiny",
+        "nano",
+        "micro",
+        "embed",
+        "embedding",
+        "rerank",
+        "reranker",
+    }
+)
+
+#: Separators used to split a model name into comparison tokens.
+_MODEL_TOKEN_PATTERN = re.compile(r"[^a-zA-Z0-9]+")
+
+
+def _model_slug(model_id: str) -> str:
+    """Return the model-name portion of an id, without provider or suffix.
+
+    Args:
+        model_id: An OpenRouter model id (e.g. ``"cohere/north-mini-code:free"``).
+
+    Returns:
+        The model name (e.g. ``"north-mini-code"``).
+    """
+    name = model_id.split("/", 1)[-1]
+    return name.split(":", 1)[0]
+
+
+def curate_models(model_ids: list[str]) -> list[str]:
+    """Filter a list of model ids down to general-purpose conversational models.
+
+    Code-specialized, tiny-capacity (mini/tiny/nano/micro), and
+    embedding/reranker models are excluded by matching exact tokens from the
+    model name. Tokens are compared exactly so names like ``minimax-01`` are
+    not misclassified by a ``mini`` substring.
+
+    Args:
+        model_ids: OpenRouter model ids to curate.
+
+    Returns:
+        A new list containing only the suitable model ids, in input order.
+    """
+    return [
+        model_id
+        for model_id in model_ids
+        if not (
+            UNSUITABLE_MODEL_TOKENS
+            & set(_MODEL_TOKEN_PATTERN.split(_model_slug(model_id)))
+        )
+    ]
 
 
 class ModelCatalogError(Exception):
@@ -40,14 +100,19 @@ class ModelCatalogService:
         return [model.id for model in self._fetch_models()]
 
     def get_free_models(self) -> list[str]:
-        """Fetch and return the sorted ids of all free OpenRouter models.
+        """Fetch and return the sorted ids of all general-purpose free models.
+
+        Free models are filtered to those suitable for general
+        conversational/RAG use (code/mini/tiny/embedding specialists are
+        excluded) before being sorted alphabetically.
 
         Returns:
-            A sorted list of free model ids.
+            A sorted list of curated free model ids.
 
         Raises:
             ModelCatalogError: If the OpenRouter request fails.
-            NoFreeModelsError: If no free models are available.
+            NoFreeModelsError: If no free models, or no suitable free models,
+                are available.
         """
         free_models = sorted(
             model.id for model in self._fetch_models() if model.id.endswith(":free")
@@ -57,8 +122,15 @@ class ModelCatalogService:
             logger.warning("No free OpenRouter models available")
             raise NoFreeModelsError("No free OpenRouter models available.")
 
-        logger.info("Discovered %d free OpenRouter models", len(free_models))
-        return free_models
+        curated = curate_models(free_models)
+        if not curated:
+            logger.warning("No suitable general-purpose free OpenRouter models")
+            raise NoFreeModelsError(
+                "No suitable general-purpose free OpenRouter models available."
+            )
+
+        logger.info("Discovered %d curated free OpenRouter models", len(curated))
+        return curated
 
     def count_models(self) -> tuple[int, int]:
         """Return the total model count and the free model count.

@@ -3,7 +3,7 @@ import logging
 from app.config.openrouter_models import OPENROUTER_MODELS
 from app.core.config import settings
 from app.services.llm.model_catalog import ModelCatalogService, ModelCatalogError
-from app.services.llm.model_pool import ModelPoolManager
+from app.services.llm.model_pool import ModelPoolManager, build_curated_pool
 from app.services.llm.provider_manager import ProviderManager
 from app.services.llm.providers.gemini import GeminiProvider
 from app.services.llm.providers.groq import GroqProvider
@@ -26,8 +26,12 @@ def build_openrouter_provider() -> OpenRouterProvider:
     except ModelCatalogError:
         logger.warning("Model discovery failed; using default OpenRouter models")
         models = list(OPENROUTER_MODELS)
+    pool_models = build_curated_pool(models, preferred=OPENROUTER_MODELS)
+    if not pool_models:
+        logger.warning("No suitable OpenRouter models; using trusted defaults")
+        pool_models = build_curated_pool(OPENROUTER_MODELS)
     return OpenRouterProvider(
-        ModelPoolManager(models),
+        ModelPoolManager(pool_models),
         api_key=settings.openrouter_api_key,
         timeout=settings.timeout,
     )
