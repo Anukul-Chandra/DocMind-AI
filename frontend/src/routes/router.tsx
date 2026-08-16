@@ -32,7 +32,7 @@ function LazyPage({ children }: { children: ReactNode }) {
     <Suspense
       fallback={
         <div className="flex flex-1 items-center justify-center p-8" role="status">
-          <div className="size-6 animate-spin rounded-full border-2 border-muted border-t-foreground" />
+          <div className="size-6 animate-spin rounded-full border-2 border-muted border-t-brand" />
         </div>
       }
     >
