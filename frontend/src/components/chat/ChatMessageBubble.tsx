@@ -11,7 +11,7 @@ interface ChatMessageBubbleProps {
 export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
   if (message.role === "user") {
     return (
-      <div className="flex justify-end">
+      <div className="docmind-message flex justify-end">
         <div className="max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-br-md bg-primary px-4 py-2.5 text-sm text-primary-foreground sm:max-w-[75%]">
           {message.content}
         </div>
@@ -20,7 +20,7 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
   }
 
   return (
-    <div className="flex flex-col items-start gap-2">
+    <div className="docmind-message flex flex-col items-start gap-2">
       <div className="flex max-w-[85%] flex-col gap-1 sm:max-w-[75%]">
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Sparkles className="size-3.5" aria-hidden="true" />

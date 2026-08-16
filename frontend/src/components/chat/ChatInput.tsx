@@ -45,8 +45,8 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     <div>
       <div
         className={cn(
-          "flex items-end gap-2 rounded-xl border bg-card p-2 shadow-sm transition-colors",
-          "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
+          "flex items-end gap-2 rounded-2xl border bg-card p-2 shadow-sm transition-[border-color,box-shadow,background-color]",
+          "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px] focus-within:shadow-md",
         )}
       >
         <textarea
