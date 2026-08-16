@@ -54,6 +54,36 @@ class Settings(BaseSettings):
 
     embedding_model: str = "all-MiniLM-L6-v2"
 
+    #: Minimum cosine similarity between a chat query and the user's best
+    #: matching indexed chunk for the query to be routed to document
+    #: retrieval (RAG) instead of the general LLM path. Calibrated against
+    #: real queries and a live corpus: document-anchored and implicit
+    #: personal questions score >= ~0.20 while unrelated general chatter
+    #: scores well below; topic-matching general questions (e.g. the corpus
+    #: contains ML papers and the user asks about ML) intentionally route to
+    #: RAG so the answer can be grounded in the user's own documents.
+    rag_relevance_threshold: float = 0.20
+
+    #: Semantic floor for self-referential (personal / self-attribute)
+    #: questions. A question about the user's own documents ("my CV", "where
+    #: did I study?") is routed to RAG when it carries first-person reference
+    #: or a self-attribute and reaches this low cosine bar; the personal
+    #: signal does most of the work, so the semantic requirement is weak.
+    rag_personal_floor: float = 0.07
+
+    #: Semantic bar for generic topical questions (no personal reference, no
+    #: explicit document noun). A general question about a topic that merely
+    #: exists in an uploaded paper must exceed this high cosine similarity to
+    #: be routed to RAG; otherwise it stays GENERAL. Keeps e.g. "define
+    #: machine learning" out of RAG when the corpus contains an ML paper.
+    rag_topic_threshold: float = 0.45
+
+    #: Semantic floor for questions that name a document noun ("paper",
+    #: "document", "doc", "file"). Explicit document references can rescue
+    #: low semantic scores when combined with positive owner-scoped BM25
+    #: evidence.
+    rag_docnoun_floor: float = 0.15
+
     llm_provider: str = ""
     default_model: str = "gpt-4o-mini"
     gemini_model: str = "gemini-2.0-flash"

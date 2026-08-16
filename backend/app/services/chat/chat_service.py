@@ -71,13 +71,17 @@ class ChatService:
         Raises:
             LLMUnavailableError: If every provider fails.
         """
-        category = self._query_router.classify(question)
+        category = self._query_router.classify(question, owner_id=owner_id)
         if category is QueryCategory.METADATA:
             return self._answer_metadata(owner_id)
         if category is QueryCategory.GENERAL:
             prompt = self._prompt_builder.build_general_prompt(question)
             return await self._provider_manager.generate(prompt.text)
-        contexts = self._retriever.retrieve(question, owner_id=owner_id)
+        contexts = self._retriever.retrieve(
+            question,
+            owner_id=owner_id,
+            query_embedding=self._query_router.last_query_embedding,
+        )
         rag_prompt = self._prompt_builder.build_prompt(question, contexts)
         return await self._provider_manager.generate(rag_prompt.text)
 
