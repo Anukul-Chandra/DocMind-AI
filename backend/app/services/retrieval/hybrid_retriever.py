@@ -49,6 +49,7 @@ class HybridRetriever(Retriever):
         k: int = 5,
         workspace_id: str = DEFAULT_WORKSPACE,
         owner_id: str = "",
+        query_embedding: list[float] | None = None,
     ) -> list[dict]:
         """Retrieve and rerank the top-k chunks combining BM25 and FAISS.
 
@@ -58,13 +59,19 @@ class HybridRetriever(Retriever):
             workspace_id: Only chunks belonging to this workspace are returned.
             owner_id: Only chunks owned by this user are returned. Empty for
                 legacy chunks indexed before ownership was tracked.
+            query_embedding: A precomputed query embedding forwarded to the
+                semantic sub-retriever to avoid a duplicate embedding.
 
         Returns:
             The top-k merged, deduplicated, reranked chunks (best first),
             constrained to the workspace and owner.
         """
         semantic_results = self._semantic.retrieve(
-            query, k=k, workspace_id=workspace_id, owner_id=owner_id
+            query,
+            k=k,
+            workspace_id=workspace_id,
+            owner_id=owner_id,
+            query_embedding=query_embedding,
         )
         keyword_results = self._bm25.retrieve(
             query, k=k, workspace_id=workspace_id, owner_id=owner_id

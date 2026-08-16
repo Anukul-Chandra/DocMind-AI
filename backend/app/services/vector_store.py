@@ -95,6 +95,26 @@ class VectorStore:
                 }
             )
 
+    def get_embedding(self, index: int) -> list[float]:
+        """Return the raw embedding vector stored at the given index.
+
+        Reconstructs the vector from the FAISS index itself rather than from
+        the ``_embeddings`` mirror, so the value is correct even when the
+        mirror is empty (e.g. after :meth:`load_index`).
+
+        Args:
+            index: The FAISS index position of the embedding.
+
+        Returns:
+            The stored embedding vector.
+
+        Raises:
+            IndexError: If the index is out of range for the current index.
+        """
+        if index < 0 or index >= self._index.ntotal:
+            raise IndexError("embedding index out of range")
+        return self._index.reconstruct(index).tolist()
+
     def search(
         self,
         query_embedding: list[float],
