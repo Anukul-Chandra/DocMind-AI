@@ -23,9 +23,9 @@ export function formatUploadDate(iso: string): string {
 
 export function DocumentCard({ document }: { document: Document }) {
   return (
-    <Card className="gap-3 py-4">
+    <Card className="group gap-3 py-4 transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-brand/30 hover:shadow-md">
       <CardHeader className="flex-row items-center gap-3 px-4">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted transition-colors group-hover:bg-brand/10">
           <FileText
             className="size-5 text-muted-foreground"
             aria-hidden="true"
@@ -55,7 +55,7 @@ export function DocumentCard({ document }: { document: Document }) {
                 ? "bg-muted text-muted-foreground"
                 : document.classification === "unknown"
                   ? "bg-muted text-muted-foreground"
-                  : "bg-primary/10 text-primary",
+                  : "bg-brand/10 text-brand",
             )}
           >
             {documentTypeLabel(document.classification)}

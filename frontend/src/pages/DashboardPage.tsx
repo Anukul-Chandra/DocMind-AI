@@ -18,16 +18,24 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useCountUp } from "@/hooks/use-count-up";
+import { useDocuments } from "@/hooks/use-documents";
 import { cn } from "@/lib/utils";
+
+function AnimatedNumber({ value }: { value: number }) {
+  const count = useCountUp(value);
+  return <>{count}</>;
+}
 
 interface OverviewCardProps {
   icon: LucideIcon;
   title: string;
   description: string;
-  value: string;
+  value: string | number;
   hint: string;
   to: string;
   action: string;
+  delay?: number;
 }
 
 function OverviewCard({
@@ -38,9 +46,10 @@ function OverviewCard({
   hint,
   to,
   action,
+  delay = 0,
 }: OverviewCardProps) {
   return (
-    <Card className="gap-5">
+    <Card className="docmind-rise gap-5" style={{ animationDelay: `${delay}ms` }}>
       <CardHeader>
         <div className="flex items-start justify-between gap-3">
           <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -56,7 +65,9 @@ function OverviewCard({
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-1">
-        <p className="text-3xl font-semibold tracking-tight">{value}</p>
+        <p className="text-3xl font-semibold tracking-tight tabular-nums">
+          {typeof value === "number" ? <AnimatedNumber value={value} /> : value}
+        </p>
         <p className="text-sm text-muted-foreground">{hint}</p>
       </CardContent>
       <CardFooter>
@@ -73,19 +84,28 @@ interface QuickActionProps {
   title: string;
   description: string;
   to: string;
+  delay?: number;
 }
 
-function QuickAction({ icon: Icon, title, description, to }: QuickActionProps) {
+function QuickAction({
+  icon: Icon,
+  title,
+  description,
+  to,
+  delay = 0,
+}: QuickActionProps) {
   return (
     <Link
       to={to}
+      style={{ animationDelay: `${delay}ms` }}
       className={cn(
-        "group flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm transition-colors",
-        "hover:border-primary/30 hover:bg-accent/40",
+        "docmind-rise group flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm",
+        "transition-[transform,border-color,background-color,box-shadow] duration-200",
+        "hover:-translate-y-0.5 hover:border-brand/30 hover:shadow-md",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
       )}
     >
-      <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
+      <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-brand/10 group-hover:text-brand">
         <Icon className="size-5" aria-hidden="true" />
       </span>
       <span className="space-y-1">
@@ -99,10 +119,16 @@ function QuickAction({ icon: Icon, title, description, to }: QuickActionProps) {
 }
 
 export function DashboardPage() {
+  const { data: documents } = useDocuments();
+  const documentCount = documents?.filter((document) => !document.deleted).length;
+
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-8 p-6 lg:p-8">
+    <div className="docmind-page mx-auto w-full max-w-6xl space-y-8 p-6 lg:p-8">
       <div className="space-y-1">
-        <p className="text-sm font-medium text-primary">Welcome back</p>
+        <p className="flex items-center gap-1.5 text-sm font-medium text-brand">
+          <Sparkles className="size-4" aria-hidden="true" />
+          Welcome back
+        </p>
         <PageHeader
           title="Dashboard"
           description="Upload documents and ask questions about them with DocMind AI."
@@ -114,7 +140,7 @@ export function DashboardPage() {
           icon={FileText}
           title="Documents"
           description="Your indexed PDF library"
-          value="—"
+          value={documentCount ?? "—"}
           hint="Upload a PDF to build your knowledge base."
           to="/app/documents"
           action="Open documents"
@@ -127,6 +153,7 @@ export function DashboardPage() {
           hint="Start a conversation to get grounded answers."
           to="/app/chat"
           action="Open chat"
+          delay={60}
         />
       </section>
 
@@ -146,12 +173,14 @@ export function DashboardPage() {
             title="Ask a question"
             description="Get grounded answers from your documents."
             to="/app/chat"
+            delay={60}
           />
           <QuickAction
             icon={FileText}
             title="Review documents"
             description="See what has been indexed so far."
             to="/app/documents"
+            delay={120}
           />
         </div>
       </section>
