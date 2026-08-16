@@ -70,17 +70,21 @@ export function LoginPage() {
   }
 
   return (
-    <div className="relative flex flex-1 flex-col items-center justify-center gap-6 p-6">
+    <div className="docmind-page relative flex flex-1 flex-col items-center justify-center gap-6 p-6">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+        <div className="absolute -top-28 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-brand/10 blur-3xl" />
+        <div className="absolute -bottom-32 right-1/4 h-72 w-72 rounded-full bg-brand/[0.07] blur-3xl" />
+      </div>
       <div className="absolute right-4 top-4">
         <ThemeToggle />
       </div>
-      <div className="flex items-center gap-2">
-        <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
-          <FileSearch className="size-5 text-primary" aria-hidden="true" />
+      <div className="docmind-rise flex items-center gap-2">
+        <span className="flex size-10 items-center justify-center rounded-lg bg-brand/10">
+          <FileSearch className="size-5 text-brand" aria-hidden="true" />
         </span>
         <span className="text-lg font-semibold">DocMind AI</span>
       </div>
-      <Card className="w-full max-w-sm">
+      <Card className="docmind-rise w-full max-w-sm" style={{ animationDelay: "60ms" }}>
         <CardHeader>
           <CardTitle>Sign in</CardTitle>
           <CardDescription>
