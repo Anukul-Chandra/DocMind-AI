@@ -1,7 +1,21 @@
-import axios, { AxiosError, type AxiosInstance } from "axios";
+import axios, {
+  type AxiosError,
+  type AxiosInstance,
+  type InternalAxiosRequestConfig,
+} from "axios";
 
 import { env } from "@/lib/env";
-import { clearStoredTokens } from "@/lib/auth-storage";
+import {
+  clearStoredTokens,
+  getStoredTokens,
+  storeTokens,
+} from "@/lib/auth-storage";
+import {
+  isRefreshableRequest,
+  refreshAccessToken,
+  type RefreshTokenPair,
+  type TokenStorage,
+} from "@/lib/token-refresh";
 import type { ApiEnvelope } from "@/types";
 
 export class ApiError extends Error {
@@ -29,22 +43,78 @@ export function setAccessToken(token: string | null): void {
   }
 }
 
+interface RefreshableRequestConfig extends InternalAxiosRequestConfig {
+  _retried?: boolean;
+}
+
+const refreshApi = {
+  async refresh(refreshToken: string): Promise<RefreshTokenPair> {
+    const response = await axios.post<ApiEnvelope<RefreshTokenPair>>(
+      `${env.apiBaseUrl}/auth/refresh`,
+      { refresh_token: refreshToken },
+      { timeout: env.apiTimeoutMs },
+    );
+    const pair = response.data?.data;
+    if (!pair) {
+      throw new Error("Refresh response did not include a token pair.");
+    }
+    return pair;
+  },
+};
+
+const refreshStorage: TokenStorage = {
+  getStoredTokens: () => getStoredTokens(),
+  storeTokens: (tokens) => storeTokens(tokens),
+  clearStoredTokens: () => clearStoredTokens(),
+};
+
+function logoutAndRedirect(): void {
+  refreshStorage.clearStoredTokens();
+  setAccessToken(null);
+  window.location.assign("/login");
+}
+
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError<ApiEnvelope<unknown>>) => {
-    if (error.response) {
-      const { status, data } = error.response;
-      if (status === 401 && error.config?.url !== "/auth/login") {
-        clearStoredTokens();
-        setAccessToken(null);
-        window.location.assign("/login");
-      }
-      throw new ApiError(
-        status,
-        data?.error?.code ?? `http_${status}`,
-        data?.error?.message ?? "Request failed.",
-      );
+  async (error: AxiosError<ApiEnvelope<unknown>>) => {
+    if (!error.response) {
+      throw new ApiError(0, "network_error", error.message || "Network error.");
     }
-    throw new ApiError(0, "network_error", error.message || "Network error.");
+
+    const { status, data } = error.response;
+    const config = error.config as RefreshableRequestConfig | undefined;
+
+    if (
+      status === 401 &&
+      config &&
+      isRefreshableRequest(config.url, config._retried === true)
+    ) {
+      try {
+        const newAccessToken = await refreshAccessToken(
+          refreshApi,
+          refreshStorage,
+        );
+        config.headers.set("Authorization", `Bearer ${newAccessToken}`);
+        config._retried = true;
+        return apiClient.request(config);
+      } catch {
+        logoutAndRedirect();
+        throw new ApiError(
+          status,
+          "unauthorized",
+          "Your session has expired. Please log in again.",
+        );
+      }
+    }
+
+    if (status === 401 && error.config?.url !== "/auth/login") {
+      logoutAndRedirect();
+    }
+
+    throw new ApiError(
+      status,
+      data?.error?.code ?? `http_${status}`,
+      data?.error?.message ?? "Request failed.",
+    );
   },
 );
