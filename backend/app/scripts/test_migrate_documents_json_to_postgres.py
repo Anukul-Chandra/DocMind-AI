@@ -45,6 +45,8 @@ RECORDS = [
         "chunk_count": 3,
         "deleted": False,
         "owner_id": "user-a",
+        "classification": "resume",
+        "extracted_data": {"name": "Ada", "skills": ["python"]},
     },
     {
         "document_id": "doc-2",
@@ -54,8 +56,10 @@ RECORDS = [
         "chunk_count": 2,
         "deleted": True,
         "owner_id": "user-b",
+        "classification": "invoice",
+        "extracted_data": {"total": 99.9},
     },
-    # Legacy record: no owner_id, no deleted field.
+    # Legacy record: no owner_id, no deleted field, no classification.
     {
         "document_id": "doc-3",
         "workspace_id": "legacy",
@@ -144,6 +148,18 @@ def main() -> int:
             rows["doc-1"].deleted is False
             and rows["doc-2"].deleted is True
             and rows["doc-3"].deleted is False,
+        )
+        check(
+            "E2. classification preserved",
+            rows["doc-1"].classification == "resume"
+            and rows["doc-2"].classification == "invoice"
+            and rows["doc-3"].classification == "unknown",
+        )
+        check(
+            "E2. extracted_data preserved",
+            rows["doc-1"].extracted_data == {"name": "Ada", "skills": ["python"]}
+            and rows["doc-2"].extracted_data == {"total": 99.9}
+            and rows["doc-3"].extracted_data is None,
         )
         check(
             "uploaded_at preserved",

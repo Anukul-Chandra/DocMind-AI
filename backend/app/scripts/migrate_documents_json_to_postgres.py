@@ -16,8 +16,8 @@ Behavior:
   roll back on any failure.
 - Idempotent: a document id that already exists in PostgreSQL is skipped
   (reported as skipped), never duplicated.
-- Preserves document id, filename, owner_id, workspace_id, uploaded_at, and
-  the deleted state.
+- Preserves document id, filename, owner_id, workspace_id, uploaded_at,
+  the deleted state, classification, and extracted_data.
 - Creates missing ``workspaces`` rows (``name = workspace_id``) following the
   existing repository rule, and cleans up nothing else.
 
@@ -175,6 +175,8 @@ def migrate(
                         chunk_count=record.chunk_count,
                         deleted=record.deleted,
                         owner_id=record.owner_id,
+                        classification=record.classification,
+                        extracted_data=record.extracted_data,
                     )
                 )
                 existing_ids.add(record.document_id)

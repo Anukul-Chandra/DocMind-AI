@@ -46,13 +46,9 @@ class PostgresDocumentRepository(DocumentRepository):
             chunk_count: The number of chunks indexed for the document.
             owner_id: The user id that owns the document.
             document_id: An explicit identifier, or None to generate one.
-            classification: The document type, or ``unknown``. Accepted for
-                interface compatibility but not persisted: the ``documents``
-                table schema is out of scope, so documents read back through
-                this backend report ``unknown``.
+            classification: The document type, or ``unknown``.
             extracted_data: Structured data extracted from the document, or
-                None. Accepted for interface compatibility but not persisted,
-                for the same schema constraint as ``classification``.
+                None.
 
         Returns:
             The registered document.
@@ -74,6 +70,8 @@ class PostgresDocumentRepository(DocumentRepository):
                 chunk_count=chunk_count,
                 owner_id=owner_id,
                 deleted=False,
+                classification=classification,
+                extracted_data=extracted_data,
             )
             session.add(row)
             session.commit()
@@ -84,6 +82,8 @@ class PostgresDocumentRepository(DocumentRepository):
             uploaded_at=now,
             chunk_count=chunk_count,
             owner_id=owner_id,
+            classification=classification,
+            extracted_data=extracted_data,
         )
 
     def list_documents(self, owner_id: str) -> list[Document]:
@@ -203,4 +203,6 @@ class PostgresDocumentRepository(DocumentRepository):
             chunk_count=row.chunk_count,
             deleted=row.deleted,
             owner_id=row.owner_id,
+            classification=row.classification,
+            extracted_data=row.extracted_data,
         )
