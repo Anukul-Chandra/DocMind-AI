@@ -116,13 +116,20 @@ class RecordingRetriever:
     def __init__(self) -> None:
         self.last_owner_id: str | None = None
 
-    def retrieve(self, query: str, k: int = 5, owner_id: str = "") -> list[dict]:
+    def retrieve(
+        self,
+        query: str,
+        k: int = 5,
+        owner_id: str = "",
+        query_embedding: list[float] | None = None,
+    ) -> list[dict]:
         """Record the owner scope and return no chunks.
 
         Args:
             query: The search query.
             k: The number of chunks to request.
             owner_id: The owner scope passed by the API layer.
+            query_embedding: A precomputed query embedding, unused here.
 
         Returns:
             An empty chunk list.
