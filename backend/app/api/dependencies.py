@@ -215,27 +215,70 @@ def get_current_user(
 
 
 @lru_cache
+def get_semantic_retriever() -> SemanticRetriever:
+    """Return the shared semantic retriever for the default workspace.
+
+    One instance is shared between the hybrid retriever and the chat query
+    router so the relevance gate and retrieval both see the same vector store,
+    metadata store, and document repository.
+    """
+    return SemanticRetriever(
+        get_embedding_service(),
+        get_vector_store(),
+        get_metadata_store(),
+        get_document_repository(),
+    )
+
+
+@lru_cache
 def get_retriever() -> Retriever:
     return HybridRetriever(
-        semantic_retriever=SemanticRetriever(
-            get_embedding_service(),
-            get_vector_store(),
-            get_metadata_store(),
-            get_document_repository(),
-        ),
-        bm25_retriever=BM25Retriever(
-            get_metadata_store(),
-            get_document_repository(),
-        ),
+        semantic_retriever=get_semantic_retriever(),
+        bm25_retriever=get_bm25_retriever(),
+    )
+
+
+@lru_cache
+def get_bm25_retriever() -> BM25Retriever:
+    """Return the shared BM25 retriever for the default workspace."""
+    return BM25Retriever(
+        get_metadata_store(),
+        get_document_repository(),
     )
 
 
 @lru_cache
 def get_chat_service() -> ChatService:
+    semantic_retriever = get_semantic_retriever()
+    bm25_retriever = get_bm25_retriever()
+
+    def _relevance_score(
+        question: str,
+        owner_id: str,
+        query_embedding: list[float] | None,
+    ) -> float:
+        """Score a question against the owner's corpus for the router."""
+        return semantic_retriever.best_similarity(
+            question,
+            owner_id=owner_id,
+            query_embedding=query_embedding,
+        )
+
+    def _lexical_score(question: str, owner_id: str) -> float:
+        """Score a question lexically against the owner's corpus for the router."""
+        return bm25_retriever.best_score(question, owner_id=owner_id)
+
     return ChatService(
         get_retriever(),
         PromptBuilder(),
         build_provider_manager(),
         document_repository=get_document_repository(),
-        query_router=QueryRouter(get_embedding_service()),
+        query_router=QueryRouter(
+            get_embedding_service(),
+            relevance_scorer=_relevance_score,
+            lexical_scorer=_lexical_score,
+            personal_floor=settings.rag_personal_floor,
+            topic_threshold=settings.rag_topic_threshold,
+            docnoun_floor=settings.rag_docnoun_floor,
+        ),
     )
