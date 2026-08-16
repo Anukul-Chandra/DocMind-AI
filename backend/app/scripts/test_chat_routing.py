@@ -114,6 +114,33 @@ async def test_classification() -> bool:
     return True
 
 
+async def test_document_reference_classification() -> bool:
+    """Explicit document references are classified as DOCUMENT."""
+    router = QueryRouter()
+    references = [
+        "give me the summary of Anukul-chandra Cv.pdf",
+        "summarize Anukul-chandra Cv.pdf",
+        "summarize my resume.docx",
+        "what does Anukul-chandra Cv.pdf say?",
+        "what does notes.txt say?",
+        "according to Anukul-chandra Cv.pdf, what is the main topic?",
+        "according to the report.md, what were the findings?",
+        "summarize that file",
+        "summarize this document",
+        "what does the document say about Anukul?",
+        "explain the file I just uploaded",
+    ]
+    for question in references:
+        actual = router.classify(question)
+        if actual is not QueryCategory.DOCUMENT:
+            print(
+                f"FAIL: {question!r} -> {actual.value}, expected "
+                f"{QueryCategory.DOCUMENT.value}"
+            )
+            return False
+    return True
+
+
 def build_service(
     retriever: RecordingRetriever,
     provider: RecordingProvider,
@@ -259,6 +286,7 @@ async def main() -> None:
 
     scenarios = [
         ("Classification: GENERAL/DOCUMENT/METADATA", test_classification),
+        ("Classification: document references -> DOCUMENT", test_document_reference_classification),
         ("GENERAL: no retrieval, plain prompt", test_general_skips_retrieval),
         ("METADATA: no retrieval, no LLM, lists docs", test_metadata_skips_retrieval_and_llm),
         ("METADATA: empty state", test_metadata_empty),
