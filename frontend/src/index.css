@@ -5,50 +5,56 @@
 :root {
   color-scheme: light;
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.141 0.005 285.823);
+  --background: oklch(0.982 0.002 255);
+  --foreground: oklch(0.17 0.006 255);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.141 0.005 285.823);
+  --card-foreground: oklch(0.17 0.006 255);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.141 0.005 285.823);
-  --primary: oklch(0.21 0.006 285.885);
+  --popover-foreground: oklch(0.17 0.006 255);
+  --primary: oklch(0.2 0.008 260);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.967 0.001 286.375);
-  --secondary-foreground: oklch(0.21 0.006 285.885);
-  --muted: oklch(0.967 0.001 286.375);
-  --muted-foreground: oklch(0.552 0.016 285.938);
-  --accent: oklch(0.967 0.001 286.375);
-  --accent-foreground: oklch(0.21 0.006 285.885);
+  --secondary: oklch(0.965 0.003 255);
+  --secondary-foreground: oklch(0.2 0.008 260);
+  --muted: oklch(0.965 0.003 255);
+  --muted-foreground: oklch(0.52 0.015 255);
+  --accent: oklch(0.955 0.004 255);
+  --accent-foreground: oklch(0.2 0.008 260);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.92 0.004 286.32);
-  --input: oklch(0.92 0.004 286.32);
-  --ring: oklch(0.705 0.015 286.067);
+  --border: oklch(0.915 0.004 255);
+  --input: oklch(0.915 0.004 255);
+  --ring: oklch(0.68 0.15 264);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
+
+  /* Controlled brand accent used sparingly across the workspace. */
+  --brand: oklch(0.55 0.2 264);
+  --brand-foreground: oklch(0.99 0 0);
 }
 
 .dark {
-  --background: oklch(0.141 0.005 285.823);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.21 0.006 285.885);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.21 0.006 285.885);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.92 0.004 286.32);
-  --primary-foreground: oklch(0.21 0.006 285.885);
-  --secondary: oklch(0.274 0.006 286.033);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.274 0.006 286.033);
-  --muted-foreground: oklch(0.705 0.015 286.067);
-  --accent: oklch(0.274 0.006 286.033);
-  --accent-foreground: oklch(0.985 0 0);
+  --background: oklch(0.13 0.005 255);
+  --foreground: oklch(0.96 0.004 255);
+  --card: oklch(0.175 0.007 255);
+  --card-foreground: oklch(0.96 0.004 255);
+  --popover: oklch(0.19 0.008 255);
+  --popover-foreground: oklch(0.96 0.004 255);
+  --primary: oklch(0.93 0.004 255);
+  --primary-foreground: oklch(0.17 0.006 255);
+  --secondary: oklch(0.245 0.009 255);
+  --secondary-foreground: oklch(0.96 0.004 255);
+  --muted: oklch(0.245 0.009 255);
+  --muted-foreground: oklch(0.71 0.012 255);
+  --accent: oklch(0.245 0.009 255);
+  --accent-foreground: oklch(0.96 0.004 255);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.552 0.016 285.938);
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.68 0.15 264);
+  --brand: oklch(0.68 0.15 264);
+  --brand-foreground: oklch(0.12 0.01 264);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -76,6 +82,8 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -93,18 +101,28 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply tracking-tight;
   }
 }
 
-/* Smooth color transitions when switching themes */
-body,
-body *,
-body *::before,
-body *::after {
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease;
+@layer base {
+  /* Smooth color transitions when switching themes (overridable by utilities) */
+  body,
+  body *,
+  body *::before,
+  body *::after {
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease,
+      color 0.2s ease;
+  }
 }
 
 .docmind-no-transitions,
@@ -114,26 +132,159 @@ body *::after {
   transition: none !important;
 }
 
-@keyframes docmind-scan {
-  0% {
-    top: -12%;
+/* ---- Motion primitives (transform/opacity only) ---- */
+
+@keyframes docmind-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.docmind-page {
+  animation: docmind-page-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes docmind-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.docmind-rise {
+  animation: docmind-rise-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes docmind-message-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.docmind-message {
+  animation: docmind-message-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes docmind-fade-in {
+  from {
     opacity: 0;
   }
-  12% {
+  to {
     opacity: 1;
   }
-  88% {
+}
+
+@keyframes docmind-fade-out {
+  from {
     opacity: 1;
   }
-  100% {
-    top: 112%;
+  to {
     opacity: 0;
   }
 }
 
-.docmind-scan {
-  animation: docmind-scan 1.5s ease-in-out infinite;
+@keyframes docmind-dialog-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
+
+@keyframes docmind-dialog-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+}
+
+/* Radix dialog enter/exit */
+[data-slot="alert-dialog-overlay"][data-state="open"] {
+  animation: docmind-fade-in 0.16s ease-out;
+}
+[data-slot="alert-dialog-overlay"][data-state="closed"] {
+  animation: docmind-fade-out 0.12s ease-in;
+}
+[data-slot="alert-dialog-content"][data-state="open"] {
+  animation: docmind-dialog-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+[data-slot="alert-dialog-content"][data-state="closed"] {
+  animation: docmind-dialog-out 0.12s ease-in;
+}
+
+@keyframes docmind-drawer-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.docmind-drawer {
+  animation: docmind-drawer-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.docmind-drawer-overlay {
+  animation: docmind-fade-in 0.2s ease-out both;
+}
+
+@keyframes docmind-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.docmind-skeleton {
+  background:
+    linear-gradient(
+      100deg,
+      transparent 30%,
+      oklch(1 0 0 / 45%) 50%,
+      transparent 70%
+    ),
+    var(--color-muted);
+  background-size: 200% 100%;
+  animation: docmind-shimmer 1.6s linear infinite;
+}
+
+.dark .docmind-skeleton {
+  background:
+    linear-gradient(
+      100deg,
+      transparent 30%,
+      oklch(1 0 0 / 7%) 50%,
+      transparent 70%
+    ),
+    var(--color-muted);
+  background-size: 200% 100%;
+}
+
+/* ---- Theme icon ---- */
 
 @keyframes docmind-theme-icon {
   from {
@@ -148,4 +299,77 @@ body *::after {
 
 .docmind-theme-icon {
   animation: docmind-theme-icon 0.25s ease-out;
+}
+
+/* ---- Signature scanning beam ---- */
+
+@keyframes docmind-scan {
+  0% {
+    top: -8%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    top: 108%;
+    opacity: 0;
+  }
+}
+
+.docmind-scan {
+  animation: docmind-scan 2.1s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+
+@keyframes docmind-scan-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+.docmind-scan-pulse {
+  animation: docmind-scan-pulse 1.1s ease-in-out infinite;
+}
+
+/* ---- Scrollbars (restrained) ---- */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ---- Reduced motion ---- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
