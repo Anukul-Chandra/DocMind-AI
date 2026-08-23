@@ -10,7 +10,6 @@ interface ChatSourcesProps {
 
 export function ChatSources({ sources }: ChatSourcesProps) {
   const [open, setOpen] = useState(false);
-  const totalChunks = sources.reduce((sum, source) => sum + source.chunkIds.length, 0);
 
   return (
     <div className="w-full max-w-[85%]">
@@ -20,31 +19,35 @@ export function ChatSources({ sources }: ChatSourcesProps) {
         aria-expanded={open}
         aria-controls="chat-sources-list"
         className={cn(
-          "flex items-center gap-1.5 text-xs transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-sm",
-          "text-brand/70",
+          "flex items-center gap-1.5 text-xs font-medium transition-all duration-200 hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 rounded-lg px-2 py-1",
+          "text-brand/70 hover:bg-brand/5",
         )}
       >
         <BookOpen className="size-3.5" aria-hidden="true" />
         {open
           ? "Hide sources"
-          : `View ${sources.length} source${sources.length === 1 ? "" : "s"} · ${totalChunks} chunk${totalChunks === 1 ? "" : "s"}`}
+          : `View {sources.length} source{sources.length === 1 ? "" : "s"} · {totalChunks} chunk{totalChunks === 1 ? "" : "s"}`}
       </button>
       {open && (
         <ul
           id="chat-sources-list"
-          className="mt-2 space-y-1.5 rounded-lg border border-brand-border/30 bg-brand/3 p-3 shadow-brand/5"
+          className="mt-3 space-y-2 rounded-xl border border-brand-border/30 bg-brand/3 p-4 shadow-brand/10 animate-in fade-in-20 slide-in-from-top-4"
         >
-          {sources.map((source) => (
+          {sources.map((source, index) => (
             <li
               key={source.filename}
-              className="flex items-center gap-2 text-xs text-muted-foreground"
+              className="flex items-center gap-3 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              style={{ animationDelay: `${index * 30}ms` }}
             >
-              <FileText className="size-3.5 shrink-0 text-brand/60" aria-hidden="true" />
-              <span className="truncate" title={source.filename}>
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand/10 text-brand ring-1 ring-brand-border/30">
+                <FileText className="size-4" aria-hidden="true" />
+              </span>
+              <span className="truncate flex-1 font-medium text-foreground" title={source.filename}>
                 {source.filename}
               </span>
-              <span className="ml-auto shrink-0 inline-flex items-center rounded-full bg-brand/10 px-2 py-0.5 text-brand text-[10px] font-medium ring-1 ring-brand-border/30">
-                {source.chunkIds.length}
+              <span className="ml-auto shrink-0 inline-flex items-center gap-1 rounded-full bg-brand/10 px-2.5 py-1 text-brand text-xs font-medium ring-1 ring-brand-border/30">
+                <span className="size-1.5 rounded-full bg-brand/50" aria-hidden="true" />
+                {source.chunkIds.length} chunks
               </span>
             </li>
           ))}

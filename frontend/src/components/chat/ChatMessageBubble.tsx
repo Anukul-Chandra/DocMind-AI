@@ -12,7 +12,7 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
   if (message.role === "user") {
     return (
       <div className="docmind-message flex justify-end">
-        <div className="max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-br-md bg-primary px-4 py-2.5 text-sm text-primary-foreground sm:max-w-[75%]">
+        <div className="max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-br-md bg-brand px-4 py-3 text-sm text-brand-foreground shadow-brand/20 sm:max-w-[75%]">
           {message.content}
         </div>
       </div>
@@ -21,23 +21,26 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
 
   return (
     <div className="docmind-message flex flex-col items-start gap-2">
-      <div className="flex max-w-[85%] flex-col gap-1 sm:max-w-[75%]">
-        <div className="flex items-center gap-1.5 text-xs text-brand/80">
-          <span className="flex size-5 items-center justify-center rounded-full bg-brand/10 text-brand ring-1 ring-brand-border/30">
+      <div className="flex max-w-[85%] flex-col gap-1.5 sm:max-w-[75%]">
+        <div className="flex items-center gap-2 text-xs">
+          <span className="flex size-6 items-center justify-center rounded-full bg-brand/10 text-brand ring-1 ring-brand-border/30 shadow-brand/10">
             <Sparkles className="size-3" aria-hidden="true" />
           </span>
-          <span className="font-medium">DocMind</span>
+          <span className="font-medium text-foreground">DocMind</span>
         </div>
         <div
           className={cn(
-            "whitespace-pre-wrap break-words rounded-2xl rounded-tl-md border bg-card px-4 py-3 text-sm leading-relaxed shadow-sm transition-shadow",
-            "border-brand-border/30 hover:shadow-brand/10",
+            "relative whitespace-pre-wrap break-words rounded-2xl rounded-tl-md bg-card px-5 py-3.5 text-sm leading-relaxed shadow-elevation-1 transition-all duration-200",
+            "border border-border/50 hover:shadow-elevation-2 hover:border-brand/20",
           )}
         >
-          {message.content}
+          <div className="prose prose-sm max-w-none text-foreground">
+            {message.content}
+          </div>
         </div>
         {(message.provider || message.model) && (
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <span className="size-1.5 rounded-full bg-brand/30" aria-hidden="true" />
             {[message.provider, message.model].filter(Boolean).join(" · ")}
           </p>
         )}
