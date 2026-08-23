@@ -28,7 +28,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="lg:hidden"
+          className="hover:bg-brand/10 hover:text-brand lg:hidden"
           onClick={onMenuClick}
           aria-label="Open navigation"
         >
@@ -38,8 +38,8 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
       </div>
       <div className="flex items-center gap-1">
         <ThemeToggle />
-        <div className="flex items-center gap-2 rounded-full border bg-card/60 py-1 pl-1 pr-3">
-          <span className="flex size-7 items-center justify-center rounded-full bg-brand/10">
+        <div className="flex items-center gap-2 rounded-full border border-brand-border bg-card/60 py-1 pl-1 pr-3 transition-colors hover:border-brand/40">
+          <span className="flex size-7 items-center justify-center rounded-full bg-brand/10 ring-1 ring-inset ring-brand/20">
             <User className="size-4 text-brand" aria-hidden="true" />
           </span>
           <span className="hidden text-sm font-medium sm:inline">Account</span>
