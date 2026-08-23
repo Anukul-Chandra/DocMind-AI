@@ -16,6 +16,7 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       aria-label={label}
       title={label}
+      className="hover:bg-brand/10 hover:text-brand"
     >
       <span key={theme} className="docmind-theme-icon">
         {isDark ? (

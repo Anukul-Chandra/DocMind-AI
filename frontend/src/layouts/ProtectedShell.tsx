@@ -45,7 +45,7 @@ export function ProtectedShell() {
             aria-hidden="true"
           />
           <AppSidebar
-            className="docmind-drawer relative z-10 h-full"
+            className="docmind-drawer relative z-10 h-full shadow-brand"
             onNavigate={() => setSidebarOpen(false)}
           />
           <Button
