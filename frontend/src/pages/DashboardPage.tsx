@@ -52,7 +52,7 @@ function OverviewCard({
     <Card className="docmind-rise gap-5" style={{ animationDelay: `${delay}ms` }}>
       <CardHeader>
         <div className="flex items-start justify-between gap-3">
-          <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <span className="flex size-10 items-center justify-center rounded-lg bg-brand/10 text-brand ring-1 ring-brand-border/30 shadow-[0_0_0_1px_var(--color-brand-border)]">
             <Icon className="size-5" aria-hidden="true" />
           </span>
           <Button asChild size="icon" variant="ghost" aria-label={action}>
@@ -101,11 +101,11 @@ function QuickAction({
       className={cn(
         "docmind-rise group flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm",
         "transition-[transform,border-color,background-color,box-shadow] duration-200",
-        "hover:-translate-y-0.5 hover:border-brand/30 hover:shadow-md",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        "hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-md hover:shadow-brand/10",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2",
       )}
     >
-      <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-brand/10 group-hover:text-brand">
+      <span className="flex size-10 items-center justify-center rounded-lg bg-brand/10 text-brand ring-1 ring-brand-border/30 transition-colors group-hover:bg-brand/20 group-hover:ring-brand/30 group-hover:shadow-[0_0_8px_var(--color-brand)]">
         <Icon className="size-5" aria-hidden="true" />
       </span>
       <span className="space-y-1">
