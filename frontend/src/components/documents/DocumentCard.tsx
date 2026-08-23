@@ -23,11 +23,11 @@ export function formatUploadDate(iso: string): string {
 
 export function DocumentCard({ document }: { document: Document }) {
   return (
-    <Card className="group gap-3 py-4 transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-brand/30 hover:shadow-md">
+    <Card className="group gap-3 py-4 transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-md hover:shadow-brand/10">
       <CardHeader className="flex-row items-center gap-3 px-4">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted transition-colors group-hover:bg-brand/10">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-brand/10 text-brand ring-1 ring-brand-border/30 transition-colors group-hover:bg-brand/20 group-hover:ring-brand/30 group-hover:shadow-[0_0_8px_var(--color-brand)]">
           <FileText
-            className="size-5 text-muted-foreground"
+            className="size-5"
             aria-hidden="true"
           />
         </span>
@@ -54,8 +54,8 @@ export function DocumentCard({ document }: { document: Document }) {
               document.deleted
                 ? "bg-muted text-muted-foreground"
                 : document.classification === "unknown"
-                  ? "bg-muted text-muted-foreground"
-                  : "bg-brand/10 text-brand",
+                ? "bg-brand/10 text-brand"
+                : "bg-brand/10 text-brand ring-1 ring-brand-border/30",
             )}
           >
             {documentTypeLabel(document.classification)}
