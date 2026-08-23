@@ -41,12 +41,15 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     }
   }
 
+  const hasValue = value.trim().length > 0;
+
   return (
-    <div>
+    <div className="w-full">
       <div
         className={cn(
-          "flex items-end gap-2 rounded-2xl border bg-card p-2 shadow-sm transition-[border-color,box-shadow,background-color]",
-          "focus-within:border-brand focus-within:ring-brand/50 focus-within:ring-[3px] focus-within:shadow-brand/10",
+          "relative flex items-end gap-2 rounded-2xl bg-card/60 border border-border/50 p-2 shadow-elevation-1 backdrop-blur-xl transition-all duration-200",
+          "focus-within:border-brand/40 focus-within:ring-2 focus-within:ring-brand/20 focus-within:ring-offset-0 focus-within:shadow-brand/15",
+          hasValue && "border-brand/30",
         )}
       >
         <textarea
@@ -59,18 +62,25 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           aria-label="Your question"
           disabled={disabled}
           autoFocus
-          className="max-h-40 min-h-9 flex-1 resize-none bg-transparent px-2 py-2 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-60"
+          className="max-h-40 min-h-9 flex-1 resize-none bg-transparent px-3 py-2.5 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-60"
         />
-        <Button
-          type="button"
-          size="icon"
-          onClick={submit}
-          disabled={disabled || !value.trim()}
-          aria-label="Send question"
-          className="group text-muted-foreground hover:text-brand hover:bg-brand/10 transition-all duration-200 disabled:opacity-50 disabled:hover:bg-transparent"
-        >
-          <Send className="size-4" aria-hidden="true" />
-        </Button>
+        <div className="relative flex items-center justify-center">
+          <Button
+            type="button"
+            size="icon"
+            onClick={submit}
+            disabled={disabled || !hasValue}
+            aria-label="Send question"
+            variant={hasValue ? "default" : "ghost"}
+            className={cn(
+              "transition-all duration-200",
+              hasValue ? "shadow-brand hover:shadow-brand/30" : "text-muted-foreground hover:text-brand hover:bg-brand/10",
+              disabled && "opacity-50",
+            )}
+          >
+            <Send className="size-4.5" aria-hidden="true" />
+          </Button>
+        </div>
       </div>
       <p className="mt-2 text-center text-xs text-muted-foreground">
         Enter to send · Shift+Enter for a new line
