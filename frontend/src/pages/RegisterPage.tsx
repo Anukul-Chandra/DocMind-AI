@@ -71,15 +71,15 @@ export function RegisterPage() {
   return (
     <div className="docmind-page relative flex flex-1 flex-col items-center justify-center gap-6 p-6">
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-        <div className="absolute -top-28 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-brand/10 blur-3xl" />
-        <div className="absolute -bottom-32 right-1/4 h-72 w-72 rounded-full bg-brand/[0.07] blur-3xl" />
+        <div className="absolute -top-28 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-brand/15 blur-3xl" />
+        <div className="absolute -bottom-32 right-1/4 h-72 w-72 rounded-full bg-brand-soft/50 blur-3xl" />
       </div>
       <div className="absolute right-4 top-4">
         <ThemeToggle />
       </div>
-      <div className="docmind-rise flex items-center gap-2">
-        <span className="flex size-10 items-center justify-center rounded-lg bg-brand/10">
-          <FileSearch className="size-5 text-brand" aria-hidden="true" />
+      <div className="docmind-rise flex items-center gap-2.5">
+        <span className="flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-strong text-brand-foreground shadow-brand ring-1 ring-brand-border">
+          <FileSearch className="size-5" aria-hidden="true" />
         </span>
         <span className="text-lg font-semibold">DocMind AI</span>
       </div>
@@ -138,14 +138,21 @@ export function RegisterPage() {
             {errors.root && (
               <p className="text-sm text-destructive">{errors.root.message}</p>
             )}
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              className="w-full bg-brand text-brand-foreground shadow-brand hover:bg-brand/90 focus-visible:border-brand"
+              disabled={isSubmitting}
+            >
               {isSubmitting ? "Creating account…" : "Create account"}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="justify-center text-sm text-muted-foreground">
           <span>Already have an account?</span>
-          <Link to="/login" className="ml-1 font-medium hover:underline">
+          <Link
+            to="/login"
+            className="ml-1 rounded-sm font-medium text-brand hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
             Sign in
           </Link>
         </CardFooter>
