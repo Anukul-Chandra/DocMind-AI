@@ -12,16 +12,16 @@ interface ErrorStateProps {
 
 export function ErrorState({ message, action, className }: ErrorStateProps) {
   return (
-    <Card className={cn("gap-2 py-10", className)}>
-      <CardContent className="flex flex-col items-center gap-3 px-6 text-center">
-        <span className="flex size-11 items-center justify-center rounded-full bg-destructive/10">
-          <AlertCircle
-            className="size-5 text-destructive"
-            aria-hidden="true"
-          />
+    <Card variant="glass" className={cn("gap-3 py-10 px-8 border-destructive/20", className)}>
+      <CardContent className="flex flex-col items-center gap-4 px-6 text-center">
+        <span className="flex size-14 items-center justify-center rounded-2xl bg-destructive/10 text-destructive ring-1 ring-destructive/20">
+          <AlertCircle className="size-7" aria-hidden="true" />
         </span>
-        <p className="max-w-md text-sm text-muted-foreground">{message}</p>
-        {action && <div className="mt-1">{action}</div>}
+        <div className="space-y-1">
+          <p className="text-lg font-semibold text-foreground">Something went wrong</p>
+          <p className="max-w-md text-base text-muted-foreground">{message}</p>
+        </div>
+        {action && <div className="mt-2">{action}</div>}
       </CardContent>
     </Card>
   );

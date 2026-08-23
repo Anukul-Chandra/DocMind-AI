@@ -20,21 +20,20 @@ export function EmptyState({
   className,
 }: EmptyStateProps) {
   return (
-    <Card className={cn("gap-2 py-10", className)}>
-      <CardContent className="flex flex-col items-center gap-3 px-6 text-center">
+    <Card variant="glass" className={cn("gap-3 py-12 px-8", className)}>
+      <CardContent className="flex flex-col items-center gap-4 px-6 text-center">
         {Icon && (
-          <span className="flex size-11 items-center justify-center rounded-full bg-brand/10 text-brand ring-1 ring-brand-border/30">
-            <Icon
-              className="size-5"
-              aria-hidden="true"
-            />
+          <span className="flex size-14 items-center justify-center rounded-2xl bg-brand/10 text-brand ring-1 ring-brand-border/30 shadow-brand/10">
+            <Icon className="size-7" aria-hidden="true" />
           </span>
         )}
-        <p className="text-sm font-medium">{title}</p>
-        {description && (
-          <p className="max-w-md text-sm text-muted-foreground">{description}</p>
-        )}
-        {action && <div className="mt-1">{action}</div>}
+        <div className="space-y-1">
+          <p className="text-lg font-semibold text-foreground">{title}</p>
+          {description && (
+            <p className="max-w-md text-base text-muted-foreground">{description}</p>
+          )}
+        </div>
+        {action && <div className="mt-2">{action}</div>}
       </CardContent>
     </Card>
   );
