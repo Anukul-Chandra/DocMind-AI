@@ -131,10 +131,10 @@ export function UploadCard() {
     <div className="space-y-3">
       {result && (
         <div
-          className="docmind-rise flex items-start gap-3 rounded-xl border border-brand/25 bg-brand/5 p-4"
+          className="docmind-rise flex items-start gap-3 rounded-xl border border-brand-border/30 bg-brand/3 shadow-brand/10"
           role="status"
         >
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand/15 text-brand">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand ring-1 ring-brand-border/30">
             <Check className="size-4" aria-hidden="true" />
           </span>
           <div className="min-w-0 flex-1">
@@ -143,14 +143,14 @@ export function UploadCard() {
               {result.filename}
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-              <span className="inline-flex items-center rounded-full border bg-card px-2 py-0.5 text-muted-foreground">
+              <span className="inline-flex items-center rounded-full border border-brand-border/30 bg-brand/5 px-2 py-0.5 text-muted-foreground">
                 {result.chunks} {result.chunks === 1 ? "chunk" : "chunks"}
               </span>
-              <span className="inline-flex items-center rounded-full border bg-card px-2 py-0.5 text-muted-foreground">
+              <span className="inline-flex items-center rounded-full border border-brand-border/30 bg-brand/5 px-2 py-0.5 text-muted-foreground">
                 {result.embeddings} embeddings
               </span>
               {classification && classification !== "unknown" && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-brand/10 px-2 py-0.5 font-medium text-brand">
+                <span className="inline-flex items-center gap-1 rounded-full bg-brand/10 px-2 py-0.5 font-medium text-brand ring-1 ring-brand-border/30">
                   <Sparkles className="size-3" aria-hidden="true" />
                   {documentTypeLabel(classification)}
                 </span>
@@ -171,24 +171,24 @@ export function UploadCard() {
       <div
         {...getRootProps()}
         className={cn(
-          "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed bg-card/40 px-6 py-10 text-center transition-colors",
+          "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed bg-card/40 px-6 py-10 text-center transition-all duration-200",
           "hover:border-brand/50 hover:bg-brand/[0.03]",
-          "focus-visible:outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-          isDragActive && "border-brand bg-brand/5",
+          "focus-visible:outline-none focus-visible:border-brand focus-visible:ring-brand/50 focus-visible:ring-[3px]",
+          isDragActive && "border-brand bg-brand/5 shadow-brand/10 ring-1 ring-brand/20",
           isDragReject && "border-destructive bg-destructive/5",
         )}
       >
         <input {...getInputProps()} />
         <span
           className={cn(
-            "flex size-12 items-center justify-center rounded-full bg-muted transition-colors",
-            isDragActive && "bg-brand/10",
+            "flex size-12 items-center justify-center rounded-full bg-brand/5 transition-all duration-200",
+            isDragActive && "bg-brand/15 ring-2 ring-brand/30",
           )}
         >
           <CloudUpload
             className={cn(
-              "size-6 text-muted-foreground transition-colors",
-              isDragActive && "text-brand",
+              "size-6 text-brand/60 transition-all duration-200",
+              isDragActive && "text-brand scale-110",
             )}
             aria-hidden="true"
           />
