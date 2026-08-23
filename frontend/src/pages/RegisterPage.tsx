@@ -69,92 +69,122 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="docmind-page relative flex flex-1 flex-col items-center justify-center gap-6 p-6">
+    <div className="docmind-page relative flex min-h-screen flex-col items-center justify-center gap-8 p-6 docmind-ambient">
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-        <div className="absolute -top-28 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-brand/15 blur-3xl" />
-        <div className="absolute -bottom-32 right-1/4 h-72 w-72 rounded-full bg-brand-soft/50 blur-3xl" />
+        <div className="absolute -top-32 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-brand/10 blur-3xl" />
+        <div className="absolute -bottom-40 right-1/4 h-80 w-80 rounded-full bg-brand-soft/30 blur-3xl" />
       </div>
-      <div className="absolute right-4 top-4">
+
+      <div className="absolute right-4 top-4 z-10">
         <ThemeToggle />
       </div>
-      <div className="docmind-rise flex items-center gap-2.5">
-        <span className="flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-strong text-brand-foreground shadow-brand ring-1 ring-brand-border">
-          <FileSearch className="size-5" aria-hidden="true" />
+
+      <div className="docmind-rise flex items-center gap-3 relative z-10">
+        <span className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-strong text-brand-foreground shadow-brand ring-1 ring-brand-border/30">
+          <FileSearch className="size-6" aria-hidden="true" />
         </span>
-        <span className="text-lg font-semibold">DocMind AI</span>
+        <span className="text-xl font-semibold text-foreground">DocMind AI</span>
       </div>
-      <Card className="docmind-rise w-full max-w-sm" style={{ animationDelay: "60ms" }}>
-        <CardHeader>
-          <CardTitle>Create an account</CardTitle>
-          <CardDescription>
-            Start uploading documents and asking questions.
+
+      <Card variant="glass" className="docmind-rise w-full max-w-md" style={{ animationDelay: "60ms" }}>
+        <CardHeader className="text-center pb-4">
+          <CardTitle className="text-2xl font-semibold text-foreground">Create an account</CardTitle>
+          <CardDescription className="text-base text-muted-foreground">
+            Start uploading documents and asking questions
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-sm font-medium text-foreground">
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
                 autoComplete="email"
                 placeholder="you@example.com"
                 aria-invalid={Boolean(errors.email)}
+                className="h-10 focus-visible:border-brand focus-visible:ring-brand/20"
                 {...register("email")}
               />
               {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
+                <p className="text-sm text-destructive flex items-center gap-1">
+                  <span className="size-3.5 rounded-full bg-destructive/10 flex items-center justify-center">
+                    <span className="size-1.5 rounded-full bg-destructive" aria-hidden="true" />
+                  </span>
+                  {errors.email.message}
+                </p>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-sm font-medium text-foreground">
+                Password
+              </Label>
               <PasswordInput
                 id="password"
                 autoComplete="new-password"
                 placeholder="At least 8 characters"
                 aria-invalid={Boolean(errors.password)}
+                className="focus-visible:border-brand focus-visible:ring-brand/20"
                 {...register("password")}
               />
               {errors.password && (
-                <p className="text-sm text-destructive">
+                <p className="text-sm text-destructive flex items-center gap-1">
+                  <span className="size-3.5 rounded-full bg-destructive/10 flex items-center justify-center">
+                    <span className="size-1.5 rounded-full bg-destructive" aria-hidden="true" />
+                  </span>
                   {errors.password.message}
                 </p>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm password</Label>
+              <Label htmlFor="confirmPassword" className="text-sm font-medium text-foreground">
+                Confirm password
+              </Label>
               <PasswordInput
                 id="confirmPassword"
                 autoComplete="new-password"
                 aria-invalid={Boolean(errors.confirmPassword)}
+                className="focus-visible:border-brand focus-visible:ring-brand/20"
                 {...register("confirmPassword")}
               />
               {errors.confirmPassword && (
-                <p className="text-sm text-destructive">
+                <p className="text-sm text-destructive flex items-center gap-1">
+                  <span className="size-3.5 rounded-full bg-destructive/10 flex items-center justify-center">
+                    <span className="size-1.5 rounded-full bg-destructive" aria-hidden="true" />
+                  </span>
                   {errors.confirmPassword.message}
                 </p>
               )}
             </div>
             {errors.root && (
-              <p className="text-sm text-destructive">{errors.root.message}</p>
+              <p className="text-sm text-destructive flex items-center gap-1">
+                <span className="size-3.5 rounded-full bg-destructive/10 flex items-center justify-center">
+                  <span className="size-1.5 rounded-full bg-destructive" aria-hidden="true" />
+                </span>
+                {errors.root.message}
+              </p>
             )}
             <Button
               type="submit"
-              className="w-full bg-brand text-brand-foreground shadow-brand hover:bg-brand/90 focus-visible:border-brand"
+              className="w-full h-11 text-base shadow-brand hover:shadow-brand/30 disabled:opacity-50"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Creating account…" : "Create account"}
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="justify-center text-sm text-muted-foreground">
-          <span>Already have an account?</span>
-          <Link
-            to="/login"
-            className="ml-1 rounded-sm font-medium text-brand hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            Sign in
-          </Link>
+        <CardFooter className="justify-center py-4 border-t border-border/50">
+          <p className="text-sm text-muted-foreground flex items-center gap-2">
+            <span>Already have an account?</span>
+            <Link
+              to="/login"
+              className="font-medium text-brand hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-sm"
+            >
+              Sign in
+            </Link>
+          </p>
         </CardFooter>
       </Card>
     </div>
