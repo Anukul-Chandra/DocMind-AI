@@ -23,9 +23,9 @@ export function EmptyState({
     <Card className={cn("gap-2 py-10", className)}>
       <CardContent className="flex flex-col items-center gap-3 px-6 text-center">
         {Icon && (
-          <span className="flex size-11 items-center justify-center rounded-full bg-muted">
+          <span className="flex size-11 items-center justify-center rounded-full bg-brand/10 text-brand ring-1 ring-brand-border/30">
             <Icon
-              className="size-5 text-muted-foreground"
+              className="size-5"
               aria-hidden="true"
             />
           </span>

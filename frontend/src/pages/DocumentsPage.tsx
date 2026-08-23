@@ -22,15 +22,15 @@ import { cn } from "@/lib/utils";
 
 function DocumentSkeleton() {
   return (
-    <Card className="docmind-skeleton gap-3 border-transparent py-4 shadow-none">
+    <Card className="docmind-skeleton gap-3 border-brand-border/30 py-4 shadow-none">
       <div className="flex items-center gap-3 px-4">
-        <span className="size-10 shrink-0 rounded-lg bg-muted" />
+        <span className="size-10 shrink-0 rounded-lg bg-brand/5" />
         <div className="flex-1 space-y-2">
-          <div className="h-3 w-3/4 rounded bg-muted" />
-          <div className="h-3 w-1/2 rounded bg-muted" />
+          <div className="h-3 w-3/4 rounded bg-brand/5" />
+          <div className="h-3 w-1/2 rounded bg-brand/5" />
         </div>
       </div>
-      <div className="h-3 w-1/3 rounded bg-muted px-4" />
+      <div className="h-3 w-1/3 rounded bg-brand/5 px-4" />
     </Card>
   );
 }
@@ -76,7 +76,7 @@ export function DocumentsPage() {
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <div className="relative">
               <Search
-                className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+                className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-brand/60"
                 aria-hidden="true"
               />
               <Input
@@ -85,7 +85,7 @@ export function DocumentsPage() {
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search by filename…"
                 aria-label="Search documents by filename"
-                className="h-9 w-full pl-9 sm:w-64"
+                className="h-9 w-full pl-9 sm:w-64 focus-visible:border-brand focus-visible:ring-brand/50"
               />
             </div>
             <select
@@ -96,7 +96,7 @@ export function DocumentsPage() {
               aria-label="Filter documents by type"
               className={cn(
                 "border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs outline-none transition-[color,box-shadow] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-                "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+                "focus-visible:border-brand focus-visible:ring-brand/50 focus-visible:ring-[3px]",
                 "sm:w-44",
               )}
             >
