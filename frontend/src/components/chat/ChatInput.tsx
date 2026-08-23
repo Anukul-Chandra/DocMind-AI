@@ -46,7 +46,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
       <div
         className={cn(
           "flex items-end gap-2 rounded-2xl border bg-card p-2 shadow-sm transition-[border-color,box-shadow,background-color]",
-          "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px] focus-within:shadow-md",
+          "focus-within:border-brand focus-within:ring-brand/50 focus-within:ring-[3px] focus-within:shadow-brand/10",
         )}
       >
         <textarea
@@ -67,6 +67,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           onClick={submit}
           disabled={disabled || !value.trim()}
           aria-label="Send question"
+          className="group text-muted-foreground hover:text-brand hover:bg-brand/10 transition-all duration-200 disabled:opacity-50 disabled:hover:bg-transparent"
         >
           <Send className="size-4" aria-hidden="true" />
         </Button>
