@@ -1,10 +1,26 @@
+<div align="center">
+
 # DocMind AI
 
-**A full-stack, retrieval-augmented generation (RAG) platform for chatting with your own documents.**
+### *Chat with your documents. Grounded. Hybrid. Multi-user.*
+
+**A full-stack Retrieval-Augmented Generation (RAG) platform** built with FastAPI + React 19
+
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.139-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://typescriptlang.org)
+[![FAISS](https://img.shields.io/badge/FAISS-Vector%20Search-1C3C5C?style=for-the-badge&logo=meta&logoColor=white)](https://faiss.ai)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://postgresql.org)
+[![License](https://img.shields.io/badge/License-MIT-10B981?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](LICENSE)
+
+</div>
+
+---
 
 Upload PDFs, and DocMind indexes them into a FAISS vector store; ask questions in plain language and get answers grounded strictly in your corpus — with a relevance gate that knows when *not* to retrieve and defers to the LLM's general knowledge instead.
 
-```
+```text
 PDF ──▶ extract ──▶ clean ──▶ chunk ──▶ embed ──▶ FAISS
                                                     │
 question ──▶ relevance gate ──▶ hybrid retrieval ──▶ grounded prompt ──▶ LLM failover chain ──▶ answer
