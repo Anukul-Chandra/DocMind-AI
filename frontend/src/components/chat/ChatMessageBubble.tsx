@@ -1,14 +1,18 @@
 import { Sparkles } from "lucide-react";
 
 import { ChatSources } from "@/components/chat/ChatSources";
+import { ProgressiveText } from "@/components/chat/ProgressiveText";
 import { cn } from "@/lib/utils";
 import type { ChatMessage } from "@/types/chat";
 
 interface ChatMessageBubbleProps {
   message: ChatMessage;
+  /** Animate progressive reveal (only used for the newest assistant message). */
+  animate?: boolean;
+  onGrow?: () => void;
 }
 
-export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
+export function ChatMessageBubble({ message, animate = false, onGrow }: ChatMessageBubbleProps) {
   if (message.role === "user") {
     return (
       <div className="docmind-message flex justify-end">
@@ -62,8 +66,8 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
               className="absolute inset-y-0 left-0 w-0.5 bg-gradient-to-b from-brand/55 via-brand/15 to-transparent"
               aria-hidden="true"
             />
-            <div className="whitespace-pre-wrap break-words pl-2.5 text-sm leading-relaxed text-foreground">
-              {message.content}
+            <div className="pl-2.5">
+              <ProgressiveText content={message.content} active={animate} onGrow={onGrow} />
             </div>
           </div>
 
