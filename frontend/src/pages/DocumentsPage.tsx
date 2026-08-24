@@ -55,6 +55,7 @@ export function DocumentsPage() {
   return (
     <div className="docmind-page mx-auto w-full max-w-6xl space-y-8 p-6 lg:p-8">
       <PageHeader
+        kicker="Knowledge Library"
         title="Documents"
         description="Ingest PDFs into the knowledge index — scanned, parsed, chunked and embedded into searchable vectors."
       />

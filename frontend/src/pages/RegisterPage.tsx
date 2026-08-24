@@ -69,24 +69,35 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="docmind-page relative flex min-h-screen flex-col items-center justify-center gap-8 p-6 docmind-ambient">
+    <div className="docmind-page relative flex min-h-screen flex-col items-center justify-center gap-8 p-6">
+      {/* Local atmosphere accents over the global backdrop */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-        <div className="absolute -top-32 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-brand/10 blur-3xl" />
-        <div className="absolute -bottom-40 right-1/4 h-80 w-80 rounded-full bg-brand-soft/30 blur-3xl" />
+        <div className="docmind-grid-fade absolute inset-0 opacity-70" />
+        <div className="absolute -top-24 left-1/2 h-80 w-[36rem] -translate-x-1/2 rounded-full bg-brand/6 blur-3xl" />
       </div>
 
       <div className="absolute right-4 top-4 z-10">
         <ThemeToggle />
       </div>
 
-      <div className="docmind-rise flex items-center gap-3 relative z-10">
+      {/* Brand */}
+      <div className="docmind-rise relative z-10 flex flex-col items-center gap-3">
         <span className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-strong text-brand-foreground shadow-brand ring-1 ring-brand-border/30">
           <FileSearch className="size-6" aria-hidden="true" />
         </span>
-        <span className="text-xl font-semibold text-foreground">DocMind AI</span>
+        <span className="flex flex-col items-center leading-tight">
+          <span className="text-xl font-semibold tracking-tight text-foreground">DocMind AI</span>
+          <span className="docmind-label mt-1 text-muted-foreground">Document Intelligence System</span>
+        </span>
       </div>
 
-      <Card variant="glass" className="docmind-rise w-full max-w-md" style={{ animationDelay: "60ms" }}>
+      {/* Auth panel */}
+      <div className="docmind-rise relative z-10 w-full max-w-md" style={{ animationDelay: "60ms" }}>
+        <span aria-hidden="true" className="absolute -left-px -top-px z-10 size-3.5 rounded-tl-md border-l border-t border-brand/40" />
+        <span aria-hidden="true" className="absolute -right-px -top-px z-10 size-3.5 rounded-tr-md border-r border-t border-brand/40" />
+        <span aria-hidden="true" className="absolute -bottom-px -left-px z-10 size-3.5 rounded-bl-md border-b border-l border-brand/40" />
+        <span aria-hidden="true" className="absolute -bottom-px -right-px z-10 size-3.5 rounded-br-md border-b border-r border-brand/40" />
+        <Card variant="glass">
         <CardHeader className="text-center pb-4">
           <CardTitle className="text-2xl font-semibold text-foreground">Create an account</CardTitle>
           <CardDescription className="text-base text-muted-foreground">
@@ -168,25 +179,33 @@ export function RegisterPage() {
             )}
             <Button
               type="submit"
-              className="w-full h-11 text-base shadow-brand hover:shadow-brand/30 disabled:opacity-50"
+              className="h-11 w-full text-base shadow-brand hover:shadow-brand/45 disabled:opacity-50"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Creating account…" : "Create account"}
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="justify-center py-4 border-t border-border/50">
-          <p className="text-sm text-muted-foreground flex items-center gap-2">
+        <CardFooter className="justify-center border-t border-border/40 py-4">
+          <p className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>Already have an account?</span>
             <Link
               to="/login"
-              className="font-medium text-brand hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-sm"
+              className="rounded-sm font-medium text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand hover:underline"
             >
               Sign in
             </Link>
           </p>
         </CardFooter>
-      </Card>
+        </Card>
+      </div>
+
+      <p
+        className="docmind-label docmind-rise relative z-10 text-muted-foreground/45"
+        style={{ animationDelay: "120ms" }}
+      >
+        DocMind AI · Secure Workspace Access
+      </p>
     </div>
   );
 }

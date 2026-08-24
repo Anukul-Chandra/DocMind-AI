@@ -14,11 +14,12 @@ export function ErrorState({ message, action, className }: ErrorStateProps) {
   return (
     <Card variant="glass" className={cn("gap-3 py-10 px-8 border-destructive/20", className)}>
       <CardContent className="flex flex-col items-center gap-4 px-6 text-center">
-        <span className="flex size-14 items-center justify-center rounded-2xl bg-destructive/10 text-destructive ring-1 ring-destructive/20">
+        <span className="flex size-14 items-center justify-center rounded-2xl bg-destructive/10 text-destructive ring-1 ring-destructive/25 shadow-[0_0_28px_-12px_var(--destructive)]">
           <AlertCircle className="size-7" aria-hidden="true" />
         </span>
         <div className="space-y-1">
-          <p className="text-lg font-semibold text-foreground">Something went wrong</p>
+          <p className="docmind-label text-destructive/70">System Alert</p>
+          <p className="text-lg font-semibold tracking-tight text-foreground">Something went wrong</p>
           <p className="max-w-md text-base text-muted-foreground">{message}</p>
         </div>
         {action && <div className="mt-2">{action}</div>}

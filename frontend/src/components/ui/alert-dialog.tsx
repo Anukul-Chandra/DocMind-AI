@@ -39,7 +39,7 @@ function AlertDialogOverlay({
   return (
     <AlertDialogPrimitive.Overlay
       data-slot="alert-dialog-overlay"
-      className={cn("fixed inset-0 z-50 bg-black/50", className)}
+      className={cn("fixed inset-0 z-50 bg-black/50 backdrop-blur-sm", className)}
       {...props}
     />
   );
@@ -55,7 +55,7 @@ function AlertDialogContent({
       <AlertDialogPrimitive.Content
         data-slot="alert-dialog-content"
         className={cn(
-          "fixed left-1/2 top-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-lg border bg-background p-6 shadow-lg sm:max-w-sm",
+          "fixed left-1/2 top-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-2xl border border-border/60 bg-popover/90 p-6 shadow-elevation-3 backdrop-blur-xl sm:max-w-sm",
           className,
         )}
         {...props}

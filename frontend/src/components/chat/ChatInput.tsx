@@ -84,7 +84,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           <ArrowUp className="size-4.5" aria-hidden="true" />
         </button>
       </div>
-      <p className="docmind-label mt-2 text-center text-muted-foreground/40">
+      <p className="docmind-label mt-2 text-center text-muted-foreground/55">
         Enter to transmit · Shift+Enter for a new line
       </p>
     </div>
