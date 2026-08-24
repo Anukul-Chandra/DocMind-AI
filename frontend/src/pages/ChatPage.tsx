@@ -3,11 +3,10 @@ import { AlertCircle, MessagesSquare } from "lucide-react";
 
 import { ApiError } from "@/api/client";
 import { chatUser } from "@/api/chat";
-import { retrieveChunks, type RetrieveChunk } from "@/api/retrieve";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { ChatMessageBubble } from "@/components/chat/ChatMessageBubble";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
-import type { ChatMessage, SourceFile } from "@/types/chat";
+import type { ChatMessage } from "@/types/chat";
 import { cn } from "@/lib/utils";
 
 const EXAMPLE_QUESTIONS = [
@@ -15,21 +14,6 @@ const EXAMPLE_QUESTIONS = [
   "Summarize the key findings.",
   "Explain the most important details.",
 ];
-
-function toSources(chunks: RetrieveChunk[]): SourceFile[] {
-  const byFilename = new Map<string, number[]>();
-  for (const chunk of chunks) {
-    const ids = byFilename.get(chunk.filename) ?? [];
-    if (!ids.includes(chunk.chunk_id)) {
-      ids.push(chunk.chunk_id);
-    }
-    byFilename.set(chunk.filename, ids);
-  }
-  return [...byFilename.entries()].map(([filename, chunkIds]) => ({
-    filename,
-    chunkIds,
-  }));
-}
 
 function EmptyState({ onExample }: { onExample: (text: string) => void }) {
   return (
@@ -98,24 +82,9 @@ export function ChatPage() {
     ]);
     setIsLoading(true);
     try {
-      const [chatResult, retrieveResult] = await Promise.allSettled([
-        chatUser(text),
-        retrieveChunks(text),
-      ]);
-      if (chatResult.status === "rejected") {
-        const reason = chatResult.reason;
-        setError(
-          reason instanceof ApiError
-            ? reason.message
-            : "Failed to get an answer. Please try again.",
-        );
-        return;
-      }
-      const { answer, provider, model } = chatResult.value;
-      const sources =
-        retrieveResult.status === "fulfilled" && retrieveResult.value.length > 0
-          ? toSources(retrieveResult.value)
-          : undefined;
+      // Sources are attached only when the backend reports that retrieval
+      // actually contributed to the answer (see chat API contract).
+      const { answer, provider, model } = await chatUser(text);
       setMessages((previous) => [
         ...previous,
         {
@@ -124,9 +93,14 @@ export function ChatPage() {
           content: answer,
           provider,
           model,
-          sources,
         },
       ]);
+    } catch (err) {
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : "Failed to get an answer. Please try again.",
+      );
     } finally {
       setIsLoading(false);
     }
