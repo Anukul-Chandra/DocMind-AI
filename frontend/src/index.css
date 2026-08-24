@@ -376,6 +376,26 @@
   animation: docmind-eq 1.05s ease-in-out infinite;
 }
 
+/* ---- Typewriter caret ----
+   Shown only while a response is being revealed; removed once complete. */
+
+@keyframes docmind-caret-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.docmind-caret {
+  display: inline-block;
+  width: 3px;
+  height: 1em;
+  margin-left: 3px;
+  border-radius: 1px;
+  vertical-align: text-bottom;
+  background: var(--brand);
+  box-shadow: 0 0 8px color-mix(in oklab, var(--brand) 70%, transparent);
+  animation: docmind-caret-blink 1s steps(1, end) infinite;
+}
+
 @keyframes docmind-scan-pulse {
   0%, 100% { opacity: 0.4; }
   50% { opacity: 0.95; }

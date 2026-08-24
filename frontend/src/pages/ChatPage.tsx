@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AlertCircle, MessagesSquare } from "lucide-react";
 
 import { ApiError } from "@/api/client";
@@ -83,6 +83,11 @@ export function ChatPage() {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
+  // Keep the viewport pinned to the newest content while a response reveals.
+  const scrollToLatest = useCallback(() => {
+    endRef.current?.scrollIntoView({ block: "end" });
+  }, []);
+
   async function handleSend(question: string) {
     const text = question.trim();
     if (!text || isLoading) return;
@@ -134,9 +139,17 @@ export function ChatPage() {
           <EmptyState onExample={(question) => void handleSend(question)} />
         ) : (
           <div className="mx-auto mt-auto flex w-full max-w-3xl flex-col gap-4 p-4 pb-2 sm:p-6 sm:pb-2 lg:p-8 lg:pb-2">
-            {messages.map((message) => (
-              <ChatMessageBubble key={message.id} message={message} />
-            ))}
+            {messages.map((message, index) => {
+              const isLatest = index === messages.length - 1 && message.role === "assistant";
+              return (
+                <ChatMessageBubble
+                  key={message.id}
+                  message={message}
+                  animate={isLatest}
+                  onGrow={isLatest ? scrollToLatest : undefined}
+                />
+              );
+            })}
             {isLoading && (
               <div className="flex items-start">
                 <TypingIndicator />
