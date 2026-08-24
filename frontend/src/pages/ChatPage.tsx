@@ -8,6 +8,7 @@ import { ChatInput } from "@/components/chat/ChatInput";
 import { ChatMessageBubble } from "@/components/chat/ChatMessageBubble";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
 import type { ChatMessage, SourceFile } from "@/types/chat";
+import { cn } from "@/lib/utils";
 
 const EXAMPLE_QUESTIONS = [
   "What is the main topic of my documents?",
@@ -32,26 +33,39 @@ function toSources(chunks: RetrieveChunk[]): SourceFile[] {
 
 function EmptyState({ onExample }: { onExample: (text: string) => void }) {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-5 p-8 text-center">
-      <span className="flex size-14 items-center justify-center rounded-full bg-brand/10">
-        <MessagesSquare className="size-7 text-brand" aria-hidden="true" />
+    <div className="flex h-full flex-col items-center justify-center gap-6 p-8 text-center">
+      <span className="relative flex size-14 items-center justify-center rounded-2xl bg-brand/10 text-brand ring-1 ring-inset ring-brand-border/30 shadow-[0_0_32px_-12px_var(--brand)]">
+        <MessagesSquare className="size-7" aria-hidden="true" />
+        <span
+          className="docmind-scan-pulse absolute -right-1 -top-1 size-2.5 rounded-full bg-brand shadow-[0_0_8px_var(--brand)] ring-2 ring-background"
+          aria-hidden="true"
+        />
       </span>
-      <div className="space-y-1">
-        <p className="font-medium">Ask DocMind about your documents</p>
+      <div className="space-y-1.5">
+        <p className="font-semibold tracking-tight text-foreground">Query the knowledge index</p>
         <p className="text-sm text-muted-foreground">
-          Questions are answered using your indexed documents.
+          Answers are grounded in your indexed documents, with sources attached.
         </p>
       </div>
-      <div className="flex flex-wrap items-center justify-center gap-2">
+      <div className="flex w-full max-w-md flex-col gap-2 sm:flex-row sm:justify-center">
         {EXAMPLE_QUESTIONS.map((question, index) => (
           <button
             key={question}
             type="button"
             onClick={() => onExample(question)}
             style={{ animationDelay: `${150 + index * 60}ms` }}
-            className="docmind-rise rounded-full border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-[transform,border-color,background-color,color] hover:-translate-y-0.5 hover:border-brand/30 hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className={cn(
+              "docmind-nav-item docmind-rise group flex flex-1 items-center gap-2.5 rounded-xl border border-border/60 bg-card/50 px-3.5 py-2.5 text-left transition-all duration-200",
+              "hover:-translate-y-0.5 hover:border-brand/35 hover:bg-brand/5 hover:shadow-elevation-2",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            )}
           >
-            {question}
+            <span className="docmind-label shrink-0 text-brand/70 tabular-nums" aria-hidden="true">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <span className="truncate text-xs text-muted-foreground transition-colors duration-200 group-hover:text-foreground">
+              {question}
+            </span>
           </button>
         ))}
       </div>
@@ -133,12 +147,13 @@ export function ChatPage() {
         )}
       </div>
 
-      <div className="shrink-0 border-t bg-background p-4 lg:px-8">
+      <div className="relative shrink-0 border-t border-border/40 bg-background/80 p-4 backdrop-blur-xl lg:px-8">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand/30 to-transparent" aria-hidden="true" />
         <div className="mx-auto w-full max-w-3xl space-y-2">
           {error && (
             <div
               role="alert"
-              className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+              className="flex items-start gap-2.5 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive backdrop-blur-sm"
             >
               <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
               <span className="min-w-0">{error}</span>
