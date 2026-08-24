@@ -310,6 +310,15 @@ class OpenRouterProvider(BaseProvider):
                 f"Invalid OpenRouter response: {exc}"
             ) from exc
 
+        # Some models return null/empty content (e.g. reasoning models that
+        # spend the whole budget on hidden reasoning). Treat that as an
+        # invalid response so the caller rotates to the next model instead
+        # of propagating None into LLMResponse.
+        if not isinstance(content, str) or not content.strip():
+            raise InvalidResponseError(
+                "OpenRouter returned an empty message content"
+            )
+
         return content
 
     async def generate_stream(
