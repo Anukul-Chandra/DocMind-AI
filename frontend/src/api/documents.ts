@@ -32,12 +32,23 @@ export async function listDocuments(): Promise<Document[]> {
   return response.data.data ?? [];
 }
 
-export async function uploadDocument(file: File): Promise<UploadResult> {
+export async function uploadDocument(
+  file: File,
+  onUploadProgress?: (percent: number) => void,
+): Promise<UploadResult> {
   const formData = new FormData();
   formData.append("file", file);
   const response = await apiClient.post<ApiEnvelope<UploadResult>>(
     "/documents/upload",
     formData,
+    {
+      onUploadProgress: (event) => {
+        if (!onUploadProgress) return;
+        const total = event.total ?? file.size;
+        if (!total) return;
+        onUploadProgress(Math.min(100, Math.round((event.loaded / total) * 100)));
+      },
+    },
   );
   return response.data.data!;
 }

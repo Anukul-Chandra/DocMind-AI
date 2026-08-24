@@ -18,7 +18,13 @@ export function useDocuments() {
 export function useUploadDocument() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: uploadDocument,
+    mutationFn: ({
+      file,
+      onUploadProgress,
+    }: {
+      file: File;
+      onUploadProgress?: (percent: number) => void;
+    }) => uploadDocument(file, onUploadProgress),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: documentsKey });
     },

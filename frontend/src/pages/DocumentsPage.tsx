@@ -56,7 +56,7 @@ export function DocumentsPage() {
     <div className="docmind-page mx-auto w-full max-w-6xl space-y-8 p-6 lg:p-8">
       <PageHeader
         title="Documents"
-        description="Upload PDFs and DocMind will index them for question answering."
+        description="Ingest PDFs into the knowledge index — scanned, parsed, chunked and embedded into searchable vectors."
       />
 
       <UploadCard />
