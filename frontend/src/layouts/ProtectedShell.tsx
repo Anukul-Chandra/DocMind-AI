@@ -40,12 +40,12 @@ export function ProtectedShell() {
           aria-label="Navigation"
         >
           <div
-            className="docmind-drawer-overlay absolute inset-0 bg-black/40"
+            className="docmind-drawer-overlay absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setSidebarOpen(false)}
             aria-hidden="true"
           />
           <AppSidebar
-            className="docmind-drawer relative z-10 h-full shadow-brand"
+            className="docmind-drawer relative z-10 h-full shadow-elevation-3"
             onNavigate={() => setSidebarOpen(false)}
           />
           <Button
