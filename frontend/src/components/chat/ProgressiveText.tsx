@@ -38,9 +38,11 @@ interface ProgressiveTextProps {
   active: boolean;
   /** Called when the rendered height changes so the chat can follow the growth. */
   onGrow?: () => void;
+  /** Fires once when the reveal completes (not for statically rendered messages). */
+  onComplete?: () => void;
 }
 
-export function ProgressiveText({ content, active, onGrow }: ProgressiveTextProps) {
+export function ProgressiveText({ content, active, onGrow, onComplete }: ProgressiveTextProps) {
   const reducedMotion = useRef(prefersReducedMotion()).current;
   const effectiveActive = active && !reducedMotion && content.length > 0;
 
@@ -49,6 +51,8 @@ export function ProgressiveText({ content, active, onGrow }: ProgressiveTextProp
   const frameRef = useRef<number | null>(null);
   const watchdogRef = useRef<number | null>(null);
   const finishedRef = useRef(false);
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
   const hostRef = useRef<HTMLDivElement>(null);
   const lastHeightRef = useRef(0);
   const onGrowRef = useRef(onGrow);
@@ -87,6 +91,7 @@ export function ProgressiveText({ content, active, onGrow }: ProgressiveTextProp
       if (t >= 1) {
         finishedRef.current = true;
         setDone(true);
+        onCompleteRef.current?.();
         return;
       }
     };
@@ -126,6 +131,7 @@ export function ProgressiveText({ content, active, onGrow }: ProgressiveTextProp
     if (watchdogRef.current !== null) window.clearInterval(watchdogRef.current);
     setRevealed(content.length);
     setDone(true);
+    onCompleteRef.current?.();
   }, [content.length]);
 
   const revealedText = done ? content : content.slice(0, revealed);
