@@ -24,11 +24,17 @@ class ChatResponse(BaseModel):
         provider: The LLM provider that produced the answer.
         model: The model used to produce the answer.
         answer: The generated answer text.
+        category: Routing decision that produced the answer
+            ("general" | "document" | "metadata").
+        sources: Document chunks that contributed to the answer. Empty
+            unless retrieval was actually used.
     """
 
     provider: str
     model: str
     answer: str
+    category: str = "general"
+    sources: list[dict] = []
 
 
 router = APIRouter(prefix="/chat", tags=["chat"])
@@ -77,4 +83,6 @@ async def chat(
         provider=response.provider,
         model=response.model,
         answer=response.text,
+        category=response.category,
+        sources=response.sources,
     )

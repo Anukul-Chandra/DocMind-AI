@@ -83,7 +83,10 @@ class ChatService:
             query_embedding=self._query_router.last_query_embedding,
         )
         rag_prompt = self._prompt_builder.build_prompt(question, contexts)
-        return await self._provider_manager.generate(rag_prompt.text)
+        response = await self._provider_manager.generate(rag_prompt.text)
+        response.category = category.value
+        response.sources = contexts
+        return response
 
     def _answer_metadata(self, owner_id: str) -> LLMResponse:
         """Answer a document-list question without retrieval or an LLM call.
@@ -99,6 +102,7 @@ class ChatService:
                 text="Your document list is not available right now.",
                 provider="metadata",
                 model="",
+                category="metadata",
             )
         documents = [
             document
@@ -110,6 +114,7 @@ class ChatService:
                 text="You have no uploaded documents yet.",
                 provider="metadata",
                 model="",
+                category="metadata",
             )
         filenames: list[str] = []
         for document in documents:
@@ -121,4 +126,5 @@ class ChatService:
             text=f"You have {len(filenames)} uploaded {noun}: {names}.",
             provider="metadata",
             model="",
+            category="metadata",
         )
