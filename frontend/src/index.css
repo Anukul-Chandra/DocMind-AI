@@ -437,6 +437,44 @@
   text-transform: uppercase;
 }
 
+/* ---- Navigation light sweep ----
+   One-shot emerald sheen that glides across an element on hover. */
+
+@keyframes docmind-light-sweep {
+  0% { transform: translateX(-170%) skewX(-18deg); opacity: 0; }
+  12% { opacity: 1; }
+  100% { transform: translateX(430%) skewX(-18deg); opacity: 0; }
+}
+
+.docmind-nav-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.docmind-nav-item::after {
+  content: "";
+  position: absolute;
+  top: -25%;
+  bottom: -25%;
+  left: 0;
+  width: 32%;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    color-mix(in oklab, var(--brand) 13%, transparent) 45%,
+    color-mix(in oklab, var(--brand) 20%, transparent) 50%,
+    color-mix(in oklab, var(--brand) 13%, transparent) 55%,
+    transparent 100%
+  );
+  transform: translateX(-170%) skewX(-18deg);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.docmind-nav-item:hover::after {
+  animation: docmind-light-sweep 0.85s cubic-bezier(0.33, 0, 0.2, 1) both;
+}
+
 /* ---- Scrollbars ---- */
 
 * {
