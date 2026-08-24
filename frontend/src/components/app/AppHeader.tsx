@@ -24,7 +24,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
   }
 
   return (
-    <header className="relative flex h-16 shrink-0 items-center justify-between gap-4 border-b border-border/50 bg-background/80 backdrop-blur-xl px-4 lg:px-6">
+    <header className="relative flex h-16 shrink-0 items-center justify-between gap-4 border-b border-border/40 bg-background/60 backdrop-blur-2xl px-4 lg:px-6">
       {/* Subtle brand accent line */}
       <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-brand/30 to-transparent pointer-events-none" aria-hidden="true" />
 

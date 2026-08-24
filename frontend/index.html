@@ -3,15 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#08110d" />
     <title>DocMind AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
     <script>
       (function () {
         try {
-          if (localStorage.getItem("docmind-theme") === "dark") {
+          // Dark command-center identity is the default; stored preference wins.
+          if (localStorage.getItem("docmind-theme") !== "light") {
             document.documentElement.classList.add("dark");
           }
         } catch (error) {
-          // Ignore storage failures (e.g. private browsing).
+          document.documentElement.classList.add("dark");
         }
       })();
     </script>
