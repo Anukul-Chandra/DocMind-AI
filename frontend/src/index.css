@@ -415,6 +415,12 @@
   background-image: var(--vignette), var(--ambient-1), var(--ambient-2), var(--ambient-3);
   background-repeat: no-repeat;
   background-size: cover;
+  animation: docmind-atmosphere-breathe 16s ease-in-out infinite;
+}
+
+@keyframes docmind-atmosphere-breathe {
+  0%, 100% { opacity: 0.82; }
+  50% { opacity: 1; }
 }
 
 /* Layer 2 — fine engineering grid fading toward the horizon */
@@ -517,14 +523,14 @@
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: var(--color-border);
+  background-color: var(--border);
   border-radius: 8px;
   border: 2px solid transparent;
   background-clip: content-box;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background-color: color-mix(in oklab, var(--brand) 30%, var(--color-border));
+  background-color: color-mix(in oklab, var(--brand) 30%, var(--border));
 }
 
 *::-webkit-scrollbar-track {
