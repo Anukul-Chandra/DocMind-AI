@@ -2,6 +2,7 @@ import { Sparkles } from "lucide-react";
 
 import { ChatSources } from "@/components/chat/ChatSources";
 import { ProgressiveText } from "@/components/chat/ProgressiveText";
+import { cn } from "@/lib/utils";
 import type { ChatMessage } from "@/types/chat";
 
 interface ChatMessageBubbleProps {
@@ -53,18 +54,12 @@ export function ChatMessageBubble({ message, animate = false, onGrow }: ChatMess
         <ProgressiveText content={message.content} active={animate} onGrow={onGrow} />
       </div>
 
-      {/* Sources stay attached below the answer, visually separate from it */}
-      <div className={CONTENT_INSET}>
-        {hasSources ? (
-          <div className="border-t border-border/40 pt-1">
-            <ChatSources sources={message.sources!} />
-          </div>
-        ) : (
-          <p className="docmind-label border-t border-border/40 pt-2.5 text-muted-foreground/40">
-            No sources attached
-          </p>
-        )}
-      </div>
+      {/* Sources appear only when the backend used retrieval for this answer */}
+      {hasSources && (
+        <div className={cn(CONTENT_INSET, "border-t border-border/40 pt-1")}>
+          <ChatSources sources={message.sources!} />
+        </div>
+      )}
     </div>
   );
 }

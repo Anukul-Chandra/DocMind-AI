@@ -7,6 +7,12 @@ class LLMResponse(BaseModel):
     text: str
     provider: str
     model: str = ""
+    # Routing provenance (filled by ChatService, not by providers):
+    # "general" | "document" | "metadata".
+    category: str = "general"
+    # Document chunks that contributed to the answer. Empty unless the
+    # question was answered through the retrieval (RAG) path.
+    sources: list[dict] = []
 
 
 class LLMStreamChunk(BaseModel):
