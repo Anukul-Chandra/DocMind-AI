@@ -311,7 +311,7 @@
 .docmind-skeleton {
   background:
     linear-gradient(100deg, transparent 30%, oklch(1 0 0 / 45%) 50%, transparent 70%),
-    var(--color-muted);
+    var(--muted);
   background-size: 200% 100%;
   animation: docmind-shimmer 1.8s linear infinite;
 }
@@ -319,7 +319,7 @@
 .dark .docmind-skeleton {
   background:
     linear-gradient(100deg, transparent 30%, oklch(1 0 0 / 5%) 50%, transparent 70%),
-    var(--color-muted);
+    var(--muted);
   background-size: 200% 100%;
 }
 
@@ -361,6 +361,19 @@
 
 .docmind-energy-y {
   animation: docmind-energy-flow 1.5s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+
+/* ---- Processing equalizer ----
+   Activity bars for the AI thinking state; stagger via inline delay. */
+
+@keyframes docmind-eq {
+  0%, 100% { transform: scaleY(0.35); opacity: 0.7; }
+  45% { transform: scaleY(1); opacity: 1; }
+}
+
+.docmind-eq-bar {
+  transform-origin: bottom;
+  animation: docmind-eq 1.05s ease-in-out infinite;
 }
 
 @keyframes docmind-scan-pulse {
@@ -495,7 +508,7 @@
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-border) transparent;
+  scrollbar-color: var(--border) transparent;
 }
 
 *::-webkit-scrollbar {
