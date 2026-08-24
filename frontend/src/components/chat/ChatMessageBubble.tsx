@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Sparkles } from "lucide-react";
 
 import { ChatSources } from "@/components/chat/ChatSources";
@@ -16,6 +17,9 @@ interface ChatMessageBubbleProps {
 const CONTENT_INSET = "pl-[34px]";
 
 export function ChatMessageBubble({ message, animate = false, onGrow }: ChatMessageBubbleProps) {
+  // Sources appear only after the answer finishes revealing; static
+  // (non-animated) messages show them immediately.
+  const [sourcesVisible, setSourcesVisible] = useState(!animate);
   if (message.role === "user") {
     return (
       <div className="docmind-message flex justify-end">
@@ -51,12 +55,18 @@ export function ChatMessageBubble({ message, animate = false, onGrow }: ChatMess
 
       {/* Conversational body — open layout, no enclosing card */}
       <div className={CONTENT_INSET}>
-        <ProgressiveText content={message.content} active={animate} onGrow={onGrow} />
+        <ProgressiveText
+          content={message.content}
+          active={animate}
+          onGrow={onGrow}
+          onComplete={() => setSourcesVisible(true)}
+        />
       </div>
 
-      {/* Sources appear only when the backend used retrieval for this answer */}
-      {hasSources && (
-        <div className={cn(CONTENT_INSET, "border-t border-border/40 pt-1")}>
+      {/* Sources appear only after the answer finishes revealing, and only
+          when the backend used retrieval for this answer */}
+      {hasSources && sourcesVisible && (
+        <div className={cn(CONTENT_INSET, "docmind-rise border-t border-border/40 pt-1")}>
           <ChatSources sources={message.sources!} />
         </div>
       )}
