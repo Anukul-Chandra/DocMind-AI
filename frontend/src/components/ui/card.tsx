@@ -4,10 +4,14 @@ import { cn } from "@/lib/utils";
 
 function Card({ className, variant = "default", ...props }: React.ComponentProps<"div"> & { variant?: "default" | "glass" | "elevated" | "brand" }) {
   const variants = {
-    default: "bg-card text-card-foreground flex flex-col gap-6 rounded-2xl border border-border/50 shadow-elevation-1",
-    glass: "glass flex flex-col gap-6 rounded-2xl",
-    elevated: "bg-card text-card-foreground flex flex-col gap-6 rounded-2xl border border-border/50 shadow-elevation-2",
-    brand: "bg-brand-surface/50 text-card-foreground flex flex-col gap-6 rounded-2xl border border-brand-border/30 shadow-brand/10",
+    default:
+      "bg-card text-card-foreground flex flex-col gap-6 rounded-2xl border border-border/60 shadow-elevation-1 transition-[border-color,box-shadow] duration-300 hover:border-brand-border/35 hover:shadow-elevation-2",
+    glass:
+      "glass flex flex-col gap-6 rounded-2xl transition-[border-color,box-shadow] duration-300 hover:border-brand-border/30",
+    elevated:
+      "bg-card text-card-foreground flex flex-col gap-6 rounded-2xl border border-border/60 shadow-elevation-2 transition-[border-color,box-shadow] duration-300 hover:border-brand-border/35 hover:shadow-elevation-3",
+    brand:
+      "bg-brand-surface/50 text-card-foreground flex flex-col gap-6 rounded-2xl border border-brand-border/30 shadow-brand/10 transition-[border-color,box-shadow] duration-300 hover:border-brand-border/50",
   };
 
   return (

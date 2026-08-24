@@ -18,30 +18,31 @@ export function AppSidebar({
   onToggleCollapsed,
 }: AppSidebarProps) {
   return (
-    <div
-      className={cn(
-        "flex shrink-0 flex-col transition-[width] duration-300 ease-out",
-        "bg-card/60 border-r border-border/50 backdrop-blur-xl",
-        collapsed ? "w-16" : "w-68",
-        className,
-      )}
-    >
-      {/* Logo / Brand */}
       <div
         className={cn(
-          "flex h-16 shrink-0 items-center gap-3 border-b border-border/50 px-4",
-          collapsed && "justify-center",
+          "flex shrink-0 flex-col transition-[width] duration-300 ease-out",
+          "bg-background/60 border-r border-border/40 backdrop-blur-2xl",
+          collapsed ? "w-16" : "w-68",
+          className,
         )}
       >
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-strong text-brand-foreground shadow-brand transition-all duration-300 hover:shadow-brand/30 hover:scale-[1.02]">
-          <FileSearch className="size-4.5" aria-hidden="true" />
-        </span>
-        {!collapsed && (
-          <span className="font-semibold text-foreground tracking-tight transition-opacity duration-200">
-            DocMind AI
+        {/* Logo / Brand */}
+        <div
+          className={cn(
+            "flex h-16 shrink-0 items-center gap-3 border-b border-border/40 px-4",
+            collapsed && "justify-center",
+          )}
+        >
+          <span className="relative flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-strong text-brand-foreground shadow-brand transition-all duration-300 hover:shadow-brand/45">
+            <FileSearch className="size-4.5" aria-hidden="true" />
           </span>
-        )}
-      </div>
+          {!collapsed && (
+            <span className="flex flex-col leading-tight transition-opacity duration-200">
+              <span className="text-sm font-semibold tracking-tight text-foreground">DocMind AI</span>
+              <span className="docmind-label text-[0.5625rem] text-muted-foreground">Document Intelligence</span>
+            </span>
+          )}
+        </div>
 
       {/* Navigation */}
       <nav className="flex-1 space-y-1 p-3" aria-label="Main navigation">
@@ -95,11 +96,10 @@ export function AppSidebar({
         )}
       >
         {!collapsed && (
-          <div className="relative rounded-xl p-3 bg-brand/5 border border-brand-border/30">
-            <div className="absolute inset-0 bg-gradient-to-r from-brand/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" aria-hidden="true" />
-            <p className="relative flex items-center gap-2 text-xs font-medium text-brand">
+          <div className="relative rounded-xl p-3 bg-brand/5 border border-brand-border/25">
+            <p className="docmind-label relative flex items-center gap-2 text-brand">
               <span className="size-1.5 shrink-0 rounded-full bg-brand animate-pulse" aria-hidden="true" />
-              <span>RAG-powered document analysis</span>
+              <span>RAG Core Online</span>
             </p>
           </div>
         )}
