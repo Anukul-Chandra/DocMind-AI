@@ -5,13 +5,13 @@ const EQ_DELAYS = ["0ms", "160ms", "320ms", "480ms"];
 export function TypingIndicator() {
   return (
     <div
-      className="docmind-message w-full max-w-[85%] overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-elevation-1 backdrop-blur-md sm:max-w-[75%]"
+      className="docmind-message flex w-full max-w-[85%] flex-col gap-2 sm:max-w-[75%]"
       role="status"
       aria-live="polite"
       aria-label="DocMind is analyzing your documents and composing an answer"
     >
-      {/* Header */}
-      <div className="flex items-center gap-2.5 border-b border-border/40 px-4 py-2.5">
+      {/* Sender row */}
+      <div className="flex items-center gap-2.5">
         <span className="relative flex size-6 shrink-0 items-center justify-center rounded-md bg-brand/12 text-brand ring-1 ring-inset ring-brand-border/30">
           <span className="docmind-scan-pulse absolute inset-0 rounded-md bg-brand/15" aria-hidden="true" />
           <Sparkles className="relative size-3" aria-hidden="true" />
@@ -20,8 +20,8 @@ export function TypingIndicator() {
         <span className="docmind-label ml-auto shrink-0 text-brand">Processing</span>
       </div>
 
-      {/* Body — activity bars + response skeleton */}
-      <div className="space-y-4 px-5 py-4">
+      {/* Body — activity bars + response skeleton, aligned with answer content */}
+      <div className="space-y-4 pl-[34px]">
         <div className="flex items-center gap-3">
           <span className="flex h-4 items-end gap-1" aria-hidden="true">
             {EQ_DELAYS.map((delay) => (

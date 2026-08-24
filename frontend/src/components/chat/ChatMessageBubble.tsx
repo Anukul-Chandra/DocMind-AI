@@ -2,7 +2,6 @@ import { Sparkles } from "lucide-react";
 
 import { ChatSources } from "@/components/chat/ChatSources";
 import { ProgressiveText } from "@/components/chat/ProgressiveText";
-import { cn } from "@/lib/utils";
 import type { ChatMessage } from "@/types/chat";
 
 interface ChatMessageBubbleProps {
@@ -11,6 +10,9 @@ interface ChatMessageBubbleProps {
   animate?: boolean;
   onGrow?: () => void;
 }
+
+/** Left inset that aligns content with the sender name (avatar 24px + gap 10px). */
+const CONTENT_INSET = "pl-[34px]";
 
 export function ChatMessageBubble({ message, animate = false, onGrow }: ChatMessageBubbleProps) {
   if (message.role === "user") {
@@ -28,60 +30,40 @@ export function ChatMessageBubble({ message, animate = false, onGrow }: ChatMess
     );
   }
 
+  const modelMeta = [message.provider, message.model].filter(Boolean).join(" / ");
+  const hasSources = Boolean(message.sources && message.sources.length > 0);
+
   return (
-    <div className="docmind-message flex flex-col items-start gap-2">
-      <div className="w-full max-w-[85%] sm:max-w-[75%]">
-        {/* System response panel */}
-        <div
-          className={cn(
-            "relative overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-elevation-1 backdrop-blur-md",
-            "transition-all duration-200 hover:border-brand/25 hover:shadow-elevation-2",
-          )}
-        >
-          {/* Header — identity + model telemetry */}
-          <div className="flex items-center gap-2.5 border-b border-border/40 px-4 py-2.5">
-            <span className="relative flex size-6 shrink-0 items-center justify-center rounded-md bg-brand/12 text-brand ring-1 ring-inset ring-brand-border/30">
-              <Sparkles className="size-3" aria-hidden="true" />
-            </span>
-            <span className="text-sm font-semibold tracking-tight text-foreground">DocMind</span>
-            <span
-              className="docmind-label hidden shrink-0 rounded bg-brand/8 px-1.5 py-0.5 text-brand/85 sm:inline"
-              aria-hidden="true"
-            >
-              Response
-            </span>
-            {(message.provider || message.model) && (
-              <span
-                className="docmind-label ml-auto min-w-0 truncate pl-3 text-muted-foreground/50"
-                title={[message.provider, message.model].filter(Boolean).join(" / ")}
-              >
-                {[message.provider, message.model].filter(Boolean).join(" / ")}
-              </span>
-            )}
-          </div>
+    <div className="docmind-message flex w-full max-w-[85%] flex-col gap-2 sm:max-w-[75%]">
+      {/* Sender row — identity + model telemetry */}
+      <div className="flex items-center gap-2.5">
+        <span className="relative flex size-6 shrink-0 items-center justify-center rounded-md bg-brand/12 text-brand ring-1 ring-inset ring-brand-border/30">
+          <Sparkles className="size-3" aria-hidden="true" />
+        </span>
+        <span className="text-sm font-semibold tracking-tight text-foreground">DocMind</span>
+        {modelMeta && (
+          <span className="docmind-label ml-auto min-w-0 truncate pl-3 text-muted-foreground/50" title={modelMeta}>
+            {modelMeta}
+          </span>
+        )}
+      </div>
 
-          {/* Body */}
-          <div className="relative px-5 py-4">
-            <span
-              className="absolute inset-y-0 left-0 w-0.5 bg-gradient-to-b from-brand/55 via-brand/15 to-transparent"
-              aria-hidden="true"
-            />
-            <div className="pl-2.5">
-              <ProgressiveText content={message.content} active={animate} onGrow={onGrow} />
-            </div>
-          </div>
+      {/* Conversational body — open layout, no enclosing card */}
+      <div className={CONTENT_INSET}>
+        <ProgressiveText content={message.content} active={animate} onGrow={onGrow} />
+      </div>
 
-          {/* Sources footer — RAG transparency stays attached to the answer */}
-          {message.sources && message.sources.length > 0 ? (
-            <div className="border-t border-border/40 bg-background/30">
-              <ChatSources sources={message.sources} />
-            </div>
-          ) : (
-            <div className="border-t border-border/40 px-4 py-2">
-              <p className="docmind-label text-muted-foreground/40">No sources attached</p>
-            </div>
-          )}
-        </div>
+      {/* Sources stay attached below the answer, visually separate from it */}
+      <div className={CONTENT_INSET}>
+        {hasSources ? (
+          <div className="border-t border-border/40 pt-1">
+            <ChatSources sources={message.sources!} />
+          </div>
+        ) : (
+          <p className="docmind-label border-t border-border/40 pt-2.5 text-muted-foreground/40">
+            No sources attached
+          </p>
+        )}
       </div>
     </div>
   );

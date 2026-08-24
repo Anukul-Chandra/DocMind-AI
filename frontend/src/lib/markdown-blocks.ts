@@ -28,13 +28,30 @@ export interface CodeBlock {
   open: boolean;
 }
 
-export type MdBlock = HeadingBlock | ParagraphBlock | ListBlock | CodeBlock;
+export interface BlockquoteBlock {
+  type: "blockquote";
+  text: string;
+}
+
+export interface ThematicBreakBlock {
+  type: "hr";
+}
+
+export type MdBlock =
+  | HeadingBlock
+  | ParagraphBlock
+  | ListBlock
+  | CodeBlock
+  | BlockquoteBlock
+  | ThematicBreakBlock;
 
 const FENCE_OPEN = /^\s*```(\w*)\s*$/;
 const FENCE_CLOSE = /^\s*```\s*$/;
 const HEADING = /^(#{1,4})\s+(.*)$/;
 const UL_ITEM = /^[-*+]\s+(.*)$/;
 const OL_ITEM = /^(\d+)[.)]\s+(.*)$/;
+const THEMATIC_BREAK = /^\s{0,3}(?:(?:\*[ \t]*){3,}|(?:-[ \t]*){3,}|(?:_[ \t]*){3,})$/;
+const BLOCKQUOTE = /^>\s?(.*)$/;
 
 /**
  * Minimal block-level markdown parser used by the progressive chat reveal.
@@ -98,6 +115,28 @@ export function parseMarkdownBlocks(input: string): MdBlock[] {
     if (/^\s*$/.test(line)) {
       flushAll();
       i += 1;
+      continue;
+    }
+
+    if (THEMATIC_BREAK.test(line)) {
+      flushAll();
+      blocks.push({ type: "hr" });
+      i += 1;
+      continue;
+    }
+
+    const quote = BLOCKQUOTE.exec(line);
+    if (quote) {
+      flushAll();
+      const quoted: string[] = [quote[1]];
+      i += 1;
+      while (i < lines.length) {
+        const next = BLOCKQUOTE.exec(lines[i]);
+        if (!next) break;
+        quoted.push(next[1]);
+        i += 1;
+      }
+      blocks.push({ type: "blockquote", text: quoted.join("\n") });
       continue;
     }
 

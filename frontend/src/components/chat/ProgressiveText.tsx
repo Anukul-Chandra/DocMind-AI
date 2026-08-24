@@ -1,15 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { InlineText } from "@/lib/render-inline";
 import {
   parseMarkdownBlocks,
   type MdBlock,
 } from "@/lib/markdown-blocks";
 import { cn } from "@/lib/utils";
 
-/** Presentation-only typewriter for an already received answer. */
-const MIN_DURATION_MS = 900;
-const MAX_DURATION_MS = 5200;
-const CHARS_PER_SECOND = 340;
+/**
+ * Presentation-only progressive reveal for an already received answer.
+ * The slice is re-parsed as Markdown every frame, so formatting stays
+ * visually correct while the text grows top-to-bottom.
+ */
+const MIN_DURATION_MS = 700;
+const MAX_DURATION_MS = 4500;
+/** Base pace; actual steps snap to word boundaries for clean chunking. */
+const CHARS_PER_SECOND = 420;
 
 function prefersReducedMotion(): boolean {
   if (typeof window === "undefined") return true;
@@ -18,6 +24,12 @@ function prefersReducedMotion(): boolean {
   } catch {
     return true;
   }
+}
+
+/** Advance the cut point to the end of the current word (or separator run). */
+function snapToWordBoundary(text: string, index: number): number {
+  while (index < text.length && !/\s/.test(text[index])) index += 1;
+  return index;
 }
 
 interface ProgressiveTextProps {
@@ -35,6 +47,8 @@ export function ProgressiveText({ content, active, onGrow }: ProgressiveTextProp
   const [revealed, setRevealed] = useState(() => (effectiveActive ? 1 : content.length));
   const [done, setDone] = useState(!effectiveActive);
   const frameRef = useRef<number | null>(null);
+  const watchdogRef = useRef<number | null>(null);
+  const finishedRef = useRef(false);
   const hostRef = useRef<HTMLDivElement>(null);
   const lastHeightRef = useRef(0);
   const onGrowRef = useRef(onGrow);
@@ -56,25 +70,43 @@ export function ProgressiveText({ content, active, onGrow }: ProgressiveTextProp
     );
     const start = performance.now();
     let cancelled = false;
+    let lastTickAt = 0;
+    finishedRef.current = false;
 
-    const tick = (now: number) => {
-      if (cancelled) return;
+    // One reveal step; driven by rAF when frames are available and by a
+    // watchdog timer when they are not (background tabs, throttled heads).
+    const step = () => {
+      if (cancelled || finishedRef.current) return;
+      const now = performance.now();
+      lastTickAt = now;
       const t = Math.min((now - start) / duration, 1);
       // Ease-out: the head of the answer appears promptly, the tail settles.
       const eased = 1 - Math.pow(1 - t, 2.2);
-      const count = t >= 1 ? total : Math.max(1, Math.round(total * eased));
-      setRevealed(count);
+      const target = t >= 1 ? total : Math.max(1, Math.round(total * eased));
+      setRevealed(t >= 1 ? total : snapToWordBoundary(content, target));
       if (t >= 1) {
+        finishedRef.current = true;
         setDone(true);
         return;
       }
-      frameRef.current = requestAnimationFrame(tick);
     };
 
-    frameRef.current = requestAnimationFrame(tick);
+    const onFrame = () => {
+      if (cancelled || finishedRef.current) return;
+      step();
+      frameRef.current = requestAnimationFrame(onFrame);
+    };
+    frameRef.current = requestAnimationFrame(onFrame);
+
+    watchdogRef.current = window.setInterval(() => {
+      if (cancelled || finishedRef.current) return;
+      if (performance.now() - lastTickAt > 250) step();
+    }, 200);
+
     return () => {
       cancelled = true;
       if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+      if (watchdogRef.current !== null) window.clearInterval(watchdogRef.current);
     };
   }, [effectiveActive, content]);
 
@@ -89,7 +121,9 @@ export function ProgressiveText({ content, active, onGrow }: ProgressiveTextProp
   }, [revealed, done]);
 
   const finishNow = useCallback(() => {
+    finishedRef.current = true;
     if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+    if (watchdogRef.current !== null) window.clearInterval(watchdogRef.current);
     setRevealed(content.length);
     setDone(true);
   }, [content.length]);
@@ -102,36 +136,37 @@ export function ProgressiveText({ content, active, onGrow }: ProgressiveTextProp
     return showCaret ? <span className="docmind-caret" aria-hidden="true" /> : null;
   }
 
+  function renderHeading(block: MdBlock & { type: "heading" }, isLast: boolean) {
+    const content = (
+      <>
+        <span
+          className="h-3 w-0.5 shrink-0 rounded-full bg-brand/55"
+          aria-hidden="true"
+        />
+        <span className="min-w-0">
+          <InlineText text={block.text} />
+          {isLast && renderCaret()}
+        </span>
+      </>
+    );
+    const className = "flex items-center gap-2.5 font-semibold tracking-tight text-foreground";
+    if (block.level <= 1) {
+      return <h3 className={cn(className, "text-lg")}>{content}</h3>;
+    }
+    if (block.level === 2) {
+      return <h4 className={cn(className, "text-base")}>{content}</h4>;
+    }
+    return <h5 className={cn(className, "text-sm text-foreground/90")}>{content}</h5>;
+  }
+
   function renderBlock(block: MdBlock, isLast: boolean) {
     switch (block.type) {
-      case "heading": {
-        if (block.level <= 1) {
-          return (
-            <h3 className="pt-1 text-lg font-semibold tracking-tight text-foreground">
-              {block.text}
-              {isLast && renderCaret()}
-            </h3>
-          );
-        }
-        if (block.level === 2) {
-          return (
-            <h4 className="text-base font-semibold tracking-tight text-foreground">
-              {block.text}
-              {isLast && renderCaret()}
-            </h4>
-          );
-        }
-        return (
-          <h5 className="text-sm font-semibold tracking-tight text-foreground/90">
-            {block.text}
-            {isLast && renderCaret()}
-          </h5>
-        );
-      }
+      case "heading":
+        return renderHeading(block, isLast);
       case "paragraph":
         return (
           <p className="whitespace-pre-wrap">
-            {block.text}
+            <InlineText text={block.text} />
             {isLast && renderCaret()}
           </p>
         );
@@ -149,13 +184,22 @@ export function ProgressiveText({ content, active, onGrow }: ProgressiveTextProp
                 >
                   {item.marker ?? "•"}
                 </span>
-                <span className="min-w-0 flex-1 whitespace-pre-wrap">
-                  {item.text}
+                <span className="min-w-0 flex-1">
+                  <InlineText text={item.text} />
                   {isLast && index === block.items.length - 1 && renderCaret()}
                 </span>
               </li>
             ))}
           </ul>
+        );
+      case "blockquote":
+        return (
+          <blockquote className="border-l-2 border-brand/40 pl-3.5 text-muted-foreground">
+            <span className="whitespace-pre-wrap">
+              <InlineText text={block.text} />
+              {isLast && renderCaret()}
+            </span>
+          </blockquote>
         );
       case "code":
         return (
@@ -173,6 +217,13 @@ export function ProgressiveText({ content, active, onGrow }: ProgressiveTextProp
             </pre>
           </div>
         );
+      case "hr":
+        return (
+          <hr
+            className="h-px border-0 bg-gradient-to-r from-brand/40 via-border/60 to-transparent"
+            aria-hidden="true"
+          />
+        );
     }
   }
 
@@ -180,7 +231,7 @@ export function ProgressiveText({ content, active, onGrow }: ProgressiveTextProp
     <div
       ref={hostRef}
       onClick={showCaret ? finishNow : undefined}
-      className={cn("space-y-3", showCaret && "cursor-pointer")}
+      className={cn("space-y-3.5 text-sm leading-relaxed text-foreground", showCaret && "cursor-pointer")}
       title={showCaret ? "Click to reveal the full response" : undefined}
     >
       {blocks.map((block, index) => (
