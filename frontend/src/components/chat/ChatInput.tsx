@@ -3,6 +3,8 @@ import { ArrowUp } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+const MAX_TEXTAREA_HEIGHT = 180;
+
 interface ChatInputProps {
   onSend: (text: string) => void;
   disabled: boolean;
@@ -20,6 +22,11 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = "auto";
+      textarea.style.overflowY = "hidden";
+      textarea.style.height = `${Math.min(
+        textarea.scrollHeight,
+        MAX_TEXTAREA_HEIGHT
+      )}px`;
       textarea.focus();
     }
   }
@@ -29,24 +36,36 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
       event.preventDefault();
       submit();
     }
+    // Shift+Enter: default browser behavior inserts a newline (\n) into the
+    // textarea since preventDefault() is only called for Enter without shift.
   }
 
   function handleChange(value: string) {
     setValue(value);
     const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = "auto";
-      textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
+    if (!textarea) return;
+
+    let height = textarea.scrollHeight;
+    if (height > MAX_TEXTAREA_HEIGHT) {
+      height = MAX_TEXTAREA_HEIGHT;
+      textarea.style.overflowY = "auto";
+    } else {
+      textarea.style.overflowY = "hidden";
     }
+    textarea.style.height = `${height}px`;
   }
 
   const hasValue = value.trim().length > 0;
 
+  function handleClickAway() {
+    textareaRef.current?.focus();
+  }
+
   return (
-    <div className="w-full">
+    <div className="w-full" onClick={handleClickAway}>
       <div
         className={cn(
-          "relative flex items-end gap-2 rounded-2xl border border-border/60 bg-card/50 p-2 shadow-elevation-1 backdrop-blur-xl transition-all duration-200",
+          "relative flex items-end gap-2 rounded-2xl border border-border/60 bg-card/70 p-2 shadow-elevation-1 backdrop-blur-xl transition-all duration-200",
           "focus-within:border-brand/45 focus-within:shadow-[0_0_32px_-14px_var(--brand)] focus-within:ring-2 focus-within:ring-brand/15",
           hasValue && !disabled && "border-brand/30",
         )}
@@ -66,7 +85,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           aria-label="Your question"
           disabled={disabled}
           autoFocus
-          className="max-h-40 min-h-9 flex-1 resize-none bg-transparent px-3 py-2.5 text-sm outline-none placeholder:text-muted-foreground/70 disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex-1 resize-none bg-transparent px-3 py-2.5 text-sm outline-none placeholder:text-muted-foreground/70 disabled:cursor-not-allowed disabled:opacity-60 min-h-[48px]"
         />
         <button
           type="button"
