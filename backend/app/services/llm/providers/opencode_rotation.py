@@ -1,4 +1,5 @@
 import logging
+import re
 import time
 from collections.abc import Callable
 
@@ -33,6 +34,14 @@ _MODEL_UNAVAILABLE_MARKERS: frozenset[str] = frozenset(
         "unknown model",
         "model not found",
     }
+)
+
+#: Matches availability phrases with filler words that real OpenCode bodies
+#: insert between "model" and the failure word, e.g.
+#: ``"Upstream request failed: Model is unavailable."``. Without this, such a
+#: 400 would be misread as a fatal bad request instead of a dead model.
+_MODEL_UNAVAILABLE_PATTERN = re.compile(
+    r"\bmodel\s+(?:is|was|currently|became)?\s*(?:unavailable|not found)\b"
 )
 
 # Failure actions produced by classify_opencode_failure.
@@ -80,6 +89,8 @@ def classify_opencode_failure(exc: Exception) -> str:
         if status_code == 400:
             detail = str(exc).lower()
             if any(marker in detail for marker in _MODEL_UNAVAILABLE_MARKERS):
+                return DEAD
+            if _MODEL_UNAVAILABLE_PATTERN.search(detail):
                 return DEAD
             return FATAL
         return FATAL
