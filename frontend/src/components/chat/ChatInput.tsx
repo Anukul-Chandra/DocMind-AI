@@ -133,7 +133,6 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           placeholder="Query the knowledge index…"
           aria-label="Your question"
           disabled={disabled}
-          autoFocus
           className="flex-1 resize-none bg-transparent px-3 py-2.5 text-sm outline-none placeholder:text-muted-foreground/70 disabled:cursor-not-allowed disabled:opacity-60 min-h-[48px]"
         />
         <button
