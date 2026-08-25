@@ -4,10 +4,12 @@ from app.config.openrouter_models import OPENROUTER_MODELS
 from app.core.config import settings
 from app.services.llm.model_catalog import ModelCatalogService, ModelCatalogError
 from app.services.llm.model_pool import ModelPoolManager, build_curated_pool
+from app.services.llm.opencode_model_pool import build_opencode_pool_manager
 from app.services.llm.provider_manager import ProviderManager
 from app.services.llm.providers.gemini import GeminiProvider
 from app.services.llm.providers.groq import GroqProvider
 from app.services.llm.providers.openrouter import OpenRouterProvider
+from app.services.llm.providers.opencode_rotation import OpenCodeRotatingProvider
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +37,29 @@ def build_openrouter_provider() -> OpenRouterProvider:
         api_key=settings.openrouter_api_key,
         timeout=settings.timeout,
     )
+
+
+def build_opencode_provider() -> OpenCodeRotatingProvider | None:
+    """Build an OpenCode rotating provider from the dynamic model catalog.
+
+    Models are discovered live (free catalog -> curation -> dedupe -> stable
+    pool); nothing is hardcoded. If discovery fails at construction time,
+    ``None`` is returned so the provider chain simply skips OpenCode instead
+    of failing startup — mirroring OpenRouter's graceful default-fallback
+    path.
+
+    Returns:
+        An OpenCodeRotatingProvider, or None when the catalog is unavailable.
+    """
+    try:
+        pool = build_opencode_pool_manager()
+    except ModelCatalogError as exc:
+        logger.warning(
+            "OpenCode model discovery failed; skipping OpenCode provider: %s", exc
+        )
+        return None
+    logger.info("OpenCode pool ready with %d models", pool.total_models())
+    return OpenCodeRotatingProvider(pool)
 
 
 def build_gemini_provider() -> GeminiProvider:
@@ -70,7 +95,11 @@ def build_provider_manager() -> ProviderManager:
     providers: list = []
     for name in settings.provider_priority.split(","):
         name = name.strip()
-        if name == "openrouter":
+        if name == "opencode":
+            provider = build_opencode_provider()
+            if provider is not None:
+                providers.append(provider)
+        elif name == "openrouter":
             providers.append(build_openrouter_provider())
         elif name == "gemini":
             providers.append(build_gemini_provider())

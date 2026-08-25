@@ -92,7 +92,7 @@ class Settings(BaseSettings):
     max_tokens: int = 1000
     timeout: int = 60
 
-    provider_priority: str = "openrouter,gemini,groq"
+    provider_priority: str = "opencode,openrouter,gemini,groq"
 
     openrouter_api_key: str = ""
     openai_api_key: str = ""
