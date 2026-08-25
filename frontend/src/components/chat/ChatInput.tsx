@@ -113,7 +113,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     <div className="w-full" onClick={handleClickAway}>
       <div
         className={cn(
-          "relative flex items-end gap-2 rounded-2xl border border-border/60 bg-card/70 p-2 shadow-elevation-1 backdrop-blur-xl transition-all duration-200",
+          "relative flex items-end rounded-2xl bg-card/80 border border-border/50 p-2 shadow-sm transition-all duration-200",
           "focus-within:border-brand/45 focus-within:shadow-[0_0_32px_-14px_var(--brand)] focus-within:ring-2 focus-within:ring-brand/15",
           hasValue && !disabled && "border-brand/30",
         )}
