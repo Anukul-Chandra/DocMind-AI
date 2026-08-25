@@ -76,60 +76,86 @@ class NoFreeModelsError(ModelCatalogError):
 
 
 class ModelCatalogService:
-    """Discover available free models from the OpenRouter /models endpoint."""
+    """Discover available free models from an OpenAI-compatible /models endpoint.
+
+    The default configuration targets OpenRouter. Subclasses can point the
+    service at another provider by overriding :attr:`PROVIDER_NAME` and
+    :attr:`FREE_MODEL_SUFFIX` and supplying a different ``base_url``.
+    """
+
+    #: Human-readable provider name used in logs and error messages.
+    PROVIDER_NAME: str = "OpenRouter"
+
+    #: Model id suffix that marks a model as explicitly free in this catalog.
+    FREE_MODEL_SUFFIX: str = ":free"
 
     def __init__(
         self,
         api_key: str,
         base_url: str = OPENROUTER_BASE_URL,
+        timeout: float | None = None,
     ) -> None:
-        """Initialize the catalog with an OpenRouter API key.
+        """Initialize the catalog with a provider API key.
 
         Args:
-            api_key: The OpenRouter API key used to list models.
-            base_url: The OpenRouter base URL.
+            api_key: The API key used to list models.
+            base_url: The OpenAI-compatible catalog base URL.
+            timeout: Optional HTTP timeout in seconds for catalog requests.
+                ``None`` keeps the underlying client's default timeout.
         """
-        self._client = OpenAI(api_key=api_key, base_url=base_url)
+        client_kwargs: dict = {}
+        if timeout is not None:
+            client_kwargs["timeout"] = timeout
+        self._client = OpenAI(api_key=api_key, base_url=base_url, **client_kwargs)
 
     def get_all_models(self) -> list[str]:
-        """Return the complete list of model ids from OpenRouter.
+        """Return the complete list of model ids from the provider.
 
         Returns:
-            A list of all model ids before any filtering.
+            A list of all valid model ids before any filtering. Malformed
+            entries without a usable id are skipped.
         """
-        return [model.id for model in self._fetch_models()]
+        return self._extract_ids(self._fetch_models())
 
     def get_free_models(self) -> list[str]:
         """Fetch and return the sorted ids of all general-purpose free models.
 
-        Free models are filtered to those suitable for general
-        conversational/RAG use (code/mini/tiny/embedding specialists are
-        excluded) before being sorted alphabetically.
+        Free models are identified by the provider's free-model id suffix and
+        filtered to those suitable for general conversational/RAG use
+        (code/mini/tiny/embedding specialists are excluded) before being
+        sorted alphabetically.
 
         Returns:
             A sorted list of curated free model ids.
 
         Raises:
-            ModelCatalogError: If the OpenRouter request fails.
+            ModelCatalogError: If the request to the provider fails.
             NoFreeModelsError: If no free models, or no suitable free models,
                 are available.
         """
         free_models = sorted(
-            model.id for model in self._fetch_models() if model.id.endswith(":free")
+            model_id
+            for model_id in self._extract_ids(self._fetch_models())
+            if model_id.endswith(self.FREE_MODEL_SUFFIX)
         )
 
         if not free_models:
-            logger.warning("No free OpenRouter models available")
-            raise NoFreeModelsError("No free OpenRouter models available.")
+            logger.warning("No free %s models available", self.PROVIDER_NAME)
+            raise NoFreeModelsError(f"No free {self.PROVIDER_NAME} models available.")
 
         curated = curate_models(free_models)
         if not curated:
-            logger.warning("No suitable general-purpose free OpenRouter models")
+            logger.warning(
+                "No suitable general-purpose free %s models", self.PROVIDER_NAME
+            )
             raise NoFreeModelsError(
-                "No suitable general-purpose free OpenRouter models available."
+                f"No suitable general-purpose free {self.PROVIDER_NAME} models "
+                "available."
             )
 
-        logger.info("Discovered %d curated free OpenRouter models", len(curated))
+        logger.info(
+            "Discovered %d curated free %s models", len(curated), self.PROVIDER_NAME
+        )
         return curated
 
     def count_models(self) -> tuple[int, int]:
@@ -140,21 +166,46 @@ class ModelCatalogService:
         """
         models = self._fetch_models()
         total = len(models)
-        free = sum(1 for model in models if model.id.endswith(":free"))
+        free = sum(
+            1
+            for model_id in self._extract_ids(models)
+            if model_id.endswith(self.FREE_MODEL_SUFFIX)
+        )
         return total, free
 
+    def _extract_ids(self, models: list[object]) -> list[str]:
+        """Extract valid string model ids from raw catalog objects.
+
+        Malformed or unexpected entries (missing, empty, or non-string ids)
+        are skipped instead of breaking discovery.
+
+        Args:
+            models: Raw model objects from the provider catalog.
+
+        Returns:
+            A list of valid model ids in catalog order.
+        """
+        model_ids: list[str] = []
+        for model in models:
+            model_id = getattr(model, "id", None)
+            if isinstance(model_id, str) and model_id.strip():
+                model_ids.append(model_id)
+        return model_ids
+
     def _fetch_models(self) -> list[object]:
-        """Fetch the raw model list from the OpenRouter /models endpoint.
+        """Fetch the raw model list from the provider /models endpoint.
 
         Returns:
             The raw list of model objects.
 
         Raises:
-            ModelCatalogError: If the OpenRouter request fails.
+            ModelCatalogError: If the request to the provider fails.
         """
         try:
             response = self._client.models.list()
         except Exception as exc:
-            logger.exception("Failed to fetch models from OpenRouter")
-            raise ModelCatalogError(f"Failed to fetch models from OpenRouter: {exc}") from exc
+            logger.exception("Failed to fetch models from %s", self.PROVIDER_NAME)
+            raise ModelCatalogError(
+                f"Failed to fetch models from {self.PROVIDER_NAME}: {exc}"
+            ) from exc
         return response.data
