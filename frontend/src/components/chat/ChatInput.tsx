@@ -147,18 +147,19 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
               ? "bg-brand text-brand-foreground shadow-sm hover:shadow-brand/30 hover:brightness-110 active:brightness-105"
               : "bg-muted text-muted-foreground/60",
           )}
->
+        >
           <ArrowUp className="size-4.5" aria-hidden="true" />
         </button>
       </div>
 
       {/* Image attachment previews */}
       {attachments.length > 0 && (
-        <div className="flex -space-x-2 items-end pt-1">
+        <div className="flex -space-x-2 items-end pt-1 max-h-[80px] overflow-y-hidden">
           {attachments.map((attachment) => (
             <div
               key={attachment.id}
-              className="relative flex shrink-0 size-12 rounded-lg bg-card/80 border border-border/40 border-t-0 border-l-0 p-1.5 backdrop-blur-sm"
+              className="relative flex shrink-0 size-12 rounded-lg bg-card/80 border border-border/40 border-t-0 border-l-0 p-1.5 backdrop-blur-sm hover:border-brand/20 transition-colors"
+              style={{ maxHeight: '80px' }}
             >
               <img
                 src={attachment.previewUrl}
@@ -172,7 +173,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
                   removeAttachment(attachment.id);
                 }}
                 aria-label="Remove attachment"
-                className="absolute right-0 top-1/2 -translate-y-1/2 rounded-r-lg p-1 text-muted-foreground/60 hover:text-destructive transition-colors"
+                className="absolute right-0 top-0 p-1 rounded-r-lg text-muted-foreground/60 hover:text-destructive transition-colors text-xs"
               >
                 <svg className="size-3" aria-hidden="true">
                   <use href="/icons/minus.svg#x" />
