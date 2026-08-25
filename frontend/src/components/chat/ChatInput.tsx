@@ -158,7 +158,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           {attachments.map((attachment) => (
             <div
               key={attachment.id}
-              className="relative flex shrink-0 size-12 rounded-lg bg-card/80 border border-border/40 border-t-0 border-l-0 p-1.5 backdrop-blur-sm hover:border-brand/20 transition-colors"
+              className="relative flex shrink-0 w-48 h-48 rounded-lg bg-card/80 border border-border/40 border-t-0 border-l-0 p-1.5 backdrop-blur-sm hover:border-brand/20 transition-colors"
               style={{ maxHeight: '80px' }}
             >
               <img
