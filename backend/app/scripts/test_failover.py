@@ -17,6 +17,26 @@ from app.services.llm.providers.base import (
 )
 
 
+class OpenCode(BaseProvider):
+    """Mock OpenCode provider that always fails as unavailable."""
+
+    def __init__(self) -> None:
+        self._model = "opencode/mock-free"
+
+    @property
+    def model(self) -> str:
+        return self._model
+
+    async def generate(
+        self,
+        prompt: str,
+        system_prompt: str | None = None,
+        temperature: float = 0.0,
+        max_tokens: int = 1000,
+    ) -> str:
+        raise ProviderError("OpenCode pool exhausted (simulated)")
+
+
 class OpenRouter(BaseProvider):
     """Mock OpenRouter provider that always fails as unavailable."""
 
@@ -162,6 +182,59 @@ async def run_scenario(
     return response.provider == expected_provider
 
 
+async def test_priority_short_circuits() -> bool:
+    """A winning provider must prevent every later provider from being called."""
+    class Counting(BaseProvider):
+        def __init__(self, name: str, succeed: bool) -> None:
+            self._name = name
+            self._succeed = succeed
+            self.calls = 0
+            self._model = f"{name.lower()}/mock"
+
+        @property
+        def model(self) -> str:
+            return self._model
+
+        @property
+        def label(self) -> str:
+            return self._name
+
+        async def generate(
+            self,
+            prompt: str,
+            system_prompt: str | None = None,
+            temperature: float = 0.0,
+            max_tokens: int = 1000,
+        ) -> str:
+            self.calls += 1
+            if not self._succeed:
+                raise ProviderError(f"{self._name} failed (simulated)")
+            return f"{self._name} answered"
+
+    checks = [
+        ("OpenCode", [Counting("OpenCode", True), Counting("OpenRouter", False),
+                      Counting("Gemini", False), Counting("Groq", False)]),
+        ("OpenRouter", [Counting("OpenCode", False), Counting("OpenRouter", True),
+                        Counting("Gemini", False), Counting("Groq", False)]),
+    ]
+    for expected_winner, providers in checks:
+        manager = ProviderManager(providers)
+        response = await manager.generate("Hi")
+        if response.text != f"{expected_winner} answered":
+            print(f"FAIL: expected {expected_winner} to win, got {response.text!r}")
+            return False
+        winner_index = next(
+            i for i, p in enumerate(providers) if p.label == expected_winner
+        )
+        for index, provider in enumerate(providers):
+            should_call = index <= winner_index
+            if provider.calls != (1 if should_call else 0):
+                print(f"FAIL: {provider.label} called {provider.calls} time(s); "
+                      f"expected {'1' if should_call else '0'}")
+                return False
+    return True
+
+
 async def main() -> None:
     """Run all failover scenarios and report the overall result."""
     logging.getLogger("app.services.llm.provider_manager").setLevel(
@@ -188,12 +261,29 @@ async def main() -> None:
             [OpenRouter(), Gemini(), Groq()],
             "Groq",
         ),
+        (
+            "Scenario 4: OpenCode exhausted -> Gemini succeeds (priority preserved)",
+            [OpenCode(), OpenRouter(), Gemini(failure=None), Groq()],
+            "Gemini",
+        ),
+        (
+            "Scenario 5: OpenCode+OpenRouter exhausted -> Groq succeeds",
+            [OpenCode(), OpenRouter(), Gemini(), Groq()],
+            "Groq",
+        ),
     ]
 
     passed = True
     for scenario, providers, expected in scenarios:
         passed = await run_scenario(scenario, providers, expected) and passed
         print()
+
+    print("=" * 60)
+    print("Priority short-circuit check")
+    passed = await test_priority_short_circuits() and passed
+    if passed:
+        print("PASSED")
+    print()
 
     print("=" * 60)
     print(f"Failover Test {'PASSED' if passed else 'FAILED'}")
