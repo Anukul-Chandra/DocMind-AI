@@ -153,7 +153,7 @@ export function ChatPage() {
 
       {/* Composer: fixed at bottom with reliable stacking context
           so background animation/noise can never bleed through or cover it. */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 bg-background/95 p-4 backdrop-blur-xl px-8">
+      <div className="fixed bottom-0 left-0 right-0 z-50 max-w-full sm:max-w-3xl mx-auto border-t border-border/40 bg-background/95 p-4 backdrop-blur-xl px-8">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand/30 to-transparent" aria-hidden="true" />
         <div className="mx-auto w-full max-w-3xl space-y-2">
           {error && (
