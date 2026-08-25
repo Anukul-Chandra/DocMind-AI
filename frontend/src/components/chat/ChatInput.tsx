@@ -1,9 +1,15 @@
-import { useRef, useState, type KeyboardEvent } from "react";
+import { useRef, useState, useEffect, type KeyboardEvent } from "react";
 import { ArrowUp } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 const MAX_TEXTAREA_HEIGHT = 180;
+
+interface ChatInputAttachment {
+  id: string;
+  previewUrl: string;
+  file: File;
+}
 
 interface ChatInputProps {
   onSend: (text: string) => void;
@@ -12,7 +18,15 @@ interface ChatInputProps {
 
 export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const [value, setValue] = useState("");
+  const [attachments, setAttachments] = useState<ChatInputAttachment[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Revoke object URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      attachments.forEach((a) => URL.revokeObjectURL(a.previewUrl));
+    };
+  }, [attachments]);
 
   function submit() {
     const text = value.trim();
@@ -55,10 +69,44 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     textarea.style.height = `${height}px`;
   }
 
-  const hasValue = value.trim().length > 0;
+  function handlePaste(
+    event: React.ClipboardEvent<HTMLTextAreaElement>
+  ) {
+    const items = event.clipboardData?.items;
+    if (!items) return;
+
+    // Check for image types among clipboard items
+    const imageItems = Array.from(items).filter(
+      (item) => item.type && item.type.startsWith("image/")
+    );
+
+    if (imageItems.length > 0) {
+      event.preventDefault(); // Prevent raw file path from entering textarea
+
+      // Use the first image item
+      const imageItem = imageItems[0];
+      const file = imageItem.getAsFile();
+
+      if (file) {
+        const id = `attachment-${Date.now()}-${Math.random()
+          .toString(36)
+          .substring(2, 9)}`;
+        const previewUrl = URL.createObjectURL(file);
+
+        setAttachments((prev) => [...prev, { id, previewUrl, file }]);
+      }
+    }
+    // If no image items, let default paste behavior handle normal text
+  }
+
+  const hasValue = value.trim().length > 0 || attachments.length > 0;
 
   function handleClickAway() {
     textareaRef.current?.focus();
+  }
+
+  function removeAttachment(id: string) {
+    setAttachments((prev) => prev.filter((a) => a.id !== id));
   }
 
   return (
@@ -80,6 +128,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           value={value}
           onChange={(event) => handleChange(event.target.value)}
           onKeyDown={handleKeyDown}
+          onPaste={handlePaste}
           rows={1}
           placeholder="Query the knowledge index…"
           aria-label="Your question"
@@ -99,10 +148,42 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
               ? "bg-brand text-brand-foreground shadow-brand hover:shadow-brand/50 hover:brightness-105 active:brightness-95"
               : "bg-muted text-muted-foreground/60",
           )}
-        >
+>
           <ArrowUp className="size-4.5" aria-hidden="true" />
         </button>
       </div>
+
+      {/* Image attachment previews */}
+      {attachments.length > 0 && (
+        <div className="flex -space-x-2 items-end pt-1">
+          {attachments.map((attachment) => (
+            <div
+              key={attachment.id}
+              className="relative flex shrink-0 size-12 rounded-lg bg-card/80 border border-border/40 border-t-0 border-l-0 p-1.5 backdrop-blur-sm"
+            >
+              <img
+                src={attachment.previewUrl}
+                alt="Attachment"
+                className="object-cover size-full rounded-l-lg"
+              />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeAttachment(attachment.id);
+                }}
+                aria-label="Remove attachment"
+                className="absolute right-0 top-1/2 -translate-y-1/2 rounded-r-lg p-1 text-muted-foreground/60 hover:text-destructive transition-colors"
+              >
+                <svg className="size-3" aria-hidden="true">
+                  <use href="/icons/minus.svg#x" />
+                </svg>
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
       <p className="docmind-label mt-2 text-center text-muted-foreground/55">
         Enter to transmit · Shift+Enter for a new line
       </p>
