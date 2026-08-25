@@ -124,7 +124,7 @@ export function ChatPage() {
   }
 
   return (
-    <div className="docmind-page relative flex h-full min-h-0 flex-col isolate">
+    <div className="docmind-page relative flex min-h-0 flex-col isolate">
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
         {messages.length === 0 ? (
           <EmptyState onExample={(question) => void handleSend(question)} />
