@@ -124,12 +124,12 @@ export function ChatPage() {
   }
 
   return (
-    <div className="docmind-page flex h-full min-h-0 flex-col">
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+    <div className="docmind-page relative flex h-full min-h-0 flex-col isolate">
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
         {messages.length === 0 ? (
           <EmptyState onExample={(question) => void handleSend(question)} />
         ) : (
-          <div className="mx-auto mt-auto flex w-full max-w-3xl flex-col gap-4 p-4 pb-2 sm:p-6 sm:pb-2 lg:p-8 lg:pb-2">
+          <div className="mx-auto mt-auto flex w-full max-w-3xl flex-col gap-4 p-4 pb-8">
             {messages.map((message, index) => {
               const isLatest = index === messages.length - 1 && message.role === "assistant";
               return (
@@ -151,7 +151,9 @@ export function ChatPage() {
         )}
       </div>
 
-      <div className="relative shrink-0 border-t border-border/40 bg-background/80 p-4 backdrop-blur-xl lg:px-8">
+      {/* Composer: fixed at bottom with reliable stacking context
+          so background animation/noise can never bleed through or cover it. */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 bg-background/95 p-4 backdrop-blur-xl px-8">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand/30 to-transparent" aria-hidden="true" />
         <div className="mx-auto w-full max-w-3xl space-y-2">
           {error && (
