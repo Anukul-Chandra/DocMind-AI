@@ -156,6 +156,14 @@ def test_failure_classification() -> bool:
             ),
             DEAD,
         ),
+        (
+            APIError(
+                'HTTP 400: {"error":{"type":"server_error",'
+                '"message":"Upstream request failed: Model is unavailable."}}',
+                status_code=400,
+            ),
+            DEAD,
+        ),
         (APIError("plain bad request", status_code=400), FATAL),
         (InvalidResponseError("no content"), ROTATE),
         (AuthenticationError("rejected"), FATAL),
@@ -297,6 +305,42 @@ def test_400_model_unavailable_is_dead_but_plain_400_fatal() -> bool:
     return expect_provider_error(
         provider2.generate("Hi"), "max_tokens too large"
     )
+
+
+def test_400_model_is_unavailable_rotates_not_fatal() -> bool:
+    """Regression: real OpenCode 400 'Model is unavailable.' must rotate.
+
+    The live endpoint phrases model unavailability as
+    ``{"error":{"type":"server_error","message":"Upstream request failed:
+    Model is unavailable."}}`` with HTTP 400. That must mark the model dead
+    and continue inside the pool instead of aborting OpenCode fatally (which
+    would skip every healthy model and leak the failure to the next provider).
+    """
+    provider, _ = build_provider([
+        (
+            400,
+            {
+                "error": {
+                    "type": "server_error",
+                    "message": "Upstream request failed: Model is unavailable.",
+                }
+            },
+        ),
+        completion("healthy model answered"),
+    ])
+
+    text = asyncio.run(provider.generate("Hi"))
+
+    if text != "healthy model answered":
+        print(f"FAIL: rotation did not reach healthy model, got {text!r}")
+        return False
+    if attempted_models(provider) != ["model-a-free", "model-b-free"]:
+        print(f"FAIL: unexpected attempts: {attempted_models(provider)}")
+        return False
+    if not provider.is_dead("model-a-free"):
+        print("FAIL: 'Model is unavailable' 400 was not treated as dead")
+        return False
+    return True
 
 
 def test_rate_limited_model_recovers_after_cooldown() -> bool:
@@ -465,6 +509,7 @@ def main() -> None:
         ("4. Timeout -> cooldown -> rotate", test_timeout_rotates_with_cooldown),
         ("5. 404 -> permanently skipped", test_404_marks_dead_and_skips),
         ("5b. Explicit-unavailable 400 vs plain 400", test_400_model_unavailable_is_dead_but_plain_400_fatal),
+        ("5c. 'Model is unavailable.' 400 rotates, not fatal", test_400_model_is_unavailable_rotates_not_fatal),
         ("6+11. 429 model revives after cooldown", test_rate_limited_model_recovers_after_cooldown),
         ("7. Success clears temporary state", test_success_clears_temporary_state),
         ("8. All cooling -> clean bounded failure", test_all_temporarily_unavailable_fails_cleanly),
