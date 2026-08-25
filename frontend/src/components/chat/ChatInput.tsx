@@ -113,8 +113,8 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     <div className="w-full" onClick={handleClickAway}>
       <div
         className={cn(
-          "relative flex items-end rounded-2xl bg-card/80 border border-border/50 p-2 shadow-sm sm:shadow-md transition-all sm:transition-colors duration-200",
-          "focus-within:border-brand/40 focus-within:shadow-[0_0_24px_-12px_var(--brand)] focus-within:ring-2 focus-within:ring-brand/20",
+          "relative flex items-end rounded-2xl bg-card/80 border-2 border-border/40 p-2.5 shadow-sm transition-colors",
+          "focus-within:border-brand/45 focus-within:shadow-[0_0_28px_-14px_var(--brand)] focus-within:ring-3 focus-within:ring-brand/20",
           hasValue && !disabled && "border-brand/30",
         )}
       >
@@ -144,7 +144,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
             "flex size-9 shrink-0 items-center justify-center rounded-xl transition-all duration-200",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-background",
             hasValue && !disabled
-              ? "bg-brand text-brand-foreground shadow-sm hover:shadow-brand/30 hover:brightness-110 active:brightness-105"
+              ? "bg-brand text-brand-foreground shadow-md hover:shadow-brand/30 hover:brightness-110 active:brightness-105"
               : "bg-muted text-muted-foreground/60",
           )}
         >
