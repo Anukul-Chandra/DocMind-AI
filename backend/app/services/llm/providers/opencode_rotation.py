@@ -191,6 +191,10 @@ class OpenCodeRotatingProvider(BaseProvider):
         )
         self._clock = clock
         self._dead_models: set[str] = set()
+        #: Model id that produced the most recent successful answer, so the
+        #: ``model`` property reports real provenance even after the pool
+        #: cursor is rewound for the next request.
+        self._last_successful_model: str | None = None
         self._client = httpx.AsyncClient(
             base_url=base_url,
             timeout=timeout,
@@ -198,11 +202,17 @@ class OpenCodeRotatingProvider(BaseProvider):
 
     @property
     def model(self) -> str:
-        """Return the model id the next attempt would use.
+        """Return the model backing this provider.
+
+        After a successful request this is the model that actually produced
+        the last answer (correct provenance); before any success it is the
+        model the next attempt would use.
 
         Returns:
-            The current pool model identifier.
+            The model identifier.
         """
+        if self._last_successful_model is not None:
+            return self._last_successful_model
         return self._pool.get_current_model()
 
     def cooldown_remaining(self, model_id: str) -> float:
@@ -286,6 +296,7 @@ class OpenCodeRotatingProvider(BaseProvider):
 
             # Success: reset any temporary failure state for this model.
             self._cooldown.clear(model_id)
+            self._last_successful_model = model_id
             # Rewind to the pool head so later requests re-scan from the
             # first eligible model; expired-cooldown models become reachable
             # again naturally.
