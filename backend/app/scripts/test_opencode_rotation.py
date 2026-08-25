@@ -470,6 +470,32 @@ def test_mixed_failures_eventual_success() -> bool:
     return True
 
 
+def test_model_reports_last_successful_model() -> bool:
+    """Regression: provider.model must report the model that answered.
+
+    ProviderManager reads ``provider.model`` after generate() returns. The
+    pool cursor is rewound on success, so without tracking, the reported
+    model would always be the pool head instead of the model that produced
+    the answer (wrong provenance in LLMResponse/ChatResponse).
+    """
+    provider, _ = build_provider([
+        (429, {}),
+        (503, {}),
+        httpx.TimeoutException("hang"),
+        completion("D saved the day"),
+    ])
+
+    text = asyncio.run(provider.generate("Hi"))
+
+    if text != "D saved the day":
+        print(f"FAIL: unexpected text {text!r}")
+        return False
+    if provider.model != "model-d-free":
+        print(f"FAIL: model provenance wrong: {provider.model!r}")
+        return False
+    return True
+
+
 def test_reuses_existing_pool_manager() -> bool:
     """The runtime layer drives the existing ModelPoolManager semantics."""
     manager = ModelPoolManager(["only-one-free"])
@@ -515,6 +541,7 @@ def main() -> None:
         ("8. All cooling -> clean bounded failure", test_all_temporarily_unavailable_fails_cleanly),
         ("9. All dead -> clean failure, no repeats", test_all_permanently_unavailable_fails_cleanly),
         ("10. Mixed failures -> D succeeds", test_mixed_failures_eventual_success),
+        ("10b. model reports last successful model", test_model_reports_last_successful_model),
         ("Reuse: existing ModelPoolManager driven", test_reuses_existing_pool_manager),
     ]
 
