@@ -86,8 +86,12 @@ class Settings(BaseSettings):
 
     llm_provider: str = ""
     default_model: str = "gpt-4o-mini"
-    gemini_model: str = "gemini-2.0-flash"
-    groq_model: str = "llama-3.3-70b-versatile"
+    #: Verified against the live Gemini catalog (models.list): stable,
+    #: non-preview, supports generateContent. gemini-2.0-flash was retired.
+    gemini_model: str = "gemini-3.6-flash"
+    #: Verified against the live Groq model list and an end-to-end chat
+    #: completion. llama-3.3-70b-versatile was removed by Groq.
+    groq_model: str = "openai/gpt-oss-120b"
     temperature: float = 0.0
     max_tokens: int = 1000
     timeout: int = 60
