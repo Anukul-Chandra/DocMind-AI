@@ -154,17 +154,16 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
 
       {/* Image attachment previews */}
       {attachments.length > 0 && (
-        <div className="flex -space-x-2 items-end pt-1 max-h-[80px] overflow-y-hidden">
+        <div className="flex gap-2 pt-2">
           {attachments.map((attachment) => (
             <div
               key={attachment.id}
-              className="relative flex shrink-0 w-48 h-48 rounded-lg bg-card/80 border border-border/40 border-t-0 border-l-0 p-1.5 backdrop-blur-sm hover:border-brand/20 transition-colors"
-              style={{ maxHeight: '80px' }}
+              className="group relative shrink-0 size-[64px] sm:size-[72px] rounded-xl bg-card/80 border border-border/40 p-0.5 backdrop-blur-sm hover:border-brand/20 transition-colors"
             >
               <img
                 src={attachment.previewUrl}
-                alt="Attachment"
-                className="object-cover size-full rounded-l-lg"
+                alt="Attachment preview"
+                className="size-full rounded-[0.6rem] object-cover"
               />
               <button
                 type="button"
@@ -173,9 +172,9 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
                   removeAttachment(attachment.id);
                 }}
                 aria-label="Remove attachment"
-                className="absolute right-0 top-0 p-1 rounded-r-lg text-muted-foreground/60 hover:text-destructive transition-colors text-xs"
+                className="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full border border-border/60 bg-card text-muted-foreground/60 opacity-0 shadow-sm transition-all hover:border-destructive/40 hover:text-destructive group-hover:opacity-100"
               >
-                <svg className="size-3" aria-hidden="true">
+                <svg className="size-2.5" aria-hidden="true">
                   <use href="/icons/minus.svg#x" />
                 </svg>
               </button>
