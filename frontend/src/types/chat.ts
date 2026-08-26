@@ -10,4 +10,6 @@ export interface ChatMessage {
   provider?: string;
   model?: string;
   sources?: SourceFile[];
+  /** Preview object URLs for image attachments sent with this message. */
+  images?: string[];
 }

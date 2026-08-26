@@ -27,6 +27,18 @@ export function ChatMessageBubble({ message, animate = false, onGrow }: ChatMess
           <span className="docmind-label pr-1 text-muted-foreground/45" aria-hidden="true">
             Operator
           </span>
+          {message.images && message.images.length > 0 && (
+            <div className="flex gap-1.5">
+              {message.images.map((url, i) => (
+                <img
+                  key={i}
+                  src={url}
+                  alt="Attached image"
+                  className="size-20 rounded-lg border border-white/10 object-cover shadow-sm"
+                />
+              ))}
+            </div>
+          )}
           <div className="whitespace-pre-wrap break-words rounded-2xl rounded-br-md bg-gradient-to-br from-brand to-brand-strong px-4 py-3 text-sm leading-relaxed text-brand-foreground shadow-[0_0_24px_-12px_var(--brand)]">
             {message.content}
           </div>
