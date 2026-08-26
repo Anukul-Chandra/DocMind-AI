@@ -45,6 +45,7 @@ class GeminiProvider(BaseProvider):
         system_prompt: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1000,
+        images: list[dict] | None = None,
     ) -> str:
         """Generate a response using the configured Gemini model.
 
@@ -70,10 +71,24 @@ class GeminiProvider(BaseProvider):
             max_output_tokens=max_tokens,
         )
 
+        # Build multimodal contents when images are present
+        if images:
+            parts: list[types.Part] = [types.Part(text=prompt)]
+            for img in images:
+                parts.append(types.Part(
+                    inline_data=types.Blob(
+                        mime_type=img["mime"],
+                        data=img["data"],
+                    ),
+                ))
+            contents = parts
+        else:
+            contents = prompt
+
         try:
             response = await self._client.aio.models.generate_content(
                 model=self._model,
-                contents=prompt,
+                contents=contents,
                 config=config,
             )
         except errors.ClientError as exc:

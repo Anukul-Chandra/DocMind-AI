@@ -13,6 +13,7 @@ from app.services.llm.providers.base import (
     InvalidResponseError,
     ProviderError,
     RateLimitError,
+    build_user_content,
 )
 
 logger = logging.getLogger(__name__)
@@ -103,6 +104,7 @@ class OpenRouterProvider(BaseProvider):
         system_prompt: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1000,
+        images: list[dict] | None = None,
     ) -> str:
         """Generate a response, rotating through the pool on recoverable errors.
 
@@ -162,6 +164,7 @@ class OpenRouterProvider(BaseProvider):
                     system_prompt=system_prompt,
                     temperature=temperature,
                     max_tokens=max_tokens,
+                    images=images,
                 )
             except ProviderError as exc:
                 last_error = exc
@@ -196,6 +199,7 @@ class OpenRouterProvider(BaseProvider):
         system_prompt: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1000,
+        images: list[dict] | None = None,
     ) -> str:
         """Run a single model attempt, bounded by the per-attempt timeout.
 
@@ -220,6 +224,7 @@ class OpenRouterProvider(BaseProvider):
                     system_prompt=system_prompt,
                     temperature=temperature,
                     max_tokens=max_tokens,
+                    images=images,
                 ),
                 timeout=self._attempt_timeout,
             )
@@ -236,6 +241,7 @@ class OpenRouterProvider(BaseProvider):
         system_prompt: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1000,
+        images: list[dict] | None = None,
     ) -> str:
         """Send a single request to OpenRouter using the given model.
 
@@ -262,7 +268,7 @@ class OpenRouterProvider(BaseProvider):
         messages: list[dict] = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
-        messages.append({"role": "user", "content": prompt})
+        messages.append({"role": "user", "content": build_user_content(prompt, images)})
 
         payload = {
             "model": model,
@@ -327,6 +333,7 @@ class OpenRouterProvider(BaseProvider):
         system_prompt: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1000,
+        images: list[dict] | None = None,
     ) -> AsyncIterator[str]:
         """Stream a response using OpenRouter's server-side events.
 
@@ -348,7 +355,7 @@ class OpenRouterProvider(BaseProvider):
         messages: list[dict] = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
-        messages.append({"role": "user", "content": prompt})
+        messages.append({"role": "user", "content": build_user_content(prompt, images)})
 
         payload = {
             "model": model,

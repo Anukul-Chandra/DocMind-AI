@@ -2,6 +2,36 @@ from abc import ABC, abstractmethod
 from typing import AsyncIterator
 
 
+def build_user_content(
+    prompt: str, images: list[dict] | None = None
+) -> str | list[dict]:
+    """Build a user message content field, attaching images when present.
+
+    When ``images`` is empty or None, returns a plain string (backwards
+    compatible with text-only providers).  When images are provided, returns
+    a list of content parts following the OpenAI multimodal format.
+
+    Args:
+        prompt: The text prompt.
+        images: Optional list of dicts with keys ``mime`` (MIME type string)
+            and ``data`` (base64-encoded image bytes).
+
+    Returns:
+        A plain string when no images, or a list of content part dicts.
+    """
+    if not images:
+        return prompt
+    parts: list[dict] = [{"type": "text", "text": prompt}]
+    for img in images:
+        parts.append({
+            "type": "image_url",
+            "image_url": {
+                "url": f"data:{img['mime']};base64,{img['data']}",
+            },
+        })
+    return parts
+
+
 class ProviderError(Exception):
     """Base class for recoverable provider errors that allow failover.
 
@@ -63,6 +93,7 @@ class BaseProvider(ABC):
         system_prompt: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1000,
+        images: list[dict] | None = None,
     ) -> str:
         """Generate a response for the given prompt.
 
@@ -71,6 +102,9 @@ class BaseProvider(ABC):
             system_prompt: An optional system prompt guiding the provider.
             temperature: Sampling temperature for the provider.
             max_tokens: Maximum number of tokens to generate.
+            images: Optional list of base64-encoded image dicts with keys
+                ``mime`` and ``data``. Providers that support vision should
+                include these as multimodal content parts.
 
         Returns:
             The generated text.
@@ -85,6 +119,7 @@ class BaseProvider(ABC):
         system_prompt: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1000,
+        images: list[dict] | None = None,
     ) -> AsyncIterator[str]:
         """Generate a streamed response for the given prompt.
 
@@ -97,6 +132,7 @@ class BaseProvider(ABC):
             system_prompt: An optional system prompt guiding the provider.
             temperature: Sampling temperature for the provider.
             max_tokens: Maximum number of tokens to generate.
+            images: Optional list of base64-encoded image dicts.
 
         Yields:
             The generated text, as one or more chunks.
@@ -109,5 +145,6 @@ class BaseProvider(ABC):
             system_prompt=system_prompt,
             temperature=temperature,
             max_tokens=max_tokens,
+            images=images,
         )
         yield text
