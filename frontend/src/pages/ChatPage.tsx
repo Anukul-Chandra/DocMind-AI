@@ -92,9 +92,16 @@ export function ChatPage() {
     const text = question.trim();
     if (!text || isLoading) return;
     setError(null);
+    // Create preview URLs for display in the sent message bubble
+    const imageUrls = attachments.map((file) => URL.createObjectURL(file));
     setMessages((previous) => [
       ...previous,
-      { id: crypto.randomUUID(), role: "user", content: text },
+      {
+        id: crypto.randomUUID(),
+        role: "user",
+        content: text,
+        ...(imageUrls.length > 0 ? { images: imageUrls } : {}),
+      },
     ]);
     setIsLoading(true);
     try {
