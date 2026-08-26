@@ -154,8 +154,8 @@ export function ChatPage() {
       {/* Composer: flex child pinned to the bottom of the chat layout.
           Separated from the scrollable conversation area so it never
           participates in centering or empty-state layout. */}
-      <div className="shrink-0 relative w-full sm:max-w-3xl mx-auto min-w-0 rounded-2xl border border-[rgba(40,180,130,0.35)] bg-[#101C18] p-4 backdrop-blur-xl px-8 shadow-[0_-2px_24px_-6px_oklch(0.5_0.128_158/0.1)] shadow-[0_0_20px_-4px_rgba(40,180,130,0.12)] shadow-[0_4px_16px_-4px_rgba(0,0,0,0.5)]">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand/30 to-transparent" aria-hidden="true" />
+      <div className="shrink-0 relative w-full sm:max-w-3xl mx-auto min-w-0 rounded-2xl border border-white/[0.06] bg-[#101C18] p-4 backdrop-blur-xl px-8 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.5)]">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" aria-hidden="true" />
         <div className="mx-auto w-full max-w-3xl space-y-2">
           {error && (
             <div
