@@ -144,14 +144,13 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
 
       <div
         className={cn(
-          "relative flex items-end rounded-2xl bg-[#050807] border-2 border-brand/20 p-2.5 shadow-sm transition-colors",
-          "focus-within:border-brand/50 focus-within:shadow-[0_0_32px_-14px_var(--brand)] focus-within:ring-3 focus-within:ring-brand/25",
-          hasValue && !disabled && "border-brand/30",
+          "relative flex items-end rounded-2xl bg-[#050807] border-2 border-white/[0.08] p-2.5 shadow-sm transition-colors",
+          "focus-within:border-white/[0.15] focus-within:ring-3 focus-within:ring-white/5",
         )}
       >
         {/* Focus accent hairline */}
         <span
-          className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-brand/50 to-transparent opacity-0 transition-opacity duration-300 focus-within:opacity-100"
+          className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent opacity-0 transition-opacity duration-300 focus-within:opacity-100"
           aria-hidden="true"
         />
         <textarea
