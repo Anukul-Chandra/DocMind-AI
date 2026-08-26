@@ -86,12 +86,15 @@ class Settings(BaseSettings):
 
     llm_provider: str = ""
     default_model: str = "gpt-4o-mini"
-    #: Verified against the live Gemini catalog (models.list): stable,
-    #: non-preview, supports generateContent. gemini-2.0-flash was retired.
-    gemini_model: str = "gemini-3.6-flash"
+    #: Verified present in the live Gemini catalog (models.list) and stable
+    #: for general text use. gemini-2.0-flash was retired; gemini-3.6-flash is
+    #: a newer/preview tier that some projects are denied access to.
+    gemini_model: str = "gemini-2.5-flash"
     #: Verified against the live Groq model list and an end-to-end chat
-    #: completion. llama-3.3-70b-versatile was removed by Groq.
-    groq_model: str = "openai/gpt-oss-120b"
+    #: completion (returns clean text). llama-3.3-70b-versatile was removed by
+    #: Groq; openai/gpt-oss-120b is available but emits empty content on this
+    #: provider, so groq/compound-mini is used as the reliable fallback.
+    groq_model: str = "groq/compound-mini"
     temperature: float = 0.0
     max_tokens: int = 1000
     timeout: int = 60
