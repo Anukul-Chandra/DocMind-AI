@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Sparkles } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Sparkles, X } from "lucide-react";
 
 import { ChatSources } from "@/components/chat/ChatSources";
 import { ProgressiveText } from "@/components/chat/ProgressiveText";
@@ -20,30 +20,78 @@ export function ChatMessageBubble({ message, animate = false, onGrow }: ChatMess
   // Sources appear only after the answer finishes revealing; static
   // (non-animated) messages show them immediately.
   const [sourcesVisible, setSourcesVisible] = useState(!animate);
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
+
+  const closePreview = useCallback(() => setPreviewIndex(null), []);
+
+  useEffect(() => {
+    if (previewIndex === null) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") closePreview();
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [previewIndex, closePreview]);
+
+  const images = message.images && message.images.length > 0 ? message.images : null;
+
   if (message.role === "user") {
     return (
-      <div className="docmind-message flex justify-end">
-        <div className="flex max-w-[85%] flex-col items-end gap-1.5 sm:max-w-[75%]">
-          <span className="docmind-label pr-1 text-muted-foreground/45" aria-hidden="true">
-            Operator
-          </span>
-          {message.images && message.images.length > 0 && (
-            <div className="flex gap-1.5">
-              {message.images.map((url, i) => (
-                <img
-                  key={i}
-                  src={url}
-                  alt="Attached image"
-                  className="size-20 rounded-lg border border-white/10 object-cover shadow-sm"
-                />
-              ))}
+      <>
+        <div className="docmind-message flex justify-end">
+          <div className="flex max-w-[85%] flex-col items-end gap-1.5 sm:max-w-[75%]">
+            <span className="docmind-label pr-1 text-muted-foreground/45" aria-hidden="true">
+              Operator
+            </span>
+            {images && (
+              <div className="flex gap-1.5">
+                {images.map((url, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setPreviewIndex(i)}
+                    className="size-20 shrink-0 cursor-zoom-in overflow-hidden rounded-lg border border-white/10 shadow-sm transition-opacity hover:opacity-80"
+                  >
+                    <img
+                      src={url}
+                      alt="Attached image"
+                      className="size-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="whitespace-pre-wrap break-words rounded-2xl rounded-br-md bg-gradient-to-br from-brand to-brand-strong px-4 py-3 text-sm leading-relaxed text-brand-foreground shadow-[0_0_24px_-12px_var(--brand)]">
+              {message.content}
             </div>
-          )}
-          <div className="whitespace-pre-wrap break-words rounded-2xl rounded-br-md bg-gradient-to-br from-brand to-brand-strong px-4 py-3 text-sm leading-relaxed text-brand-foreground shadow-[0_0_24px_-12px_var(--brand)]">
-            {message.content}
           </div>
         </div>
-      </div>
+
+        {/* Full-size image preview modal */}
+        {images && previewIndex !== null && (
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+            role="dialog"
+            aria-label="Image preview"
+            onClick={closePreview}
+          >
+            <button
+              type="button"
+              onClick={closePreview}
+              className="absolute right-4 top-4 flex size-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
+              aria-label="Close preview"
+            >
+              <X className="size-5" />
+            </button>
+            <img
+              src={images[previewIndex]}
+              alt="Full-size preview"
+              className="max-h-[90vh] max-w-[90vw] rounded-lg object-contain shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        )}
+      </>
     );
   }
 
