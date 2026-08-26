@@ -124,7 +124,7 @@ export function ChatPage() {
   }
 
   return (
-    <div className="docmind-page relative flex min-h-0 flex-col isolate">
+    <div className="docmind-page relative flex min-h-0 flex-col h-full">
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
         {messages.length === 0 ? (
           <EmptyState onExample={(question) => void handleSend(question)} />
@@ -151,10 +151,10 @@ export function ChatPage() {
         )}
       </div>
 
-      {/* Composer: fixed at bottom with distinct futuristic surface
-          and reliable stacking context so background animation/noise
-          can never bleed through or cover it. */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 max-w-full sm:max-w-3xl mx-auto min-w-0 border-t border-border/40 bg-card/80 border-b-2 border-border/60 bg-gradient-to-b from-card/80 to-card/90 p-4 backdrop-blur-xl px-8 shadow-[0_2px_8px_rgba(0,0,0,0.15)]">
+      {/* Composer: flex child pinned to the bottom of the chat layout.
+          Separated from the scrollable conversation area so it never
+          participates in centering or empty-state layout. */}
+      <div className="shrink-0 relative w-full sm:max-w-3xl mx-auto min-w-0 border-t border-border/40 bg-card/80 border-b-2 border-border/60 bg-gradient-to-b from-card/80 to-card/90 p-4 backdrop-blur-xl px-8 shadow-[0_2px_8px_rgba(0,0,0,0.15)]">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand/30 to-transparent" aria-hidden="true" />
         <div className="mx-auto w-full max-w-3xl space-y-2">
           {error && (
