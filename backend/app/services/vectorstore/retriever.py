@@ -52,6 +52,7 @@ class SemanticRetriever(Retriever):
             query_embedding = self._embedding_service.generate_embeddings([query])[0]
         candidate_count = min(1000, 4 * k + 4)
         _, indices = self._vector_store.search(query_embedding, candidate_count)
+        query_vector = np.asarray(query_embedding, dtype=np.float64)
         documents = []
         for index in indices[0]:
             if index == -1:
@@ -59,6 +60,10 @@ class SemanticRetriever(Retriever):
             document = self._metadata_store.get_document(index)
             if not self.is_eligible(document, workspace_id, owner_id):
                 continue
+            document["semantic_score"] = self._cosine(
+                query_vector,
+                self._vector_store.get_embedding(index),
+            )
             documents.append(document)
             if len(documents) >= k:
                 break

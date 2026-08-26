@@ -213,8 +213,10 @@ class BM25Retriever(Retriever):
         scored.sort(key=lambda pair: pair[0], reverse=True)
 
         documents: list[dict] = []
-        for _, index in scored[:k]:
-            documents.append(self._metadata_store.get_document(index))
+        for score, index in scored[:k]:
+            doc = self._metadata_store.get_document(index)
+            doc["lexical_score"] = score
+            documents.append(doc)
         return documents
 
     def best_score(
