@@ -2,13 +2,46 @@ import { Sparkles } from "lucide-react";
 
 const EQ_DELAYS = ["0ms", "160ms", "320ms", "480ms"];
 
-export function TypingIndicator() {
+export type IndicatorCategory = "general" | "document" | "metadata";
+
+const CATEGORY_MESSAGES: Record<IndicatorCategory, string> = {
+  general: "Thinking…",
+  document: "Analyzing your indexed documents…",
+  metadata: "Checking your documents…",
+};
+
+const CATEGORY_ARIA: Record<IndicatorCategory, string> = {
+  general: "DocMind is thinking",
+  document: "DocMind is analyzing your documents and composing an answer",
+  metadata: "DocMind is checking your documents",
+};
+
+interface TypingIndicatorProps {
+  category?: IndicatorCategory;
+  hasImages?: boolean;
+}
+
+export function TypingIndicator({ category = "general", hasImages = false }: TypingIndicatorProps) {
+  const message =
+    category === "document"
+      ? CATEGORY_MESSAGES.document
+      : hasImages
+        ? "Processing image…"
+        : CATEGORY_MESSAGES[category];
+
+  const ariaLabel =
+    category === "document"
+      ? CATEGORY_ARIA.document
+      : hasImages
+        ? "DocMind is processing an image"
+        : CATEGORY_ARIA[category];
+
   return (
     <div
       className="docmind-message flex w-full max-w-[85%] flex-col gap-2 sm:max-w-[75%]"
       role="status"
       aria-live="polite"
-      aria-label="DocMind is analyzing your documents and composing an answer"
+      aria-label={ariaLabel}
     >
       {/* Sender row */}
       <div className="flex items-center gap-2.5">
@@ -33,7 +66,7 @@ export function TypingIndicator() {
             ))}
           </span>
           <span className="text-sm text-muted-foreground">
-            Analyzing your indexed documents…
+            {message}
           </span>
         </div>
         <div className="space-y-2.5" aria-hidden="true">

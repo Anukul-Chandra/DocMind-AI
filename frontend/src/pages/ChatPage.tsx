@@ -2,10 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AlertCircle, MessagesSquare } from "lucide-react";
 
 import { ApiError } from "@/api/client";
-import { chatUser, type ChatSourceChunk } from "@/api/chat";
+import { chatUser, classifyChat, type ChatSourceChunk } from "@/api/chat";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { ChatMessageBubble } from "@/components/chat/ChatMessageBubble";
-import { TypingIndicator } from "@/components/chat/TypingIndicator";
+import { TypingIndicator, type IndicatorCategory } from "@/components/chat/TypingIndicator";
 import type { ChatMessage, SourceFile } from "@/types/chat";
 import { cn } from "@/lib/utils";
 
@@ -96,6 +96,8 @@ function loadMessages(): ChatMessage[] {
 export function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>(loadMessages);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingCategory, setLoadingCategory] = useState<IndicatorCategory>("general");
+  const [loadingHasImages, setLoadingHasImages] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -128,7 +130,22 @@ export function ChatPage() {
         ...(imageUrls.length > 0 ? { images: imageUrls } : {}),
       },
     ]);
+
+    const hasImages = attachments.length > 0;
+    setLoadingHasImages(hasImages);
+
+    let category: IndicatorCategory = "general";
+    try {
+      const classifyResult = await classifyChat(text);
+      if (classifyResult.category === "document" || classifyResult.category === "metadata") {
+        category = classifyResult.category;
+      }
+    } catch {
+      // If classify fails, fall back to general
+    }
+    setLoadingCategory(category);
     setIsLoading(true);
+
     try {
       const { answer, provider, model, sources } = await chatUser(text, attachments);
       setMessages((previous) => [
@@ -173,7 +190,7 @@ export function ChatPage() {
             })}
             {isLoading && (
               <div className="flex items-start">
-                <TypingIndicator />
+                <TypingIndicator category={loadingCategory} hasImages={loadingHasImages} />
               </div>
             )}
             <div ref={endRef} />

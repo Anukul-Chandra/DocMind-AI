@@ -248,7 +248,12 @@ def get_bm25_retriever() -> BM25Retriever:
 
 
 @lru_cache
-def get_chat_service() -> ChatService:
+def get_query_router() -> QueryRouter:
+    """Return the shared QueryRouter for chat classification.
+
+    Uses the same embedding service and scorers as the ChatService so that
+    classification results are consistent and embeddings are reused.
+    """
     semantic_retriever = get_semantic_retriever()
     bm25_retriever = get_bm25_retriever()
 
@@ -268,17 +273,22 @@ def get_chat_service() -> ChatService:
         """Score a question lexically against the owner's corpus for the router."""
         return bm25_retriever.best_score(question, owner_id=owner_id)
 
+    return QueryRouter(
+        get_embedding_service(),
+        relevance_scorer=_relevance_score,
+        lexical_scorer=_lexical_score,
+        personal_floor=settings.rag_personal_floor,
+        topic_threshold=settings.rag_topic_threshold,
+        docnoun_floor=settings.rag_docnoun_floor,
+    )
+
+
+@lru_cache
+def get_chat_service() -> ChatService:
     return ChatService(
         get_retriever(),
         PromptBuilder(),
         build_provider_manager(),
         document_repository=get_document_repository(),
-        query_router=QueryRouter(
-            get_embedding_service(),
-            relevance_scorer=_relevance_score,
-            lexical_scorer=_lexical_score,
-            personal_floor=settings.rag_personal_floor,
-            topic_threshold=settings.rag_topic_threshold,
-            docnoun_floor=settings.rag_docnoun_floor,
-        ),
+        query_router=get_query_router(),
     )

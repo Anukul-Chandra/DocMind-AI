@@ -3,9 +3,10 @@ import logging
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, Form, status
 
-from app.api.dependencies import get_chat_service, get_current_user
+from app.api.dependencies import get_chat_service, get_current_user, get_query_router
 from app.services.auth import User
 from app.services.chat.chat_service import ChatService
+from app.services.chat.query_router import QueryCategory, QueryRouter
 from app.services.llm.provider_manager import LLMUnavailableError
 
 logger = logging.getLogger(__name__)
@@ -96,3 +97,29 @@ async def chat(
         "category": response.category,
         "sources": response.sources,
     }
+
+
+@router.post(
+    "/classify",
+    status_code=status.HTTP_200_OK,
+)
+async def classify(
+    question: str = Form(...),
+    current_user: User = Depends(get_current_user),
+    query_router: QueryRouter = Depends(get_query_router),
+) -> dict:
+    """Classify a question into a routing category without generating an answer.
+
+    This allows the frontend to show an appropriate loading state before the
+    full chat request is made.
+
+    Args:
+        question: The user's question text.
+        current_user: The authenticated user whose corpus determines relevance.
+        query_router: The shared QueryRouter instance.
+
+    Returns:
+        A dict with the routing category ("general" | "document" | "metadata").
+    """
+    category = query_router.classify(question, owner_id=current_user.user_id)
+    return {"category": category.value}
