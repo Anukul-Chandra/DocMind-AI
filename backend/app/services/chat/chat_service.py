@@ -3,6 +3,8 @@ from app.repositories.interfaces import DocumentRepository
 from app.services.chat.query_router import QueryCategory, QueryRouter
 from app.services.llm.prompt_builder import PromptBuilder
 from app.services.llm.provider_manager import ProviderManager
+from app.services.rag.crag import CragOrchestrator
+from app.services.rag.query_rewriter import QueryRewriter
 from app.services.rag.retrieval_evaluator import RetrievalEvaluator
 from app.services.retrieval.base import Retriever
 
@@ -32,6 +34,7 @@ class ChatService:
         document_repository: DocumentRepository | None = None,
         query_router: QueryRouter | None = None,
         retrieval_evaluator: RetrievalEvaluator | None = None,
+        query_rewriter: QueryRewriter | None = None,
     ) -> None:
         """Initialize the chat service with its collaborators.
 
@@ -48,6 +51,11 @@ class ChatService:
                 None to use the default deterministic router.
             retrieval_evaluator: Evaluates retrieval quality for
                 document-grounded queries, or None to skip evaluation.
+            query_rewriter: Rewrites weak queries into better retrieval queries
+                for corrective retrieval.  When both ``retrieval_evaluator``
+                and ``query_rewriter`` are present, DOCUMENT queries run through
+                a single corrective-retrieval pass.  If either is None, the
+                service degrades to plain retrieval.
         """
         self._retriever = retriever
         self._prompt_builder = prompt_builder
@@ -55,6 +63,14 @@ class ChatService:
         self._document_repository = document_repository
         self._query_router = query_router or QueryRouter()
         self._retrieval_evaluator = retrieval_evaluator
+
+        self._crag: CragOrchestrator | None = None
+        if retrieval_evaluator is not None and query_rewriter is not None:
+            self._crag = CragOrchestrator(
+                retriever=retriever,
+                evaluator=retrieval_evaluator,
+                rewriter=query_rewriter,
+            )
 
     async def chat(
         self,
@@ -92,13 +108,20 @@ class ChatService:
             return await self._provider_manager.generate(
                 prompt.text, images=images,
             )
-        contexts = self._retriever.retrieve(
-            question,
-            owner_id=owner_id,
-            query_embedding=self._query_router.last_query_embedding,
-        )
-        if self._retrieval_evaluator is not None:
-            self._retrieval_evaluator.evaluate(question, contexts)
+        if self._crag is not None:
+            contexts = await self._crag.retrieve(
+                question,
+                owner_id=owner_id,
+                query_embedding=self._query_router.last_query_embedding,
+            )
+        else:
+            contexts = self._retriever.retrieve(
+                question,
+                owner_id=owner_id,
+                query_embedding=self._query_router.last_query_embedding,
+            )
+            if self._retrieval_evaluator is not None:
+                self._retrieval_evaluator.evaluate(question, contexts)
         rag_prompt = self._prompt_builder.build_prompt(question, contexts)
         response = await self._provider_manager.generate(
             rag_prompt.text, images=images,
