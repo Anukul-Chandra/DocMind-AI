@@ -73,8 +73,28 @@ function EmptyState({ onExample }: { onExample: (text: string) => void }) {
   );
 }
 
+function readFileAsDataURL(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+const STORAGE_KEY = "docmind-chat-messages";
+
+function loadMessages(): ChatMessage[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as ChatMessage[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 export function ChatPage() {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>(loadMessages);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
@@ -82,6 +102,11 @@ export function ChatPage() {
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
+
+  // Persist conversation across refresh
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+  }, [messages]);
 
   // Keep the viewport pinned to the newest content while a response reveals.
   const scrollToLatest = useCallback(() => {
@@ -92,8 +117,8 @@ export function ChatPage() {
     const text = question.trim();
     if (!text || isLoading) return;
     setError(null);
-    // Create preview URLs for display in the sent message bubble
-    const imageUrls = attachments.map((file) => URL.createObjectURL(file));
+    // Create data URLs so image attachments survive browser refresh
+    const imageUrls = await Promise.all(attachments.map(readFileAsDataURL));
     setMessages((previous) => [
       ...previous,
       {
