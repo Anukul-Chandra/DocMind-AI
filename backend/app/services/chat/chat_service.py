@@ -3,6 +3,7 @@ from app.repositories.interfaces import DocumentRepository
 from app.services.chat.query_router import QueryCategory, QueryRouter
 from app.services.llm.prompt_builder import PromptBuilder
 from app.services.llm.provider_manager import ProviderManager
+from app.services.rag.retrieval_evaluator import RetrievalEvaluator
 from app.services.retrieval.base import Retriever
 
 
@@ -30,6 +31,7 @@ class ChatService:
         provider_manager: ProviderManager,
         document_repository: DocumentRepository | None = None,
         query_router: QueryRouter | None = None,
+        retrieval_evaluator: RetrievalEvaluator | None = None,
     ) -> None:
         """Initialize the chat service with its collaborators.
 
@@ -44,12 +46,15 @@ class ChatService:
                 metadata questions, or None if the path is unavailable.
             query_router: Classifies questions into routing categories, or
                 None to use the default deterministic router.
+            retrieval_evaluator: Evaluates retrieval quality for
+                document-grounded queries, or None to skip evaluation.
         """
         self._retriever = retriever
         self._prompt_builder = prompt_builder
         self._provider_manager = provider_manager
         self._document_repository = document_repository
         self._query_router = query_router or QueryRouter()
+        self._retrieval_evaluator = retrieval_evaluator
 
     async def chat(
         self,
@@ -92,6 +97,8 @@ class ChatService:
             owner_id=owner_id,
             query_embedding=self._query_router.last_query_embedding,
         )
+        if self._retrieval_evaluator is not None:
+            self._retrieval_evaluator.evaluate(question, contexts)
         rag_prompt = self._prompt_builder.build_prompt(question, contexts)
         response = await self._provider_manager.generate(
             rag_prompt.text, images=images,
