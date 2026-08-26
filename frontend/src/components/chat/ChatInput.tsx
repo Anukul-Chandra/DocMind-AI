@@ -133,7 +133,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
                 aria-label="Remove attachment"
                 className="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full border border-border/60 bg-card text-muted-foreground/60 opacity-0 shadow-sm transition-all hover:border-destructive/40 hover:text-destructive group-hover:opacity-100"
               >
-                <svg className="size-2.5" aria-hidden="true">
+                <svg className="size-2.5 text-white" aria-hidden="true">
                   <use href="/icons/minus.svg#x" />
                 </svg>
               </button>
