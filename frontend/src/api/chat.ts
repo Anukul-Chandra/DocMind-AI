@@ -16,7 +16,14 @@ export interface ChatResponse {
   sources?: ChatSourceChunk[];
 }
 
-export async function chatUser(question: string): Promise<ChatResponse> {
-  const response = await apiClient.post<ChatResponse>("/chat/", { question });
+export async function chatUser(question: string, attachments: File[] = []): Promise<ChatResponse> {
+  const formData = new FormData();
+  formData.append("question", question);
+  for (const file of attachments) {
+    formData.append("attachments", file);
+  }
+  const response = await apiClient.post<ChatResponse>("/chat/", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
   return response.data;
 }

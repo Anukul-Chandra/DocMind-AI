@@ -12,7 +12,7 @@ interface ChatInputAttachment {
 }
 
 interface ChatInputProps {
-  onSend: (text: string) => void;
+  onSend: (text: string, attachments: File[]) => void;
   disabled: boolean;
 }
 
@@ -31,7 +31,11 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   function submit() {
     const text = value.trim();
     if (!text || disabled) return;
-    onSend(text);
+    const files = attachments.map((a) => a.file);
+    onSend(text, files);
+    // Revoke object URLs before clearing
+    attachments.forEach((a) => URL.revokeObjectURL(a.previewUrl));
+    setAttachments([]);
     setValue("");
     const textarea = textareaRef.current;
     if (textarea) {

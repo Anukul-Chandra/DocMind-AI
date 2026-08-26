@@ -31,6 +31,7 @@ class ProviderManager:
         system_prompt: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1000,
+        images: list[dict] | None = None,
     ) -> LLMResponse:
         """Generate a response, failing over to the next provider on error.
 
@@ -39,6 +40,9 @@ class ProviderManager:
             system_prompt: An optional system prompt guiding the providers.
             temperature: Sampling temperature for the providers.
             max_tokens: Maximum number of tokens to generate.
+            images: Optional list of base64-encoded image dicts with keys
+                ``mime`` and ``data``. Forwarded to providers that support
+                multimodal input; ignored by providers that do not.
 
         Returns:
             The first successful LLM response.
@@ -56,6 +60,7 @@ class ProviderManager:
                     system_prompt=system_prompt,
                     temperature=temperature,
                     max_tokens=max_tokens,
+                    images=images,
                 )
                 logger.info("Success: Provider = %s", provider_name)
                 return LLMResponse(
@@ -76,6 +81,7 @@ class ProviderManager:
         system_prompt: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1000,
+        images: list[dict] | None = None,
     ) -> AsyncIterator[LLMStreamChunk]:
         """Stream a response, failing over to the next provider on error.
 
@@ -104,6 +110,7 @@ class ProviderManager:
                 system_prompt=system_prompt,
                 temperature=temperature,
                 max_tokens=max_tokens,
+                images=images,
             )
             first_chunk = True
             try:

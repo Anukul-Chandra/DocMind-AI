@@ -11,6 +11,7 @@ from app.services.llm.providers.base import (
     BaseProvider,
     InvalidResponseError,
     RateLimitError,
+    build_user_content,
 )
 
 
@@ -47,6 +48,7 @@ class GroqProvider(BaseProvider):
         system_prompt: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1000,
+        images: list[dict] | None = None,
     ) -> str:
         """Generate a response using the configured Groq model.
 
@@ -68,7 +70,7 @@ class GroqProvider(BaseProvider):
         messages: list[dict] = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
-        messages.append({"role": "user", "content": prompt})
+        messages.append({"role": "user", "content": build_user_content(prompt, images)})
 
         try:
             response = await self._client.chat.completions.create(

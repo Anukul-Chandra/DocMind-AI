@@ -88,7 +88,7 @@ export function ChatPage() {
     endRef.current?.scrollIntoView({ block: "end" });
   }, []);
 
-  async function handleSend(question: string) {
+  async function handleSend(question: string, attachments: File[] = []) {
     const text = question.trim();
     if (!text || isLoading) return;
     setError(null);
@@ -98,9 +98,7 @@ export function ChatPage() {
     ]);
     setIsLoading(true);
     try {
-      // The backend decides whether retrieval contributed; sources are
-      // attached only when it reports the chunks it actually used.
-      const { answer, provider, model, sources } = await chatUser(text);
+      const { answer, provider, model, sources } = await chatUser(text, attachments);
       setMessages((previous) => [
         ...previous,
         {
@@ -167,7 +165,7 @@ export function ChatPage() {
             </div>
           )}
           <ChatInput
-            onSend={(text) => void handleSend(text)}
+            onSend={(text, attachments) => void handleSend(text, attachments)}
             disabled={isLoading}
           />
         </div>

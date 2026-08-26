@@ -51,7 +51,12 @@ class ChatService:
         self._document_repository = document_repository
         self._query_router = query_router or QueryRouter()
 
-    async def chat(self, question: str, owner_id: str = "") -> LLMResponse:
+    async def chat(
+        self,
+        question: str,
+        owner_id: str = "",
+        images: list[dict] | None = None,
+    ) -> LLMResponse:
         """Answer a question, routing it to the appropriate path.
 
         The caller (the API layer) is responsible for authentication and for
@@ -64,6 +69,9 @@ class ChatService:
             owner_id: The user id that owns the retrievable chunks and
                 documents. Empty for the backward-compatible ownerless path;
                 the API layer always passes an authenticated user's id.
+            images: Optional list of base64-encoded image dicts with keys
+                ``mime`` and ``data``. Passed through to the provider for
+                multimodal requests.
 
         Returns:
             The LLM response containing the answer and provenance metadata.
@@ -76,14 +84,18 @@ class ChatService:
             return self._answer_metadata(owner_id)
         if category is QueryCategory.GENERAL:
             prompt = self._prompt_builder.build_general_prompt(question)
-            return await self._provider_manager.generate(prompt.text)
+            return await self._provider_manager.generate(
+                prompt.text, images=images,
+            )
         contexts = self._retriever.retrieve(
             question,
             owner_id=owner_id,
             query_embedding=self._query_router.last_query_embedding,
         )
         rag_prompt = self._prompt_builder.build_prompt(question, contexts)
-        response = await self._provider_manager.generate(rag_prompt.text)
+        response = await self._provider_manager.generate(
+            rag_prompt.text, images=images,
+        )
         response.category = category.value
         response.sources = contexts
         return response
