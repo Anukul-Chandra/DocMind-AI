@@ -1,4 +1,4 @@
-"""Corrective retrieval orchestration for Adaptive CRAG (Part 3B).
+"""Corrective retrieval orchestration for Adaptive CRAG (Parts 3B/3C).
 
 This module connects the existing :class:`~app.services.rag.query_rewriter.QueryRewriter`
 and :class:`~app.services.rag.retrieval_evaluator.RetrievalEvaluator` to the
@@ -11,8 +11,21 @@ Flow (DOCUMENT queries only, enforced by the caller):
     2. Evaluate retrieval quality.
     3. If GOOD: keep the original contexts, no rewrite.
     4. Else: rewrite the query ONCE and retrieve again.
-    5. If the corrective retrieval is empty or raises, fall back to the
-       original contexts.
+    5. After corrective retrieval, inspect the second evaluation and select
+       the best available evidence:
+
+         - corrective GOOD ............ use corrective contexts.
+         - corrective UNCERTAIN ........ use the stronger of the original and
+                                         corrective contexts (by evaluation
+                                         signals, never by recency).
+         - corrective BAD ............. never use the bad corrective contexts;
+                                         prefer the original contexts if they
+                                         carry any usable (non-empty) evidence,
+                                         otherwise return empty.
+
+       In every failure mode (rewrite failure, corrective retrieval failure,
+       corrective evaluation failure, empty corrective retrieval) the original
+       contexts are preserved, or empty if the original is also empty.
 
 Hard limits (never exceeded in a single call):
 
@@ -24,7 +37,10 @@ Hard limits (never exceeded in a single call):
 The orchestrator is provider-agnostic: it only depends on the retriever,
 evaluator, and rewriter abstractions passed to it.  It never touches the
 final answer prompt — the caller remains responsible for building the prompt
-from the original question and the returned (possibly corrected) contexts.
+from the original question and the returned (possibly corrected / empty)
+contexts.  When both attempts yield no usable evidence, the orchestrator
+returns an empty list so the PromptBuilder can signal insufficient document
+evidence rather than the system fabricating an answer.
 """
 
 from __future__ import annotations
@@ -41,6 +57,13 @@ from app.services.retrieval.base import Retriever
 from app.services.vectorstore.workspace import DEFAULT_WORKSPACE
 
 logger = logging.getLogger(__name__)
+
+# Quality ranking used when comparing the original and corrective evaluations.
+_QUALITY_RANK = {
+    RetrievalQuality.GOOD: 2,
+    RetrievalQuality.UNCERTAIN: 1,
+    RetrievalQuality.BAD: 0,
+}
 
 
 class CragOrchestrator:
@@ -87,10 +110,11 @@ class CragOrchestrator:
                 freshly.
 
         Returns:
-            The final selected contexts: the original retrieval on GOOD
-            quality, or the corrective retrieval when it succeeds and is
-            non-empty.  Falls back to the original contexts in every failure
-            mode so the chat request is never broken by CRAG.
+            The final selected contexts: the best available evidence among the
+            original and corrective retrievals, chosen by retrieval quality and
+            evaluator confidence.  Returns an empty list only when both attempts
+            yield no usable evidence, so the caller can signal the absence of
+            document evidence instead of fabricating an answer.
         """
         contexts = self._retriever.retrieve(
             query,
@@ -106,8 +130,8 @@ class CragOrchestrator:
             return contexts
 
         # First evaluation (count: 1).
-        evaluation: RetrievalEvaluation = self._evaluator.evaluate(query, contexts)
-        if evaluation.quality is RetrievalQuality.GOOD:
+        initial_eval: RetrievalEvaluation = self._evaluator.evaluate(query, contexts)
+        if initial_eval.quality is RetrievalQuality.GOOD:
             return contexts
 
         # One rewrite, maximum.  The rewriter is itself safe: it returns the
@@ -138,14 +162,61 @@ class CragOrchestrator:
             )
             return contexts
 
-        # Empty corrective retrieval is "nothing useful" → fall back.
+        # Empty corrective retrieval is "nothing useful" → keep the original
+        # (which may itself be empty, in which case the final result is empty).
         if not corrected:
             logger.info("CRAG corrective retrieval empty; using original contexts.")
             return contexts
 
-        # Second evaluation (count: 2).  Computed for observability/consistency
-        # with the CRAG design; the corrected contexts are used as final unless
-        # empty/failed (handled above).
-        self._evaluator.evaluate(rewritten, corrected)
+        # Second evaluation (count: 2).
+        try:
+            corrected_eval: RetrievalEvaluation = self._evaluator.evaluate(
+                rewritten, corrected
+            )
+        except Exception as exc:  # corrective evaluation failure → fall back
+            logger.warning(
+                "CRAG corrective evaluation failed; using original contexts: %s",
+                exc,
+            )
+            return contexts
 
-        return corrected
+        # Final context selection driven by the corrective evaluation quality.
+        if corrected_eval.quality is RetrievalQuality.GOOD:
+            return corrected
+
+        if corrected_eval.quality is RetrievalQuality.UNCERTAIN:
+            # Use the genuinely better of the two evidenced candidates.  We do
+            # NOT prefer the corrective retrieval merely because it is newer;
+            # the decision is made purely from existing evaluation signals.
+            if self._is_better(initial_eval, corrected_eval):
+                return corrected
+            return contexts
+
+        # corrected_eval.quality is BAD: never present bad corrective evidence.
+        # Prefer the original contexts if they carry any usable (non-empty)
+        # chunks; otherwise there is no usable evidence at all.
+        return contexts if contexts else []
+
+    @staticmethod
+    def _is_better(
+        initial: RetrievalEvaluation,
+        corrected: RetrievalEvaluation,
+    ) -> bool:
+        """Return True if *corrected* is the stronger evidence of the two.
+
+        The decision uses only existing evaluation signals: a higher quality
+        rank wins outright; ties are broken by the evaluator's confidence so we
+        pick the genuinely stronger context rather than the newer one.
+
+        Args:
+            initial: The evaluation of the original retrieval.
+            corrected: The evaluation of the corrective retrieval.
+
+        Returns:
+            True if the corrective evidence should be preferred.
+        """
+        corrected_rank = _QUALITY_RANK[corrected.quality]
+        initial_rank = _QUALITY_RANK[initial.quality]
+        if corrected_rank != initial_rank:
+            return corrected_rank > initial_rank
+        return corrected.confidence > initial.confidence
