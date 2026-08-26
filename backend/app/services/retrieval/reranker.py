@@ -122,4 +122,8 @@ class SemanticReranker(DefaultReranker):
             for i, candidate in enumerate(candidates)
         ]
         scored.sort(key=lambda pair: (-pair[0], pair[2]))
-        return [candidate for _, candidate, _ in scored[:k]]
+        result: list[dict] = []
+        for rerank_score, candidate, _ in scored[:k]:
+            candidate["rerank_score"] = rerank_score
+            result.append(candidate)
+        return result

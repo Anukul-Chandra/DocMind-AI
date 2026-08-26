@@ -100,19 +100,34 @@ class HybridRetriever(Retriever):
         for rank, candidate in enumerate(semantic_results):
             key = self._key(candidate)
             scores[key] += 1.0 / (self.RRF_K + rank)
-            lookup.setdefault(key, candidate)
+            if key not in lookup:
+                lookup[key] = candidate
+            else:
+                lookup[key].setdefault(
+                    "semantic_score", candidate.get("semantic_score")
+                )
 
         for rank, candidate in enumerate(keyword_results):
             key = self._key(candidate)
             scores[key] += 1.0 / (self.RRF_K + rank)
-            lookup.setdefault(key, candidate)
+            if key not in lookup:
+                lookup[key] = candidate
+            else:
+                lookup[key].setdefault(
+                    "lexical_score", candidate.get("lexical_score")
+                )
 
         ranked = sorted(
             scores.items(),
             key=lambda item: item[1],
             reverse=True,
         )
-        return [lookup[key] for key, _ in ranked]
+        result: list[dict] = []
+        for key, rrf_score in ranked:
+            chunk = lookup[key]
+            chunk["rrf_score"] = rrf_score
+            result.append(chunk)
+        return result
 
     @staticmethod
     def _key(candidate: dict) -> tuple:
