@@ -113,9 +113,9 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     <div className="w-full" onClick={handleClickAway}>
       <div
         className={cn(
-          "relative flex items-end rounded-2xl bg-background/80 border-2 border-border/60 p-2.5 shadow-sm transition-colors",
-          "focus-within:border-brand/55 focus-within:shadow-[0_0_32px_-14px_var(--brand)] focus-within:ring-3 focus-within:ring-brand/25",
-          hasValue && !disabled && "border-brand/35",
+          "relative flex items-end rounded-2xl bg-background border-2 border-brand/20 p-2.5 shadow-sm transition-colors",
+          "focus-within:border-brand/50 focus-within:shadow-[0_0_32px_-14px_var(--brand)] focus-within:ring-3 focus-within:ring-brand/25",
+          hasValue && !disabled && "border-brand/30",
         )}
       >
         {/* Focus accent hairline */}
