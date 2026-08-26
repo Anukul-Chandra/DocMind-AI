@@ -111,6 +111,37 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
 
   return (
     <div className="w-full" onClick={handleClickAway}>
+      {/* Image attachment previews — above input */}
+      {attachments.length > 0 && (
+        <div className="flex gap-2 pb-2">
+          {attachments.map((attachment) => (
+            <div
+              key={attachment.id}
+              className="group relative shrink-0 size-[64px] sm:size-[72px] rounded-xl bg-card/80 border border-border/40 p-0.5 backdrop-blur-sm hover:border-brand/20 transition-colors"
+            >
+              <img
+                src={attachment.previewUrl}
+                alt="Attachment preview"
+                className="size-full rounded-[0.6rem] object-cover"
+              />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeAttachment(attachment.id);
+                }}
+                aria-label="Remove attachment"
+                className="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full border border-border/60 bg-card text-muted-foreground/60 opacity-0 shadow-sm transition-all hover:border-destructive/40 hover:text-destructive group-hover:opacity-100"
+              >
+                <svg className="size-2.5" aria-hidden="true">
+                  <use href="/icons/minus.svg#x" />
+                </svg>
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div
         className={cn(
           "relative flex items-end rounded-2xl bg-[#050807] border-2 border-brand/20 p-2.5 shadow-sm transition-colors",
@@ -151,37 +182,6 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           <ArrowUp className="size-4.5" aria-hidden="true" />
         </button>
       </div>
-
-      {/* Image attachment previews */}
-      {attachments.length > 0 && (
-        <div className="flex gap-2 pt-2">
-          {attachments.map((attachment) => (
-            <div
-              key={attachment.id}
-              className="group relative shrink-0 size-[64px] sm:size-[72px] rounded-xl bg-card/80 border border-border/40 p-0.5 backdrop-blur-sm hover:border-brand/20 transition-colors"
-            >
-              <img
-                src={attachment.previewUrl}
-                alt="Attachment preview"
-                className="size-full rounded-[0.6rem] object-cover"
-              />
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeAttachment(attachment.id);
-                }}
-                aria-label="Remove attachment"
-                className="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full border border-border/60 bg-card text-muted-foreground/60 opacity-0 shadow-sm transition-all hover:border-destructive/40 hover:text-destructive group-hover:opacity-100"
-              >
-                <svg className="size-2.5" aria-hidden="true">
-                  <use href="/icons/minus.svg#x" />
-                </svg>
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
 
       <p className="docmind-label mt-2 text-center text-muted-foreground/55">
         Enter to transmit · Shift+Enter for a new line
