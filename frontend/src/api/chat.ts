@@ -16,6 +16,19 @@ export interface ChatResponse {
   sources?: ChatSourceChunk[];
 }
 
+export interface ClassifyResponse {
+  category: string;
+}
+
+export async function classifyChat(question: string): Promise<ClassifyResponse> {
+  const formData = new FormData();
+  formData.append("question", question);
+  const response = await apiClient.post<ClassifyResponse>("/chat/classify", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+}
+
 export async function chatUser(question: string, attachments: File[] = []): Promise<ChatResponse> {
   const formData = new FormData();
   formData.append("question", question);

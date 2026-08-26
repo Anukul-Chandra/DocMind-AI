@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { fileURLToPath, URL } from "node:url";
 
 import react from "@vitejs/plugin-react";
@@ -25,6 +26,11 @@ export default defineConfig(({ mode }) => {
         "/retrieve": { target: apiTarget, changeOrigin: true },
         "/health": { target: apiTarget, changeOrigin: true },
       },
+    },
+    test: {
+      environment: "jsdom",
+      globals: true,
+      setupFiles: ["./src/test/setup.ts"],
     },
   };
 });
