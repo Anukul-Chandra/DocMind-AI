@@ -169,11 +169,10 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           disabled={disabled || !hasValue}
           aria-label="Send question"
           className={cn(
-            "flex size-9 shrink-0 items-center justify-center rounded-xl transition-all duration-200",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-            hasValue && !disabled
-              ? "bg-brand text-brand-foreground shadow-md hover:shadow-brand/30 hover:brightness-110 active:brightness-105"
-              : "bg-muted text-muted-foreground/60",
+            "flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#3FD58F] text-[#050807] transition-all duration-200",
+            "hover:brightness-110 hover:shadow-[0_0_12px_-2px_rgba(63,213,143,0.4)] active:brightness-95",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3FD58F] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050807]",
+            disabled && "opacity-40 cursor-not-allowed hover:brightness-100 hover:shadow-none active:brightness-100",
           )}
         >
           <ArrowUp className="size-4.5" aria-hidden="true" />
