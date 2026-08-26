@@ -285,13 +285,16 @@ def get_query_router() -> QueryRouter:
 
 @lru_cache
 def get_chat_service() -> ChatService:
+    from app.services.rag.query_rewriter import QueryRewriter
     from app.services.rag.retrieval_evaluator import RetrievalEvaluator
 
+    provider_manager = build_provider_manager()
     return ChatService(
         get_retriever(),
         PromptBuilder(),
-        build_provider_manager(),
+        provider_manager,
         document_repository=get_document_repository(),
         query_router=get_query_router(),
         retrieval_evaluator=RetrievalEvaluator(),
+        query_rewriter=QueryRewriter(provider_manager),
     )
