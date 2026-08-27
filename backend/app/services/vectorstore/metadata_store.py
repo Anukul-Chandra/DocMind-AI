@@ -1,12 +1,18 @@
+from typing import Optional
+
 from app.services.storage import JsonFileStore
+from app.services.storage_backends import MetadataBackend
 from app.services.vectorstore.workspace import DEFAULT_WORKSPACE
 
 
-class MetadataStore:
+class MetadataStore(MetadataBackend):
     """Store document chunk metadata in the order they are added."""
 
-    def __init__(self) -> None:
+    def __init__(self, path: Optional[str] = None) -> None:
         self.documents: list[dict] = []
+        self._path: Optional[str] = path
+        if path is not None:
+            self.load(path)
 
     def add_documents(
         self,
@@ -100,3 +106,8 @@ class MetadataStore:
             path: The file path to load the metadata from.
         """
         self.documents = JsonFileStore.load(path, default=[])
+
+    def persist(self) -> None:
+        """Flush the metadata to the configured ``path`` (no-op if none)."""
+        if self._path is not None:
+            self.save(self._path)

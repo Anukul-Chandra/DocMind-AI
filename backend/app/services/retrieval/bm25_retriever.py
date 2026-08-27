@@ -5,7 +5,7 @@ from typing import Mapping
 
 from app.repositories.interfaces import DocumentRepository
 from app.services.retrieval.base import Retriever
-from app.services.vectorstore.metadata_store import MetadataStore
+from app.services.storage_backends import MetadataBackend
 from app.services.vectorstore.workspace import DEFAULT_WORKSPACE
 
 TOKEN_PATTERN = re.compile(r"[a-z0-9]+")
@@ -111,7 +111,7 @@ class BM25Retriever(Retriever):
 
     def __init__(
         self,
-        metadata_store: MetadataStore,
+        metadata_store: MetadataBackend,
         document_registry: DocumentRepository | None = None,
     ) -> None:
         """Initialize the retriever, building the index on first use.

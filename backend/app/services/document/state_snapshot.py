@@ -24,8 +24,7 @@ import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from app.services.vector_store import IndexSnapshot, VectorStore
-from app.services.vectorstore.metadata_store import MetadataStore
+from app.services.storage_backends import MetadataBackend, VectorBackend, VectorSnapshot
 
 
 @dataclass
@@ -41,7 +40,7 @@ class UploadStateSnapshot:
             or None when the file did not exist.
     """
 
-    faiss: IndexSnapshot
+    faiss: VectorSnapshot
     metadata_records: list[dict] = field(default_factory=list)
     metadata_path: str | None = None
     metadata_file_existed: bool = False
@@ -49,8 +48,8 @@ class UploadStateSnapshot:
 
 
 def capture_upload_state(
-    vector_store: VectorStore,
-    metadata_store: MetadataStore,
+    vector_store: VectorBackend,
+    metadata_store: MetadataBackend,
     metadata_path: str | None = None,
 ) -> UploadStateSnapshot:
     """Capture the pre-operation state of the stores to be mutated.
@@ -87,8 +86,8 @@ def capture_upload_state(
 
 def restore_upload_state(
     snapshot: UploadStateSnapshot,
-    vector_store: VectorStore,
-    metadata_store: MetadataStore,
+    vector_store: VectorBackend,
+    metadata_store: MetadataBackend,
 ) -> None:
     """Restore the stores to the state captured in a snapshot.
 
