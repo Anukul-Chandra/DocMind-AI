@@ -9,6 +9,7 @@ from app.db.models.conversation import Conversation
 from app.db.models.document import Document
 from app.db.models.request_log import RequestLogEntry
 from app.db.models.user import User
+from app.db.models.vector_chunk import VectorChunk
 from app.db.models.workspace import Workspace
 
 __all__ = [
@@ -17,5 +18,6 @@ __all__ = [
     "Document",
     "RequestLogEntry",
     "User",
+    "VectorChunk",
     "Workspace",
 ]
