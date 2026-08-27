@@ -25,8 +25,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from app.repositories.interfaces import DocumentRepository
-from app.services.vector_store import VectorStore
-from app.services.vectorstore.metadata_store import MetadataStore
+from app.services.storage_backends import MetadataBackend, VectorBackend
 
 PHYSICAL_FILE_PATTERNS = ("*.pdf",)
 
@@ -189,8 +188,8 @@ def _check_physical_files(
 
 
 def check_consistency(
-    vector_store: VectorStore,
-    metadata_store: MetadataStore,
+    vector_store: VectorBackend,
+    metadata_store: MetadataBackend,
     document_repository: DocumentRepository,
     storage_dir: str | Path | None = None,
 ) -> ConsistencyReport:

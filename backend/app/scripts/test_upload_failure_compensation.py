@@ -94,7 +94,7 @@ class StubEmbeddingService:
 class FailingMetadataStore(MetadataStore):
     """A MetadataStore whose persistence step always fails."""
 
-    def save(self, path: str) -> None:
+    def persist(self) -> None:
         raise OSError("simulated metadata write failure")
 
 
@@ -130,6 +130,11 @@ def _build_service(
     vector_store: VectorStore,
     tmp: Path,
 ) -> DocumentService:
+    # Configure the backends' persistence destinations (the abstraction's
+    # path-free ``persist()`` flushes to whatever path was supplied at
+    # construction time).
+    vector_store._index_path = str(tmp / "faiss" / "index.faiss")
+    metadata_store._path = str(tmp / "metadata.json")
     return DocumentService(
         pdf_processor=processor,
         chunker=Chunker(chunk_size=10000, chunk_overlap=200),

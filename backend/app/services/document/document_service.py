@@ -13,9 +13,8 @@ from app.services.document.state_snapshot import (
     restore_upload_state,
 )
 from app.services.embedding import EmbeddingService
+from app.services.storage_backends import MetadataBackend, VectorBackend
 from app.services.text_cleaner import clean_text
-from app.services.vector_store import VectorStore
-from app.services.vectorstore.metadata_store import MetadataStore
 from app.services.vectorstore.workspace import DEFAULT_WORKSPACE
 
 
@@ -59,8 +58,8 @@ class DocumentService:
         pdf_processor: PDFProcessor,
         chunker: Chunker,
         embedding_service: EmbeddingService,
-        vector_store: VectorStore,
-        metadata_store: MetadataStore,
+        vector_store: VectorBackend,
+        metadata_store: MetadataBackend,
         faiss_index_path: str | None = None,
         metadata_path: str | None = None,
         classifier: DocumentClassifier | None = None,
@@ -117,8 +116,7 @@ class DocumentService:
             snapshot: The snapshot captured before the indexing attempt.
         """
         restore_upload_state(snapshot, self._vector_store, self._metadata_store)
-        if self._faiss_index_path is not None:
-            self._vector_store.save(self._faiss_index_path)
+        self._vector_store.persist()
 
     async def index_document(
         self,
@@ -174,10 +172,8 @@ class DocumentService:
                 owner_id,
             )
 
-            if self._faiss_index_path is not None:
-                self._vector_store.save(self._faiss_index_path)
-            if self._metadata_path is not None:
-                self._metadata_store.save(self._metadata_path)
+            self._vector_store.persist()
+            self._metadata_store.persist()
         except Exception as exc:
             raise DocumentIndexError(
                 f"Failed to index document {display_filename}: {exc}"

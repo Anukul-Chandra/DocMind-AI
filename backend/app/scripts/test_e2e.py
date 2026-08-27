@@ -123,9 +123,10 @@ async def main() -> int:
         try:
             embedding_service = EmbeddingService()
             vector_store = VectorStore(
-                dimension=embedding_service.get_embedding_dimension()
+                dimension=embedding_service.get_embedding_dimension(),
+                index_path=str(faiss_path),
             )
-            metadata_store = MetadataStore()
+            metadata_store = MetadataStore(path=str(metadata_path))
             document_registry = DocumentRegistry(documents_path)
             document_service = DocumentService(
                 PDFProcessor(),

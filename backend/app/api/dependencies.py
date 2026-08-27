@@ -37,6 +37,7 @@ from app.services.llm.factory import build_provider_manager
 from app.services.llm.prompt_builder import PromptBuilder
 from app.services.logging.request_logger import RequestLogger
 from app.services.retrieval import BM25Retriever, HybridRetriever, Retriever
+from app.services.storage_backends import MetadataBackend, VectorBackend
 from app.services.vector_store import VectorStore
 from app.services.vectorstore.metadata_store import MetadataStore
 from app.services.vectorstore.retriever import SemanticRetriever
@@ -48,17 +49,16 @@ def get_embedding_service() -> EmbeddingService:
 
 
 @lru_cache
-def get_vector_store() -> VectorStore:
-    store = VectorStore(get_embedding_service().get_embedding_dimension())
-    store.load_index(settings.faiss_index_path)
-    return store
+def get_vector_store() -> VectorBackend:
+    return VectorStore(
+        get_embedding_service().get_embedding_dimension(),
+        index_path=settings.faiss_index_path,
+    )
 
 
 @lru_cache
-def get_metadata_store() -> MetadataStore:
-    store = MetadataStore()
-    store.load(settings.metadata_path)
-    return store
+def get_metadata_store() -> MetadataBackend:
+    return MetadataStore(path=settings.metadata_path)
 
 
 @lru_cache

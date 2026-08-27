@@ -5,6 +5,9 @@ from pathlib import Path
 
 import numpy as np
 import faiss
+from typing import Optional
+
+from app.services.storage_backends import VectorBackend, VectorSnapshot
 
 
 @dataclass(frozen=True)
@@ -24,13 +27,16 @@ class IndexSnapshot:
     embeddings: tuple[tuple[float, ...], ...]
 
 
-class VectorStore:
+class VectorStore(VectorBackend):
     """FAISS-backed vector store for embedding similarity search."""
 
-    def __init__(self, dimension: int) -> None:
+    def __init__(self, dimension: int, index_path: Optional[str] = None) -> None:
         self._index = faiss.IndexFlatL2(dimension)
         self._embeddings: list[list[float]] = []
         self.documents: list[dict] = []
+        self._index_path: Optional[str] = index_path
+        if index_path is not None:
+            self.load_index(index_path)
 
     @property
     def ntotal(self) -> int:
@@ -51,32 +57,45 @@ class VectorStore:
         self._index.add(vectors)
         self._embeddings.extend(embeddings)
 
-    def snapshot_state(self) -> IndexSnapshot:
+    def snapshot_state(self) -> VectorSnapshot:
         """Capture the current index state as an independent snapshot.
 
         The FAISS index is deep-cloned, so later changes to this store never
         affect the returned snapshot, and later changes to the snapshot never
-        affect this store.
+        affect this store. The snapshot is wrapped in a backend-agnostic
+        :class:`VectorSnapshot` so callers do not depend on FAISS internals.
 
         Returns:
-            An IndexSnapshot preserving the current contents and ordering.
+            A VectorSnapshot preserving the current contents and ordering.
         """
-        return IndexSnapshot(
-            index=faiss.clone_index(self._index),
-            embeddings=tuple(tuple(vector) for vector in self._embeddings),
+        return VectorSnapshot(
+            IndexSnapshot(
+                index=faiss.clone_index(self._index),
+                embeddings=tuple(tuple(vector) for vector in self._embeddings),
+            )
         )
 
-    def restore_state(self, snapshot: IndexSnapshot) -> None:
+    def restore_state(self, state: VectorSnapshot) -> None:
         """Restore a previously captured index state exactly.
 
         The snapshot is cloned on restore so the original snapshot object is
         never mutated by subsequent operations on this store.
 
         Args:
-            snapshot: An IndexSnapshot captured earlier from this store.
+            state: A VectorSnapshot captured earlier from this store.
         """
+        if not isinstance(state, VectorSnapshot):
+            raise TypeError("restore_state expects a VectorSnapshot")
+        snapshot = state.payload
+        if not isinstance(snapshot, IndexSnapshot):
+            raise TypeError("VectorSnapshot payload is not an IndexSnapshot")
         self._index = faiss.clone_index(snapshot.index)
         self._embeddings = [list(vector) for vector in snapshot.embeddings]
+
+    def persist(self) -> None:
+        """Flush the index to the configured ``index_path`` (no-op if none)."""
+        if self._index_path is not None:
+            self.save(self._index_path)
 
     def add_documents(self, texts: list[str], filename: str) -> None:
         """Store document chunks mapped to the FAISS index order.

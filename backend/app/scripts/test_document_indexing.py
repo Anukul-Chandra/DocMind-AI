@@ -28,8 +28,11 @@ def build_document_service() -> tuple[DocumentService, VectorStore, MetadataStor
         A tuple of the DocumentService, its VectorStore, and its MetadataStore.
     """
     embedding_service = EmbeddingService()
-    vector_store = VectorStore(dimension=embedding_service.get_embedding_dimension())
-    metadata_store = MetadataStore()
+    vector_store = VectorStore(
+        dimension=embedding_service.get_embedding_dimension(),
+        index_path=settings.faiss_index_path,
+    )
+    metadata_store = MetadataStore(path=settings.metadata_path)
     service = DocumentService(
         PDFProcessor(),
         Chunker(),

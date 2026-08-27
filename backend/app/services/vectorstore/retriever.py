@@ -3,19 +3,18 @@ import numpy as np
 from app.repositories.interfaces import DocumentRepository
 from app.services.embedding import EmbeddingService
 from app.services.retrieval.base import Retriever
-from app.services.vector_store import VectorStore
-from app.services.vectorstore.metadata_store import MetadataStore
+from app.services.storage_backends import MetadataBackend, VectorBackend
 from app.services.vectorstore.workspace import DEFAULT_WORKSPACE
 
 
 class SemanticRetriever(Retriever):
-    """Retrieve relevant document chunks for a query using embeddings and FAISS."""
+    """Retrieve relevant document chunks for a query using embeddings and a vector backend."""
 
     def __init__(
         self,
         embedding_service: EmbeddingService,
-        vector_store: VectorStore,
-        metadata_store: MetadataStore,
+        vector_store: VectorBackend,
+        metadata_store: MetadataBackend,
         document_registry: DocumentRepository | None = None,
     ) -> None:
         self._document_registry = document_registry
