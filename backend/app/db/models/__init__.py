@@ -5,6 +5,7 @@ These models back the repository implementations in
 """
 
 from app.db.models.chat_message import ChatMessage
+from app.db.models.chunk_metadata import ChunkMetadata
 from app.db.models.conversation import Conversation
 from app.db.models.document import Document
 from app.db.models.request_log import RequestLogEntry
@@ -14,6 +15,7 @@ from app.db.models.workspace import Workspace
 
 __all__ = [
     "ChatMessage",
+    "ChunkMetadata",
     "Conversation",
     "Document",
     "RequestLogEntry",
