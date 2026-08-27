@@ -44,12 +44,15 @@ def test_json_metadata_store_implements_metadata_backend():
 def test_storage_backends_module_has_no_pgvector_dependency():
     import app.services.storage_backends as mod
 
-    # The abstraction must not pull in a database driver or storage backend.
-    assert "pgvector" not in sys.modules
+    # The abstraction itself must not import a concrete database driver or
+    # storage backend; only the Postgres implementation (a separate module)
+    # does. pgvector may already be in sys.modules because other tests import
+    # the Postgres backend, so we assert on the abstraction module only.
     source = (mod.__file__ or "")
     with open(source) as fh:
         body = fh.read()
-    assert "pgvector" not in body
+    assert "import pgvector" not in body
+    assert "from pgvector" not in body
     assert "sqlalchemy" not in body
     assert "postgres" not in body
 
