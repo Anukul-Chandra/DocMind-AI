@@ -46,8 +46,10 @@ evidence rather than the system fabricating an answer.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 
+from app.core.config import settings
 from app.services.rag.query_rewriter import QueryRewriter
 from app.services.rag.retrieval_evaluator import (
     RetrievalEvaluation,
@@ -83,10 +85,19 @@ class CragOrchestrator:
         retriever: Retriever,
         evaluator: RetrievalEvaluator | None = None,
         rewriter: QueryRewriter | None = None,
+        rewrite_timeout: float | None = None,
     ) -> None:
         self._retriever = retriever
         self._evaluator = evaluator
         self._rewriter = rewriter
+        # Single hard outer deadline for the optional rewrite. Defaults to the
+        # configured value so provider rotation/retries cannot hold an
+        # interactive request hostage; tests may inject a tighter bound.
+        self._rewrite_timeout = (
+            rewrite_timeout
+            if rewrite_timeout is not None
+            else settings.crag_rewrite_timeout_seconds
+        )
 
     async def retrieve(
         self,
@@ -135,10 +146,23 @@ class CragOrchestrator:
         if initial_eval.quality is RetrievalQuality.GOOD:
             return contexts
 
-        # One rewrite, maximum.  The rewriter is itself safe: it returns the
-        # original query on any failure, which we detect to skip correction.
+        # One rewrite, maximum, bounded by a single hard outer deadline. The
+        # rewriter may internally rotate across providers/models; this
+        # asyncio.wait_for is the ONLY outer safety boundary — it cancels the
+        # in-flight rewrite (and any underlying provider task) on expiry so no
+        # orphan task survives, then falls back to the original contexts exactly
+        # like an ordinary rewrite failure. No CRAG-level retry is added.
         try:
-            rewritten = await self._rewriter.rewrite(query)
+            rewritten = await asyncio.wait_for(
+                self._rewriter.rewrite(query),
+                timeout=self._rewrite_timeout,
+            )
+        except asyncio.TimeoutError:
+            logger.warning(
+                "CRAG rewrite exceeded deadline of %.1fs; using original contexts.",
+                self._rewrite_timeout,
+            )
+            return contexts
         except Exception as exc:  # defensive: never break the chat request
             logger.warning("CRAG rewrite failed; using original contexts: %s", exc)
             return contexts

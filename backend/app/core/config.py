@@ -99,6 +99,19 @@ class Settings(BaseSettings):
     max_tokens: int = 1000
     timeout: int = 60
 
+    #: Hard outer deadline (seconds) for the OPTIONAL CRAG query rewrite. The
+    #: rewrite is a single best-effort LLM call that may internally rotate
+    #: across providers/models; this ceiling guarantees provider rotation,
+    #: retries, and transport timeouts can never block an interactive chat turn
+    #: longer than this budget. On expiry the original contexts are preserved
+    #: and corrective retrieval is skipped, so the user still gets the normal
+    #: answer. Calibrated against baseline retrieval (~0.1s) and the typical
+    #: sub-second-to-few-second latency of a healthy free-tier rewrite; 5s keeps
+    #: a full CRAG turn responsive while tolerating normal variance plus a model
+    #: rotation or two. It is the single outer safety boundary — no CRAG-level
+    #: retry is added on top of the provider/OpenCode rotation beneath it.
+    crag_rewrite_timeout_seconds: float = 5.0
+
     provider_priority: str = "opencode,openrouter,gemini,groq"
 
     openrouter_api_key: str = ""

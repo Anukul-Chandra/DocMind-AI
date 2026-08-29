@@ -20,9 +20,12 @@ Key behavior under test:
     - GENERAL / METADATA queries never enter CRAG.
 """
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+
+import asyncio
+import time
 
 from app.models.llm import LLMResponse
 from app.services.chat.chat_service import ChatService
@@ -686,3 +689,202 @@ class TestChatServiceCragWiring:
         resp = await service.chat("list my docs", owner_id="u1")
         assert retriever.calls == []
         assert resp.category == "metadata"
+
+
+# ---------------------------------------------------------------------------
+# Rewrite deadline (hard outer latency ceiling)
+# ---------------------------------------------------------------------------
+
+class SlowRewriter:
+    """Async fake that sleeps past any deadline and never returns on its own."""
+
+    def __init__(self, hang: float):
+        self.hang = hang
+        self.calls: list[str] = []
+
+    async def rewrite(self, query: str) -> str:
+        self.calls.append(query)
+        await asyncio.sleep(self.hang)
+        return "rewritten"
+
+
+class RotatingSlowRewriter:
+    """Simulates an OpenCode-style internal rotation: many slow attempts."""
+
+    def __init__(self, attempts: int, per_attempt: float):
+        self._attempts = attempts
+        self._per_attempt = per_attempt
+        self.calls: list[str] = []
+
+    async def rewrite(self, query: str) -> str:
+        self.calls.append(query)
+        for _ in range(self._attempts):
+            await asyncio.sleep(self._per_attempt)
+        return "rewritten"
+
+
+class DelayedFailingRewriter:
+    """Sleeps then raises, simulating a slow provider timeout/error."""
+
+    def __init__(self, hang: float):
+        self.hang = hang
+
+    async def rewrite(self, query: str) -> str:
+        await asyncio.sleep(self.hang)
+        raise RuntimeError("provider timeout")
+
+
+class TestRewriteDeadline:
+    """The CRAG rewrite has a single hard outer deadline.
+
+    On expiry the original contexts are preserved, corrective retrieval is
+    skipped, and the chat request proceeds normally — exactly like an ordinary
+    rewrite failure. The deadline is the ONLY outer boundary; it bounds any
+    provider rotation/retry activity beneath it and leaves no orphan task.
+    """
+
+    @pytest.mark.asyncio
+    async def test_fast_rewrite_within_deadline_runs_normally(self):
+        initial = _chunk("initial")
+        corrected = _chunk("corrected")
+        retriever = FakeRetriever({"orig": initial, "rewritten": corrected})
+        evaluator = SequenceEvaluator(
+            [(RetrievalQuality.UNCERTAIN, 0.1), (RetrievalQuality.GOOD, 0.9)]
+        )
+        rewriter = FakeRewriter("rewritten")
+
+        orch = CragOrchestrator(
+            retriever, evaluator, rewriter, rewrite_timeout=2.0
+        )
+        result = await orch.retrieve("orig", owner_id="u1")
+
+        assert result == corrected
+        assert rewriter.calls == ["orig"]      # exactly one rewrite
+        assert len(retriever.calls) == 2       # initial + corrective
+
+    @pytest.mark.asyncio
+    async def test_rewrite_timeout_preserves_original_no_corrective(self):
+        initial = _chunk("initial")
+        retriever = FakeRetriever({"orig": initial})
+        orch = CragOrchestrator(
+            retriever,
+            FakeEvaluator(RetrievalQuality.UNCERTAIN),
+            SlowRewriter(hang=5.0),
+            rewrite_timeout=0.3,
+        )
+        result = await orch.retrieve("orig", owner_id="u1")
+
+        assert result == initial               # original contexts preserved
+        assert len(retriever.calls) == 1       # corrective retrieval skipped
+        assert retriever.calls[0][0] == "orig" # original question unchanged
+
+    @pytest.mark.asyncio
+    async def test_rotation_cannot_exceed_total_deadline(self):
+        initial = _chunk("initial")
+        retriever = FakeRetriever({"orig": initial})
+        # 5 attempts * 2s = 10s of internal rotation, far past the 0.5s ceiling.
+        orch = CragOrchestrator(
+            retriever,
+            FakeEvaluator(RetrievalQuality.UNCERTAIN),
+            RotatingSlowRewriter(attempts=5, per_attempt=2.0),
+            rewrite_timeout=0.5,
+        )
+        start = time.monotonic()
+        result = await orch.retrieve("orig", owner_id="u1")
+        elapsed = time.monotonic() - start
+
+        assert result == initial
+        assert elapsed < 1.0   # hard outer boundary held
+        assert len(retriever.calls) == 1
+
+    @pytest.mark.asyncio
+    async def test_rewriter_exception_falls_back_safely(self):
+        initial = _chunk("initial")
+        retriever = FakeRetriever({"orig": initial})
+        orch = CragOrchestrator(
+            retriever,
+            FakeEvaluator(RetrievalQuality.BAD),
+            FailingRewriter(),
+            rewrite_timeout=1.0,
+        )
+        result = await orch.retrieve("orig", owner_id="u1")
+        assert result == initial
+        assert len(retriever.calls) == 1
+
+    @pytest.mark.asyncio
+    async def test_provider_timeout_falls_back_safely(self):
+        initial = _chunk("initial")
+        retriever = FakeRetriever({"orig": initial})
+        orch = CragOrchestrator(
+            retriever,
+            FakeEvaluator(RetrievalQuality.UNCERTAIN),
+            DelayedFailingRewriter(hang=1.0),
+            rewrite_timeout=5.0,
+        )
+        result = await orch.retrieve("orig", owner_id="u1")
+        assert result == initial
+        assert len(retriever.calls) == 1
+
+    @pytest.mark.asyncio
+    async def test_initial_good_bypasses_rewrite_even_with_deadline(self):
+        initial = _chunk("initial")
+        retriever = FakeRetriever({"orig": initial})
+        rewriter = FakeRewriter("rewritten")
+        orch = CragOrchestrator(
+            retriever, FakeEvaluator(RetrievalQuality.GOOD), rewriter,
+            rewrite_timeout=0.3,
+        )
+        result = await orch.retrieve("orig", owner_id="u1")
+        assert result == initial
+        assert rewriter.calls == []            # no rewrite attempted
+        assert len(retriever.calls) == 1
+
+    @pytest.mark.asyncio
+    async def test_both_bad_with_timed_out_rewrite_is_safe(self):
+        # A timed-out rewrite behaves like any other rewrite failure: it returns
+        # the original (BAD) contexts rather than hanging or crashing. The
+        # both-BAD -> empty path still requires a *successful* rewrite, so it is
+        # unchanged; this only confirms the timeout failure mode is safe.
+        initial = _chunk("initial")
+        retriever = FakeRetriever({"orig": initial, "rewritten": _chunk("corrected")})
+        evaluator = SequenceEvaluator(
+            [(RetrievalQuality.BAD, 0.05), (RetrievalQuality.BAD, 0.05)]
+        )
+        orch = CragOrchestrator(
+            retriever, evaluator, SlowRewriter(hang=5.0), rewrite_timeout=0.3
+        )
+        result = await orch.retrieve("orig", owner_id="u1")
+        assert result == initial
+        assert len(retriever.calls) == 1
+
+    @pytest.mark.asyncio
+    async def test_chat_service_still_answers_when_rewrite_times_out(self):
+        # Service-level proof: a timed-out rewrite must not break the chat turn.
+        # Patch the configured deadline small so the test stays fast.
+        initial = _chunk("initial")
+        retriever = FakeRetriever({"orig": initial})
+        pb = MagicMock(spec=PromptBuilder)
+        pb.build_prompt.return_value = MagicMock(text="prompt")
+
+        with patch(
+            "app.core.config.settings.crag_rewrite_timeout_seconds", 0.3
+        ):
+            service = ChatService(
+                retriever=retriever,
+                prompt_builder=pb,
+                provider_manager=AsyncMock(
+                    generate=AsyncMock(
+                        return_value=LLMResponse(text="answer", provider="p", model="m")
+                    )
+                ),
+                query_router=_router(QueryCategory.DOCUMENT),
+                retrieval_evaluator=FakeEvaluator(RetrievalQuality.UNCERTAIN),
+                query_rewriter=SlowRewriter(hang=5.0),
+            )
+            resp = await service.chat("orig", owner_id="u1")
+
+        assert resp.text == "answer"          # normal answer generation proceeded
+        assert len(retriever.calls) == 1      # no corrective retrieval attempted
+        assert retriever.calls[0][0] == "orig"  # original question used for retrieval
+        # Original question (not the rewrite) drives the prompt.
+        assert pb.build_prompt.call_args.args[0] == "orig"
