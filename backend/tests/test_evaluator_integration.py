@@ -17,6 +17,7 @@ from app.services.chat.chat_service import ChatService
 from app.services.chat.query_router import QueryCategory, QueryRouter, RouteResult
 from app.services.llm.prompt_builder import PromptBuilder
 from app.services.llm.provider_manager import ProviderManager
+from app.services.rag.query_rewriter import QueryRewriter
 from app.services.rag.retrieval_evaluator import (
     RetrievalEvaluation,
     RetrievalEvaluator,
@@ -297,3 +298,115 @@ class TestNoDebugInfoExposed:
         assert not hasattr(resp, "evaluation")
         assert "BAD" not in resp.text
         assert "UNCERTAIN" not in resp.text
+
+
+# ---------------------------------------------------------------------------
+# RetrievalEvaluator -> ChatService -> CRAG integration (corrective path)
+# ---------------------------------------------------------------------------
+
+
+class _ByQueryRetriever(Retriever):
+    """Deterministic retriever keyed by query text."""
+
+    def __init__(self, by_query: dict[str, list[dict]]) -> None:
+        self._by_query = by_query
+
+    def retrieve(self, query, k=5, workspace_id="default", owner_id="", query_embedding=None):
+        return self._by_query.get(query, [])
+
+    def is_eligible(self, document, workspace_id, owner_id=""):
+        return True
+
+
+class _SequenceEvaluator(RetrievalEvaluator):
+    """Returns the configured quality for each successive evaluate() call."""
+
+    def __init__(self, qualities: list[RetrievalQuality]) -> None:
+        self._qualities = list(qualities)
+        self.calls: list[tuple] = []
+
+    def evaluate(self, query: str, chunks: list[dict]) -> RetrievalEvaluation:
+        self.calls.append((query, chunks))
+        quality = self._qualities.pop(0) if self._qualities else RetrievalQuality.BAD
+        return RetrievalEvaluation(
+            quality=quality,
+            confidence=0.8,
+            reason="sequence",
+            best_semantic=0.0,
+            best_rerank=0.0,
+            best_lexical=0.0,
+            best_rrf=0.0,
+            context_count=len(chunks),
+        )
+
+
+class TestCragBothBadIntegration:
+    """Evaluator-driven CRAG: initial BAD + corrective BAD -> empty context.
+
+    When both retrieval attempts are judged unusable, no weak evidence may be
+    presented. The ChatService must receive an empty final context and report
+    ``response.sources == []`` even though the initial chunks were non-empty.
+    """
+
+    @pytest.mark.asyncio
+    async def test_both_bad_yields_empty_sources(self):
+        initial = [{"text": "initial chunk", "semantic_score": 0.1}]
+        corrected = [{"text": "corrected chunk", "semantic_score": 0.1}]
+        retriever = _ByQueryRetriever(
+            {"question": initial, "rewritten question": corrected}
+        )
+        evaluator = _SequenceEvaluator(
+            [RetrievalQuality.BAD, RetrievalQuality.BAD]
+        )
+        rewriter = MagicMock(spec=QueryRewriter)
+        rewriter.rewrite = AsyncMock(return_value="rewritten question")
+
+        service = ChatService(
+            retriever=retriever,
+            prompt_builder=MagicMock(spec=PromptBuilder),
+            provider_manager=_make_provider(text="answer"),
+            query_router=_make_router(QueryCategory.DOCUMENT),
+            retrieval_evaluator=evaluator,
+            query_rewriter=rewriter,
+        )
+
+        resp = await service.chat("question")
+
+        # The CRAG path was exercised (initial eval + one rewrite + corrective eval).
+        assert len(evaluator.calls) == 2
+        assert rewriter.rewrite.await_count == 1
+        # Both attempts unusable -> empty final context, no trusted sources.
+        assert resp.sources == []
+
+    @pytest.mark.asyncio
+    async def test_both_bad_original_question_still_sent_to_prompt(self):
+        initial = [{"text": "initial chunk", "semantic_score": 0.1}]
+        corrected = [{"text": "corrected chunk", "semantic_score": 0.1}]
+        retriever = _ByQueryRetriever(
+            {"question": initial, "rewritten question": corrected}
+        )
+        evaluator = _SequenceEvaluator(
+            [RetrievalQuality.BAD, RetrievalQuality.BAD]
+        )
+        rewriter = MagicMock(spec=QueryRewriter)
+        rewriter.rewrite = AsyncMock(return_value="rewritten question")
+
+        pb = MagicMock(spec=PromptBuilder)
+        pb.build_prompt.return_value = MagicMock(text="prompt")
+
+        service = ChatService(
+            retriever=retriever,
+            prompt_builder=pb,
+            provider_manager=_make_provider(text="answer"),
+            query_router=_make_router(QueryCategory.DOCUMENT),
+            retrieval_evaluator=evaluator,
+            query_rewriter=rewriter,
+        )
+
+        await service.chat("question")
+
+        # Original user question is preserved; empty contexts signal insufficient
+        # evidence to the PromptBuilder (no fabrication).
+        call_args = pb.build_prompt.call_args
+        assert call_args.args[0] == "question"
+        assert call_args.args[1] == []
