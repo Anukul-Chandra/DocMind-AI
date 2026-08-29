@@ -78,12 +78,18 @@ class ScriptedRuntimeClient:
     """Fake async client scripting one result per attempt, in order.
 
     Results are ``(status_code, payload)`` tuples or Exception instances.
-    Records every attempted model id.
+    Records every attempted model id and the full request payload for each
+    call (so tests can assert message/image shape).
     """
 
     def __init__(self, results: list) -> None:
         self._results: list = list(results)
         self.attempted: list[str] = []
+        self.calls: list[dict] = []
+
+    def captured_call(self) -> dict | None:
+        """Return the most recently captured request payload, if any."""
+        return self.calls[-1] if self.calls else None
 
     async def post(
         self,
@@ -93,6 +99,7 @@ class ScriptedRuntimeClient:
         json: dict | None = None,
     ) -> ScriptedResponse:
         self.attempted.append(json["model"])
+        self.calls.append(json)
         result = self._results.pop(0)
         if isinstance(result, Exception):
             raise result
@@ -496,6 +503,93 @@ def test_model_reports_last_successful_model() -> bool:
     return True
 
 
+def test_generate_accepts_images_and_forwards() -> bool:
+    """The rotating provider accepts the full ProviderManager argument set.
+
+    OpenCodeRotatingProvider is the provider actually placed first in the
+    production chain, so its ``generate`` signature must accept ``images``
+    exactly like BaseProvider/OpenCodeProvider; otherwise ProviderManager's
+    ``generate(..., images=...)`` call raises TypeError. With images=None the
+    request must be text-only (no image payload), preserving prior behavior.
+    """
+    provider, _ = build_provider([completion("ok")])
+
+    # Must not raise TypeError with the full ProviderManager argument set.
+    text = asyncio.run(provider.generate(
+        "Hi", system_prompt="sys", temperature=0.3, max_tokens=128, images=None,
+    ))
+    if text != "ok":
+        print(f"FAIL: unexpected text {text!r}")
+        return False
+
+    call = provider._client.captured_call()
+    if call is None:
+        print("FAIL: no request captured")
+        return False
+    # images=None must NOT leak an image payload: user content stays a string.
+    if call["messages"][-1]["content"] != "Hi":
+        print(f"FAIL: expected text-only content, got {call['messages'][-1]}")
+        return False
+    return True
+
+
+def test_generate_forwards_image_content_parts() -> bool:
+    """When images are supplied they are forwarded as multimodal content parts.
+
+    Mirrors OpenCodeProvider/base.build_user_content: a prompt plus images
+    becomes a list of OpenAI content parts, never an empty/irrelevant payload.
+    """
+    provider, _ = build_provider([completion("ok")])
+    images = [{"mime": "image/png", "data": "BASE64DATA"}]
+
+    text = asyncio.run(provider.generate("Describe this", images=images))
+    if text != "ok":
+        print(f"FAIL: unexpected text {text!r}")
+        return False
+
+    call = provider._client.captured_call()
+    content = call["messages"][-1]["content"]
+    if not isinstance(content, list):
+        print(f"FAIL: expected multimodal content list, got {content!r}")
+        return False
+    if content[0] != {"type": "text", "text": "Describe this"}:
+        print(f"FAIL: text part wrong: {content[0]}")
+        return False
+    if content[1]["type"] != "image_url":
+        print(f"FAIL: missing image part: {content[1]}")
+        return False
+    if content[1]["image_url"]["url"] != "data:image/png;base64,BASE64DATA":
+        print(f"FAIL: image data uri wrong: {content[1]}")
+        return False
+    return True
+
+
+def test_provider_manager_passes_images_without_typeerror() -> bool:
+    """ProviderManager.generate(..., images=...) must not crash on OpenCode.
+
+    This is the exact call shape that previously raised
+    ``TypeError: unexpected keyword argument 'images'`` for the rotating
+    provider. We wire a single rotating provider into a ProviderManager and
+    confirm the full argument set flows through.
+    """
+    from app.services.llm.provider_manager import ProviderManager
+
+    provider, _ = build_provider([completion("manager ok")])
+    manager = ProviderManager([provider])
+
+    try:
+        response = asyncio.run(manager.generate(
+            "Hi", system_prompt="sys", temperature=0.2, max_tokens=64, images=None,
+        ))
+    except TypeError as exc:
+        print(f"FAIL: ProviderManager raised TypeError on images arg: {exc}")
+        return False
+    if response.text != "manager ok":
+        print(f"FAIL: unexpected response text {response.text!r}")
+        return False
+    return True
+
+
 def test_reuses_existing_pool_manager() -> bool:
     """The runtime layer drives the existing ModelPoolManager semantics."""
     manager = ModelPoolManager(["only-one-free"])
@@ -543,6 +637,9 @@ def main() -> None:
         ("10. Mixed failures -> D succeeds", test_mixed_failures_eventual_success),
         ("10b. model reports last successful model", test_model_reports_last_successful_model),
         ("Reuse: existing ModelPoolManager driven", test_reuses_existing_pool_manager),
+        ("Images: generate accepts images, text-only when None", test_generate_accepts_images_and_forwards),
+        ("Images: forwards multimodal content parts", test_generate_forwards_image_content_parts),
+        ("Images: ProviderManager passes images w/o TypeError", test_provider_manager_passes_images_without_typeerror),
     ]
 
     passed = True
