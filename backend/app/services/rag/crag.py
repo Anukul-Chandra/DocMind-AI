@@ -18,10 +18,11 @@ Flow (DOCUMENT queries only, enforced by the caller):
          - corrective UNCERTAIN ........ use the stronger of the original and
                                          corrective contexts (by evaluation
                                          signals, never by recency).
-         - corrective BAD ............. never use the bad corrective contexts;
-                                         prefer the original contexts if they
-                                         carry any usable (non-empty) evidence,
-                                         otherwise return empty.
+          - corrective BAD ............. never use the bad corrective contexts;
+                                          additionally, since the initial
+                                          retrieval was already BAD, both
+                                          attempts produced unusable evidence,
+                                          so return empty (no trusted context).
 
        In every failure mode (rewrite failure, corrective retrieval failure,
        corrective evaluation failure, empty corrective retrieval) the original
@@ -192,10 +193,11 @@ class CragOrchestrator:
                 return corrected
             return contexts
 
-        # corrected_eval.quality is BAD: never present bad corrective evidence.
-        # Prefer the original contexts if they carry any usable (non-empty)
-        # chunks; otherwise there is no usable evidence at all.
-        return contexts if contexts else []
+        # corrected_eval.quality is BAD and the initial was already BAD: both
+        # retrieval attempts produced unusable evidence. Never present either
+        # weak result as trusted document context — return empty so the caller
+        # signals insufficient evidence instead of fabricating an answer.
+        return []
 
     @staticmethod
     def _is_better(
