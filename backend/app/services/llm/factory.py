@@ -8,6 +8,7 @@ from app.services.llm.opencode_model_pool import build_opencode_pool_manager
 from app.services.llm.provider_manager import ProviderManager
 from app.services.llm.providers.gemini import GeminiProvider
 from app.services.llm.providers.groq import GroqProvider
+from app.services.llm.providers.agnes import AgnesProvider
 from app.services.llm.providers.openrouter import OpenRouterProvider
 from app.services.llm.providers.opencode_rotation import OpenCodeRotatingProvider
 
@@ -86,6 +87,27 @@ def build_groq_provider() -> GroqProvider:
     )
 
 
+def build_agnes_provider() -> AgnesProvider | None:
+    """Build an Agnes AI provider with configuration injected from settings.
+
+    Returns ``None`` when no API key is configured so the provider is skipped
+    gracefully (mirroring OpenCode's discovery-failure skip) instead of
+    failing startup. Agnes is opt-in: it is only used when ``agnes`` appears
+    in ``settings.provider_priority``.
+
+    Returns:
+        An AgnesProvider instance, or None when the API key is absent.
+    """
+    if not settings.agnes_api_key:
+        return None
+    return AgnesProvider(
+        api_key=settings.agnes_api_key,
+        model=settings.agnes_model,
+        base_url=settings.agnes_base_url,
+        timeout=settings.timeout,
+    )
+
+
 def build_provider_manager() -> ProviderManager:
     """Build a ProviderManager from the configured provider priority.
 
@@ -105,4 +127,8 @@ def build_provider_manager() -> ProviderManager:
             providers.append(build_gemini_provider())
         elif name == "groq":
             providers.append(build_groq_provider())
+        elif name == "agnes":
+            provider = build_agnes_provider()
+            if provider is not None:
+                providers.append(provider)
     return ProviderManager(providers)

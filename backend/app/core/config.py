@@ -121,6 +121,14 @@ class Settings(BaseSettings):
     github_api_key: str = ""
     cerebras_api_key: str = ""
     sambanova_api_key: str = ""
+    #: Agnes AI (OpenAI-compatible gateway). Base URL and default model are
+    #: taken from the official Agnes AI documentation:
+    #:   https://agnes-ai.com/doc/overview  (Base URL https://apihub.agnes-ai.com/v1)
+    #: Verified chat models: agnes-2.5-flash, agnes-2.0-flash, agnes-1.5-flash.
+    #: agnes-2.5-flash is the current flagship and is text + image-URL capable.
+    agnes_api_key: str = ""
+    agnes_base_url: str = "https://apihub.agnes-ai.com/v1"
+    agnes_model: str = "agnes-2.5-flash"
 
     @model_validator(mode="after")
     def _resolve_storage_paths(self) -> "Settings":
