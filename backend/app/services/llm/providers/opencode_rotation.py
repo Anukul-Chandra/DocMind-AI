@@ -229,6 +229,7 @@ class OpenCodeRotatingProvider(BaseProvider):
         system_prompt: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1000,
+        images: list[dict] | None = None,
     ) -> str:
         """Generate a response, rotating through eligible pool models.
 
@@ -266,6 +267,7 @@ class OpenCodeRotatingProvider(BaseProvider):
                     system_prompt=system_prompt,
                     temperature=temperature,
                     max_tokens=max_tokens,
+                    images=images,
                 )
             except ProviderError as exc:
                 action = classify_opencode_failure(exc)

@@ -165,6 +165,42 @@ def test_prompt_flow() -> bool:
     return True
 
 
+def test_images_none_keeps_text_only() -> bool:
+    """images=None leaves the request text-only (no image payload leaked)."""
+    provider = build_provider([completion("ok")])
+
+    asyncio.run(provider.generate("Hi", images=None))
+
+    messages = provider._client.calls[0]["messages"]
+    if messages[-1]["content"] != "Hi":
+        print(f"FAIL: expected text-only user content, got {messages[-1]}")
+        return False
+    return True
+
+
+def test_images_forwarded_as_content_parts() -> bool:
+    """A supplied image is forwarded as an OpenAI multimodal content part."""
+    provider = build_provider([completion("ok")])
+    images = [{"mime": "image/png", "data": "BASE64DATA"}]
+
+    asyncio.run(provider.generate("Describe this", images=images))
+
+    content = provider._client.calls[0]["messages"][-1]["content"]
+    if not isinstance(content, list):
+        print(f"FAIL: expected multimodal content list, got {content!r}")
+        return False
+    if content[0] != {"type": "text", "text": "Describe this"}:
+        print(f"FAIL: text part wrong: {content[0]}")
+        return False
+    if content[1]["type"] != "image_url":
+        print(f"FAIL: missing image part: {content[1]}")
+        return False
+    if content[1]["image_url"]["url"] != "data:image/png;base64,BASE64DATA":
+        print(f"FAIL: image data uri wrong: {content[1]}")
+        return False
+    return True
+
+
 def test_http_400() -> bool:
     """HTTP 400 (e.g. model unavailable) maps to APIError with code 400."""
     provider = build_provider([(400, {"error": "Model unavailable"})])
@@ -320,6 +356,8 @@ def main() -> None:
         ("Success: completion returns text", test_successful_completion),
         ("Wiring: model id + endpoint + base URL", test_correct_model_and_endpoint),
         ("Prompt flow: user/system messages + params", test_prompt_flow),
+        ("Images: images=None keeps request text-only", test_images_none_keeps_text_only),
+        ("Images: forwards multimodal content parts", test_images_forwarded_as_content_parts),
         ("Errors: HTTP 400 -> APIError(400)", test_http_400),
         ("Errors: HTTP 404 -> APIError(404)", test_http_404),
         ("Errors: HTTP 429 -> RateLimitError", test_http_429),
