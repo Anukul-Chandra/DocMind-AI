@@ -6,14 +6,17 @@ evaluator, rewriter, LLM, or provider calls are made.
 Key behavior under test:
     - GOOD initial ............ keep initial, no rewrite.
     - BAD/UNCERTAIN initial ... one rewrite + one corrective retrieval, then
-                               select the best available evidence:
+        select the best available evidence:
         * corrective GOOD ............. use corrective.
         * corrective UNCERTAIN ........ use the stronger of original /
-                                        corrective (by eval signals).
-        * corrective BAD .............. never use bad corrective; prefer the
-                                        original if non-empty, else empty.
+                                         corrective (by eval signals).
+        * corrective BAD + initial BAD  both attempts unusable -> empty final
+                                        context (never fall back to weak
+                                        original or corrective evidence).
     - Both attempts empty/insufficient -> empty final context.
-    - Every failure mode falls back safely to the original (or empty).
+    - Every TECHNICAL failure mode (rewrite failure, corrective retrieval
+      failure, empty corrective retrieval, corrective evaluation failure)
+      falls back safely to the original (or empty).
     - GENERAL / METADATA queries never enter CRAG.
 """
 
@@ -217,7 +220,7 @@ class TestInitialUncertainCorrectiveGood:
 
 class TestInitialBadCorrectiveBad:
     @pytest.mark.asyncio
-    async def test_bad_then_bad_keeps_original(self):
+    async def test_bad_then_bad_returns_empty(self):
         initial = _chunk("initial")
         corrected = _chunk("corrected")
         retriever = FakeRetriever({"orig": initial, "rewritten": corrected})
@@ -228,8 +231,10 @@ class TestInitialBadCorrectiveBad:
         orch = CragOrchestrator(retriever, evaluator, FakeRewriter("rewritten"))
         result = await orch.retrieve("orig", owner_id="u1")
 
-        # Do NOT use the bad corrective contexts; keep the original (usable).
-        assert result == initial
+        # Both attempts produced unusable evidence: never present either weak
+        # result as trusted context. Final context must be empty even though
+        # the original chunks were non-empty.
+        assert result == []
 
 
 class TestUncertainCorrectiveUncertain:
@@ -275,6 +280,150 @@ class TestBothBadEmpty:
         result = await orch.retrieve("orig", owner_id="u1")
 
         assert result == []  # insufficient evidence -> empty, no fabrication
+
+
+class TestBothBadFinalContext:
+    """Intended behavior: Initial BAD + corrective BAD -> empty final context.
+
+    This must hold even when the original (initial) contexts are non-empty, and
+    even when the corrective contexts are non-empty. Neither weak result may be
+    sent as trusted document context. Technical failures (rewriter/retrieval/
+    evaluation exceptions, empty corrective) are a separate concern and keep
+    their existing safe fallback to the original contexts.
+    """
+
+    @pytest.mark.asyncio
+    async def test_initial_bad_corrective_bad_final_empty(self):
+        initial = _chunk("initial")
+        corrected = _chunk("corrected")
+        retriever = FakeRetriever({"orig": initial, "rewritten": corrected})
+        evaluator = SequenceEvaluator(
+            [(RetrievalQuality.BAD, 0.05), (RetrievalQuality.BAD, 0.05)]
+        )
+        orch = CragOrchestrator(retriever, evaluator, FakeRewriter("rewritten"))
+        result = await orch.retrieve("orig", owner_id="u1")
+        assert result == []
+
+    @pytest.mark.asyncio
+    async def test_both_bad_nonempty_initial_and_corrective_empty(self):
+        initial = _chunk("initial")
+        corrected = _chunk("corrected")
+        retriever = FakeRetriever({"orig": initial, "rewritten": corrected})
+        evaluator = SequenceEvaluator(
+            [(RetrievalQuality.BAD, 0.2), (RetrievalQuality.BAD, 0.1)]
+        )
+        orch = CragOrchestrator(retriever, evaluator, FakeRewriter("rewritten"))
+        result = await orch.retrieve("orig", owner_id="u1")
+        # Original non-empty chunk must NOT be returned as trusted context.
+        assert result == []
+        assert initial not in result
+
+    @pytest.mark.asyncio
+    async def test_both_bad_sources_empty_via_chat_service(self):
+        retriever = FakeRetriever(
+            {"orig": _chunk("initial"), "rewritten": _chunk("corrected")}
+        )
+        evaluator = SequenceEvaluator(
+            [(RetrievalQuality.BAD, 0.05), (RetrievalQuality.BAD, 0.05)]
+        )
+        service = _make_service(retriever, evaluator, FakeRewriter("rewritten"))
+        resp = await service.chat("orig", owner_id="u1")
+        assert resp.sources == []
+
+    @pytest.mark.asyncio
+    async def test_original_question_reaches_prompt_builder_when_both_bad(self):
+        initial = _chunk("initial")
+        corrected = _chunk("corrected")
+        retriever = FakeRetriever({"orig": initial, "rewritten": corrected})
+        pb = MagicMock(spec=PromptBuilder)
+        pb.build_prompt.return_value = MagicMock(text="prompt")
+        service = ChatService(
+            retriever=retriever,
+            prompt_builder=pb,
+            provider_manager=AsyncMock(
+                generate=AsyncMock(
+                    return_value=LLMResponse(text="answer", provider="p", model="m")
+                )
+            ),
+            query_router=_router(QueryCategory.DOCUMENT),
+            retrieval_evaluator=SequenceEvaluator(
+                [(RetrievalQuality.BAD, 0.05), (RetrievalQuality.BAD, 0.05)]
+            ),
+            query_rewriter=FakeRewriter("rewritten"),
+        )
+        await service.chat("orig", owner_id="u1")
+        call_args = pb.build_prompt.call_args
+        assert call_args.args[0] == "orig"   # original question preserved
+        assert call_args.args[1] == []       # empty contexts (insufficient)
+
+    @pytest.mark.asyncio
+    async def test_bad_then_good_uses_corrective(self):
+        initial = _chunk("initial")
+        corrected = _chunk("corrected")
+        retriever = FakeRetriever({"orig": initial, "rewritten": corrected})
+        evaluator = SequenceEvaluator(
+            [(RetrievalQuality.BAD, 0.05), (RetrievalQuality.GOOD, 0.9)]
+        )
+        orch = CragOrchestrator(retriever, evaluator, FakeRewriter("rewritten"))
+        result = await orch.retrieve("orig", owner_id="u1")
+        assert result == corrected
+
+    @pytest.mark.asyncio
+    async def test_bad_then_uncertain_uses_stronger(self):
+        initial = _chunk("initial")
+        corrected = _chunk("corrected")
+        retriever = FakeRetriever({"orig": initial, "rewritten": corrected})
+        evaluator = SequenceEvaluator(
+            [(RetrievalQuality.BAD, 0.05), (RetrievalQuality.UNCERTAIN, 0.9)]
+        )
+        orch = CragOrchestrator(retriever, evaluator, FakeRewriter("rewritten"))
+        result = await orch.retrieve("orig", owner_id="u1")
+        assert result == corrected
+
+    @pytest.mark.asyncio
+    async def test_corrective_retrieval_failure_preserves_fallback(self):
+        initial = _chunk("initial")
+        retriever = BoomRetriever({"orig": initial, "rewritten": _chunk("c")})
+        orch = CragOrchestrator(
+            retriever, FakeEvaluator(RetrievalQuality.UNCERTAIN), FakeRewriter("rewritten")
+        )
+        result = await orch.retrieve("orig", owner_id="u1")
+        assert result == initial  # technical failure -> safe fallback
+
+    @pytest.mark.asyncio
+    async def test_empty_corrective_preserves_fallback(self):
+        initial = _chunk("initial")
+        retriever = FakeRetriever({"orig": initial, "rewritten": []})
+        orch = CragOrchestrator(
+            retriever, FakeEvaluator(RetrievalQuality.UNCERTAIN), FakeRewriter("rewritten")
+        )
+        result = await orch.retrieve("orig", owner_id="u1")
+        assert result == initial  # empty corrective -> safe fallback
+
+    @pytest.mark.asyncio
+    async def test_rewriter_failure_preserves_fallback(self):
+        initial = _chunk("initial")
+        retriever = FakeRetriever({"orig": initial})
+        orch = CragOrchestrator(
+            retriever, FakeEvaluator(RetrievalQuality.BAD), FailingRewriter()
+        )
+        result = await orch.retrieve("orig", owner_id="u1")
+        assert result == initial  # rewriter failure -> safe fallback
+
+    @pytest.mark.asyncio
+    async def test_no_extra_rewrite_or_retrieval_beyond_limits(self):
+        initial = _chunk("initial")
+        corrected = _chunk("corrected")
+        retriever = FakeRetriever({"orig": initial, "rewritten": corrected})
+        evaluator = SequenceEvaluator(
+            [(RetrievalQuality.BAD, 0.05), (RetrievalQuality.BAD, 0.05)]
+        )
+        rewriter = FakeRewriter("rewritten")
+        orch = CragOrchestrator(retriever, evaluator, rewriter)
+        await orch.retrieve("orig", owner_id="u1")
+        assert len(retriever.calls) == 2   # exactly two retrieval passes
+        assert len(evaluator.calls) == 2   # exactly two evaluations
+        assert len(rewriter.calls) == 1    # exactly one rewrite
 
 
 class TestCorrectiveEmpty:
@@ -412,7 +561,7 @@ class TestLimits:
         rewriter = FakeRewriter("rewritten")
         orch = CragOrchestrator(retriever, evaluator, rewriter)
         result = await orch.retrieve("orig", owner_id="u1")
-        assert result == initial  # corrected BAD -> original, no further loop
+        assert result == []  # both BAD -> empty, no further loop
         assert len(retriever.calls) == 2
         assert len(rewriter.calls) == 1  # exactly one rewrite
 
