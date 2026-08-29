@@ -151,7 +151,7 @@ Full reference in [`backend/.env.example`](backend/.env.example). Key knobs:
 |---|---|---|
 | `JWT_SECRET` | — (**required**) | Long random string; server refuses to start without it |
 | `PERSISTENCE_BACKEND` | `json` | `json` or `postgres` |
-| `PROVIDER_PRIORITY` | `openrouter,gemini,groq` | Failover order |
+| `PROVIDER_PRIORITY` | `opencode,openrouter,gemini,groq` | Failover order |
 | `RATE_LIMIT_PER_MINUTE` / `_AUTH_` | 300 / 60 | Per-IP fixed windows; stricter on auth endpoints |
 | `CORS_ORIGINS` | Vite dev origins | Comma-separated allowlist |
 | `MAX_UPLOAD_SIZE_BYTES` | 50 MiB | Hard streaming cap |
