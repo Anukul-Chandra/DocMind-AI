@@ -194,12 +194,13 @@ async def test_owner_isolation() -> bool:
 
 
 async def test_embedding_reuse() -> bool:
-    """The router stores its query embedding for retrieval reuse."""
+    """The router returns a request-local query embedding for retrieval reuse."""
     router = get_chat_service()._query_router
-    router.last_query_embedding = None
-    router.classify("what was my last job?", owner_id=OWNER)
-    if router.last_query_embedding is None:
-        print("FAIL: router did not store the query embedding")
+    route = router.classify_with_embedding(
+        "what was my last job?", owner_id=OWNER
+    )
+    if route.query_embedding is None:
+        print("FAIL: router did not produce a request-local query embedding")
         return False
     return True
 

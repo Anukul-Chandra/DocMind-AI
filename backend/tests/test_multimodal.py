@@ -191,7 +191,7 @@ class TestChatServiceImages:
     @pytest.mark.asyncio
     async def test_images_forwarded_to_provider_manager(self):
         from app.services.chat.chat_service import ChatService
-        from app.services.chat.query_router import QueryCategory
+        from app.services.chat.query_router import QueryCategory, RouteResult
 
         mock_retriever = MagicMock()
         mock_prompt_builder = MagicMock()
@@ -201,7 +201,9 @@ class TestChatServiceImages:
             text="answer", provider="test", model="m", category="general", sources=[],
         ))
         mock_query_router = MagicMock()
-        mock_query_router.classify.return_value = QueryCategory.GENERAL
+        mock_query_router.classify_with_embedding.return_value = RouteResult(
+            QueryCategory.GENERAL, None
+        )
 
         service = ChatService(
             retriever=mock_retriever,
@@ -228,7 +230,7 @@ class TestEndToEndImageTransport:
     @pytest.mark.asyncio
     async def test_image_reaches_provider_as_multimodal_content(self):
         from app.services.chat.chat_service import ChatService
-        from app.services.chat.query_router import QueryCategory
+        from app.services.chat.query_router import QueryCategory, RouteResult
 
         captured_prompt = {}
 
@@ -243,7 +245,9 @@ class TestEndToEndImageTransport:
         mock_provider_manager = AsyncMock()
         mock_provider_manager.generate = fake_generate
         mock_query_router = MagicMock()
-        mock_query_router.classify.return_value = QueryCategory.GENERAL
+        mock_query_router.classify_with_embedding.return_value = RouteResult(
+            QueryCategory.GENERAL, None
+        )
 
         service = ChatService(
             retriever=mock_retriever,

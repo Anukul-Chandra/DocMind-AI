@@ -14,7 +14,7 @@ import pytest
 
 from app.models.llm import LLMResponse
 from app.services.chat.chat_service import ChatService
-from app.services.chat.query_router import QueryCategory, QueryRouter
+from app.services.chat.query_router import QueryCategory, QueryRouter, RouteResult
 from app.services.llm.prompt_builder import PromptBuilder
 from app.services.llm.provider_manager import ProviderManager
 from app.services.rag.retrieval_evaluator import (
@@ -41,8 +41,9 @@ def _make_provider(text="answer", provider="openrouter", model="m"):
 
 def _make_router(category: QueryCategory):
     r = MagicMock(spec=QueryRouter)
-    r.classify.return_value = category
-    r.last_query_embedding = [0.1, 0.2, 0.3]
+    r.classify_with_embedding.return_value = RouteResult(
+        category, [0.1, 0.2, 0.3]
+    )
     return r
 
 

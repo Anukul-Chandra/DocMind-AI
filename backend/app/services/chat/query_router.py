@@ -37,6 +37,7 @@ classification degrades to the deterministic rules and everything else is
 GENERAL.
 """
 
+from dataclasses import dataclass
 from enum import Enum
 import re
 
@@ -58,6 +59,23 @@ class QueryCategory(Enum):
     GENERAL = "general"
     DOCUMENT = "document"
     METADATA = "metadata"
+
+
+@dataclass
+class RouteResult:
+    """The outcome of classifying a single query.
+
+    Attributes:
+        category: The routing category for the query.
+        query_embedding: The embedding generated from the *current* question
+            when semantic retrieval is required (DOCUMENT category), otherwise
+            ``None``. This is request-local: it is produced for exactly one
+            classification call and never persisted on shared instance state,
+            so a later query can never silently reuse a previous embedding.
+    """
+
+    category: QueryCategory
+    query_embedding: list[float] | None = None
 
 
 #: Lowercase substrings that signal a request about the user's document
@@ -415,7 +433,6 @@ class QueryRouter:
         self._personal_floor = personal_floor
         self._topic_threshold = topic_threshold
         self._docnoun_floor = docnoun_floor
-        self.last_query_embedding: list[float] | None = None
 
     def classify(self, question: str, owner_id: str = "") -> QueryCategory:
         """Return the routing category for the given question.
@@ -423,6 +440,12 @@ class QueryRouter:
         Deterministic rules take precedence. Only when they do not match is the
         question embedded and scored against the user's own corpus; below the
         relevance thresholds the question remains GENERAL.
+
+        This is a convenience wrapper around :meth:`classify_with_embedding`
+        that discards the generated embedding. Use
+        ``classify_with_embedding`` when the caller needs the embedding for
+        downstream retrieval so that the embedding always belongs to the
+        current question.
 
         Args:
             question: The user's chat question.
@@ -432,17 +455,43 @@ class QueryRouter:
         Returns:
             The routing category for the question.
         """
+        return self.classify_with_embedding(question, owner_id=owner_id).category
+
+    def classify_with_embedding(
+        self, question: str, owner_id: str = ""
+    ) -> RouteResult:
+        """Classify a query and return its request-local embedding.
+
+        The embedding returned for a DOCUMENT query is generated from the
+        *current* question and is never taken from shared instance state. This
+        prevents a later query from reusing a previous query's embedding during
+        semantic retrieval. The embedding is ``None`` for METADATA and GENERAL
+        queries, which require no semantic retrieval (so no embedding is
+        generated, preserving the no-wasted-call behavior).
+
+        Args:
+            question: The user's chat question.
+            owner_id: The user id whose corpus determines relevance. Empty for
+                the legacy ownerless path.
+
+        Returns:
+            A :class:`RouteResult` with the routing category and, when
+            retrieval is required, the current question's embedding.
+        """
         text = question.strip().lower()
         if self._is_metadata_intent(text):
-            return QueryCategory.METADATA
+            return RouteResult(QueryCategory.METADATA, None)
         if _DOCUMENT_EXTENSION_PATTERN.search(text):
-            return QueryCategory.DOCUMENT
+            # Explicit filename reference: routed to DOCUMENT and needs
+            # retrieval, so embed the current question here rather than relying
+            # on any previously stored embedding.
+            return RouteResult(QueryCategory.DOCUMENT, self._embed(question))
         if _is_future_upload_request(text):
-            return QueryCategory.GENERAL
+            return RouteResult(QueryCategory.GENERAL, None)
         if self._is_general_ask(text):
-            return QueryCategory.GENERAL
+            return RouteResult(QueryCategory.GENERAL, None)
         if self._embedding_service is None or self._relevance_scorer is None:
-            return QueryCategory.GENERAL
+            return RouteResult(QueryCategory.GENERAL, None)
         return self._classify_relevance(question, owner_id, text)
 
     @staticmethod
@@ -478,10 +527,30 @@ class QueryRouter:
             return False
         return any(trigger in text for trigger in _METADATA_TRIGGERS)
 
-    def _classify_relevance(self, question: str, owner_id: str, text: str) -> QueryCategory:
-        """Embed once, combine signals, and route by the audited rule."""
-        query_embedding = self._embedding_service.generate_embeddings([question])[0]
-        self.last_query_embedding = query_embedding
+    def _embed(self, question: str) -> list[float] | None:
+        """Embed a single question, or return ``None`` if no service is set.
+
+        Args:
+            question: The question text to embed.
+
+        Returns:
+            The question embedding, or ``None`` when no embedding service is
+            configured.
+        """
+        if self._embedding_service is None:
+            return None
+        return self._embedding_service.generate_embeddings([question])[0]
+
+    def _classify_relevance(self, question: str, owner_id: str, text: str) -> RouteResult:
+        """Embed once, combine signals, and route by the audited rule.
+
+        The embedding is generated exactly once for the current question and
+        returned (for DOCUMENT) so retrieval always uses the current question's
+        vector rather than any shared cached state.
+        """
+        query_embedding = self._embed(question)
+        if query_embedding is None:
+            return RouteResult(QueryCategory.GENERAL, None)
         similarity = self._relevance_scorer(
             question,
             owner_id,
@@ -496,15 +565,15 @@ class QueryRouter:
 
         if personal and self_attribute:
             if similarity >= self._personal_floor:
-                return QueryCategory.DOCUMENT
+                return RouteResult(QueryCategory.DOCUMENT, query_embedding)
         elif personal:
             if similarity >= self._personal_floor and lexical > 0.0:
-                return QueryCategory.DOCUMENT
+                return RouteResult(QueryCategory.DOCUMENT, query_embedding)
         if docnoun and lexical > 0.0 and similarity >= self._docnoun_floor:
-            return QueryCategory.DOCUMENT
+            return RouteResult(QueryCategory.DOCUMENT, query_embedding)
         if similarity >= self._topic_threshold:
-            return QueryCategory.DOCUMENT
-        return QueryCategory.GENERAL
+            return RouteResult(QueryCategory.DOCUMENT, query_embedding)
+        return RouteResult(QueryCategory.GENERAL, None)
 
     def _is_general_ask(self, text: str) -> bool:
         """Return whether the question is a general-knowledge generation ask.
