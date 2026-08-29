@@ -1,0 +1,7 @@
+backend/.env
+backend/storage/
+.venv/
+__pycache__/
+.lh/
+.history/
+*.pyc
