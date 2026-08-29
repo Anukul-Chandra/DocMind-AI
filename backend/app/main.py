@@ -9,10 +9,14 @@ from app.api.routes import auth_router, chat_router, documents_router, router
 from app.api.retrieve import router as retrieve_router
 from app.core.config import settings
 
+_docs_enabled = settings.enable_docs
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
     description=settings.app_description,
+    docs_url="/docs" if _docs_enabled else None,
+    redoc_url="/redoc" if _docs_enabled else None,
+    openapi_url="/openapi.json" if _docs_enabled else None,
 )
 
 register_exception_handlers(app)
