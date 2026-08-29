@@ -104,7 +104,7 @@ class FakeGemini(BaseProvider):
         return self._model
 
     async def generate(self, prompt, system_prompt=None, temperature=0.0,
-                       max_tokens=1000) -> str:
+                        max_tokens=1000, images=None) -> str:
         self.calls += 1
         return self._text
 
