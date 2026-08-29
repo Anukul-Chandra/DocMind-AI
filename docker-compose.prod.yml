@@ -1,0 +1,31 @@
+# Production deployment for the DocMind AI backend.
+#
+# Single instance, single uvicorn worker, persistent /app/storage volume.
+# FAISS + JSON are the active storage backend and are NOT safe for horizontal
+# scaling, so replicas are pinned to 1 and --workers 1 is enforced in the image.
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: ./backend/.env
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    # Pin to a single replica: FAISS + JSON state is process-local and must not
+    # be split across containers or workers.
+    deploy:
+      replicas: 1
+    volumes:
+      - docmind-storage:/app/storage
+    healthcheck:
+      test:
+        ["CMD", "python", "-c",
+         "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  docmind-storage:
