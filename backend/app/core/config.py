@@ -16,6 +16,11 @@ class Settings(BaseSettings):
     app_version: str = "0.1.0"
     app_description: str = "An intelligent document analysis and management system powered by AI."
 
+    #: When True, FastAPI serves /docs, /redoc, and /openapi.json. Set to False
+    #: in production to avoid exposing the API schema. Defaults to True so local
+    #: development keeps the interactive docs.
+    enable_docs: bool = True
+
     chunk_size: int = 1000
     chunk_overlap: int = 200
 
