@@ -100,7 +100,11 @@ class ChatService:
         Raises:
             LLMUnavailableError: If every provider fails.
         """
-        category = self._query_router.classify(question, owner_id=owner_id)
+        route = self._query_router.classify_with_embedding(
+            question, owner_id=owner_id
+        )
+        category = route.category
+        query_embedding = route.query_embedding
         if category is QueryCategory.METADATA:
             return self._answer_metadata(owner_id)
         if category is QueryCategory.GENERAL:
@@ -112,13 +116,13 @@ class ChatService:
             contexts = await self._crag.retrieve(
                 question,
                 owner_id=owner_id,
-                query_embedding=self._query_router.last_query_embedding,
+                query_embedding=query_embedding,
             )
         else:
             contexts = self._retriever.retrieve(
                 question,
                 owner_id=owner_id,
-                query_embedding=self._query_router.last_query_embedding,
+                query_embedding=query_embedding,
             )
             if self._retrieval_evaluator is not None:
                 self._retrieval_evaluator.evaluate(question, contexts)
