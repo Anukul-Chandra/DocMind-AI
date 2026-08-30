@@ -66,7 +66,7 @@ class FakeCatalogClient:
             raise self._http_error
         return FakeResponse(self._payload)
 
-    def aclose(self):
+    def close(self):
         return None
 
 

@@ -7,6 +7,12 @@ from app.services.llm.providers.base import BaseProvider, RecoverableError
 logger = logging.getLogger(__name__)
 
 
+def _is_image_error(exc: Exception) -> bool:
+    """Return True when a provider failure appears to be image-related."""
+    message = str(exc).lower()
+    return "image" in message or "vision" in message or "multimodal" in message
+
+
 class LLMUnavailableError(Exception):
     """Raised when all providers fail to generate a response."""
 
@@ -69,6 +75,30 @@ class ProviderManager:
                     model=provider.model,
                 )
             except RecoverableError as exc:
+                if images and _is_image_error(exc):
+                    logger.info(
+                        "Provider %s rejected images; retrying text-only",
+                        provider_name,
+                    )
+                    try:
+                        text = await provider.generate(
+                            prompt,
+                            system_prompt=system_prompt,
+                            temperature=temperature,
+                            max_tokens=max_tokens,
+                            images=None,
+                        )
+                        logger.info(
+                            "Success: Provider = %s (text-only retry)",
+                            provider_name,
+                        )
+                        return LLMResponse(
+                            text=text,
+                            provider=provider_name,
+                            model=provider.model,
+                        )
+                    except RecoverableError:
+                        pass
                 self._errors.append((provider_name, exc))
                 logger.warning(
                     "Provider %s failed: %s", provider_name, exc

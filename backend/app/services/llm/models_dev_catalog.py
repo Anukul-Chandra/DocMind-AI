@@ -115,7 +115,7 @@ class ModelsDevCatalog:
 
     def __init__(
         self,
-        client: Callable[[], httpx.AsyncClient] | None = None,
+        client: Callable[[], httpx.Client] | None = None,
         ttl_seconds: float = DEFAULT_CACHE_TTL_SECONDS,
         url: str = MODELS_DEV_URL,
         timeout: float = DEFAULT_CATALOG_TIMEOUT_SECONDS,
@@ -125,13 +125,13 @@ class ModelsDevCatalog:
 
         Args:
             client: Factory returning an httpx client used to fetch the
-                catalog. Defaults to a plain :class:`httpx.AsyncClient`.
+                catalog. Defaults to a plain :class:`httpx.Client`.
             ttl_seconds: Freshness window before the next access refreshes.
             url: Catalog URL to fetch.
             timeout: HTTP timeout for the catalog fetch.
             clock: Injectable monotonic-style clock (test seam).
         """
-        self._client_factory = client or (lambda: httpx.AsyncClient(timeout=timeout))
+        self._client_factory = client or (lambda: httpx.Client(timeout=timeout))
         self._ttl_seconds = max(0.0, ttl_seconds)
         self._url = url
         self._timeout = timeout
@@ -153,7 +153,7 @@ class ModelsDevCatalog:
                 f"Failed to fetch models.dev catalog: {exc}"
             ) from exc
         finally:
-            client.aclose()
+            client.close()
 
     def get_free_models(self, provider: str) -> list[str]:
         """Return the authoritative free models for a provider.

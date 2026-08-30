@@ -116,7 +116,7 @@ class Settings(BaseSettings):
     #: a full CRAG turn responsive while tolerating normal variance plus a model
     #: rotation or two. It is the single outer safety boundary — no CRAG-level
     #: retry is added on top of the provider/OpenCode rotation beneath it.
-    crag_rewrite_timeout_seconds: float = 5.0
+    crag_rewrite_timeout_seconds: float = 2.0
 
     provider_priority: str = "agnes,opencode,openrouter,gemini,groq"
 
