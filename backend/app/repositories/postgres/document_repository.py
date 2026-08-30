@@ -87,18 +87,20 @@ class PostgresDocumentRepository(DocumentRepository):
         )
 
     def list_documents(self, owner_id: str) -> list[Document]:
-        """Return all documents owned by a user.
+        """Return non-deleted documents owned by a user.
 
         Args:
             owner_id: The user id whose documents to return.
 
         Returns:
-            A list of documents owned by the given user.
+            A list of non-deleted documents owned by the given user.
         """
         with self._session_factory() as session:
             rows = (
                 session.execute(
-                    select(db.Document).where(db.Document.owner_id == owner_id)
+                    select(db.Document)
+                    .where(db.Document.owner_id == owner_id)
+                    .where(db.Document.deleted.is_(False))
                 )
                 .scalars()
                 .all()

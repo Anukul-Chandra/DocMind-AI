@@ -157,8 +157,14 @@ export function ChatPage() {
     if (!text || isLoading) return;
     setError(null);
 
+    setIsLoading(true);
+    setLoadingCategory("general");
+
     const conversationId = await ensureConversation();
-    if (!conversationId) return;
+    if (!conversationId) {
+      setIsLoading(false);
+      return;
+    }
 
     // Create data URLs so image attachments survive browser refresh
     const imageUrls = await Promise.all(attachments.map(readFileAsDataURL));
@@ -174,17 +180,14 @@ export function ChatPage() {
     const hasImages = attachments.length > 0;
     setLoadingHasImages(hasImages);
 
-    let category: IndicatorCategory = "general";
     try {
       const classifyResult = await classifyChat(text);
       if (classifyResult.category === "document" || classifyResult.category === "metadata") {
-        category = classifyResult.category;
+        setLoadingCategory(classifyResult.category);
       }
     } catch {
       // If classify fails, fall back to general
     }
-    setLoadingCategory(category);
-    setIsLoading(true);
 
     try {
       const { answer, provider, model, sources } = await chatUser(
