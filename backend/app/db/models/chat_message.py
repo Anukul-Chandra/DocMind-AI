@@ -18,6 +18,7 @@ class ChatMessage(Base):
     conversation_id: Mapped[str] = mapped_column(
         String(64), ForeignKey("conversations.id"), index=True
     )
+    user_id: Mapped[str] = mapped_column(String(64), index=True)
     role: Mapped[str] = mapped_column(String(32))
     content: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(

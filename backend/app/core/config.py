@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     metadata_path: str = str(PROJECT_ROOT / "storage" / "metadata.json")
     documents_path: str = str(PROJECT_ROOT / "storage" / "documents.json")
     users_path: str = str(PROJECT_ROOT / "storage" / "users.json")
+    conversations_path: str = str(PROJECT_ROOT / "storage" / "conversations.json")
     logs_dir: str = str(PROJECT_ROOT / "storage" / "logs")
 
     persistence_backend: str = "json"
@@ -152,6 +153,7 @@ class Settings(BaseSettings):
         "metadata_path",
         "documents_path",
         "users_path",
+        "conversations_path",
         "logs_dir",
     ):
             path = Path(getattr(self, field))

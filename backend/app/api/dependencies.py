@@ -5,11 +5,14 @@ from fastapi import Depends, Header, HTTPException, Request, status
 from app.core.config import settings
 from app.db.session import get_session_factory
 from app.repositories import (
+    ConversationRepository,
     DocumentRepository,
+    JsonConversationRepository,
     JsonDocumentRepository,
     JsonUserRepository,
     LogRepository,
     JsonLogRepository,
+    PostgresConversationRepository,
     PostgresDocumentRepository,
     PostgresLogRepository,
     PostgresUserRepository,
@@ -23,6 +26,8 @@ from app.services.auth import (
     UserRepository,
 )
 from app.services.chat.chat_service import ChatService
+from app.services.chat.conversations_service import ConversationsService
+from app.services.chat.memory import ConversationMemory
 from app.services.chat.query_router import QueryRouter
 from app.services.document import (
     Chunker,
@@ -107,6 +112,31 @@ def get_user_repository() -> UserRepository:
     if settings.persistence_backend == "postgres":
         return PostgresUserRepository(get_session_factory())
     return JsonUserRepository(settings.users_path)
+
+
+@lru_cache
+def get_conversation_repository() -> ConversationRepository:
+    """Return the ConversationRepository selected by the persistence backend.
+
+    ``persistence_backend`` of ``"json"`` (the default) uses the file-backed
+    JSON conversation store; ``"postgres"`` uses the SQLAlchemy-backed
+    repository. Callers only ever see the resulting repository, never the
+    backend.
+    """
+    if settings.persistence_backend == "postgres":
+        return PostgresConversationRepository(get_session_factory())
+    return JsonConversationRepository(ConversationMemory(settings.conversations_path))
+
+
+@lru_cache
+def get_conversations_service() -> ConversationsService:
+    """Return the ConversationsService bound to the configured repository.
+
+    The service receives the repository selected by
+    ``get_conversation_repository``, so it never knows whether persistence is
+    JSON or PostgreSQL.
+    """
+    return ConversationsService(get_conversation_repository())
 
 
 @lru_cache
@@ -297,4 +327,5 @@ def get_chat_service() -> ChatService:
         query_router=get_query_router(),
         retrieval_evaluator=RetrievalEvaluator(),
         query_rewriter=QueryRewriter(provider_manager),
+        conversation_repository=get_conversation_repository(),
     )
