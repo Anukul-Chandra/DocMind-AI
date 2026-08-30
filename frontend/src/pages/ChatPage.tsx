@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AlertCircle, MessagesSquare } from "lucide-react";
+import { useOutletContext } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { ApiError } from "@/api/client";
 import { chatUser, classifyChat, type ChatSourceChunk } from "@/api/chat";
+import type { ChatShellContext } from "@/layouts/ProtectedShell";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { ChatMessageBubble } from "@/components/chat/ChatMessageBubble";
-import { ConversationRail } from "@/components/chat/ConversationRail";
 import { TypingIndicator, type IndicatorCategory } from "@/components/chat/TypingIndicator";
 import {
   conversationsKey,
@@ -97,8 +98,8 @@ function toChatMessage(message: ConversationMessage, id: string): ChatMessage {
 
 export function ChatPage() {
   const queryClient = useQueryClient();
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const [railCollapsed, setRailCollapsed] = useState(false);
+  const { activeChatId: activeId, setActiveChatId } =
+    useOutletContext<ChatShellContext>();
   const [isLoading, setIsLoading] = useState(false);
   const [loadingCategory, setLoadingCategory] = useState<IndicatorCategory>("general");
   const [loadingHasImages, setLoadingHasImages] = useState(false);
@@ -139,7 +140,7 @@ export function ChatPage() {
     if (activeId) return activeId;
     try {
       const created = await createMutation.mutateAsync();
-      setActiveId(created.conversation_id);
+      setActiveChatId(created.conversation_id);
       return created.conversation_id;
     } catch (err) {
       setError(
@@ -213,34 +214,11 @@ export function ChatPage() {
     }
   }
 
-  async function handleNewChat() {
-    setError(null);
-    try {
-      const created = await createMutation.mutateAsync();
-      setActiveId(created.conversation_id);
-      void queryClient.invalidateQueries({ queryKey: conversationsKey });
-    } catch (err) {
-      setError(
-        err instanceof ApiError
-          ? err.message
-          : "Could not start a new conversation.",
-      );
-    }
-  }
-
   const showEmptyState = storedMessages.length === 0 && !isLoading;
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-[#080B0A]">
       <div className="flex min-h-0 flex-1">
-        <ConversationRail
-          activeId={activeId}
-          collapsed={railCollapsed}
-          onSelect={setActiveId}
-          onToggleCollapsed={() => setRailCollapsed((value) => !value)}
-          onNewChat={() => void handleNewChat()}
-        />
-
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
             {showEmptyState ? (
