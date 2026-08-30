@@ -1,12 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AlertCircle, MessagesSquare } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { ApiError } from "@/api/client";
 import { chatUser, classifyChat, type ChatSourceChunk } from "@/api/chat";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { ChatMessageBubble } from "@/components/chat/ChatMessageBubble";
+import { ConversationRail } from "@/components/chat/ConversationRail";
 import { TypingIndicator, type IndicatorCategory } from "@/components/chat/TypingIndicator";
+import {
+  conversationsKey,
+  conversationsMessagesKey,
+  useConversationMessages,
+  useCreateConversation,
+} from "@/hooks/use-conversations";
 import type { ChatMessage, SourceFile } from "@/types/chat";
+import type { ConversationMessage } from "@/types/conversations";
 import { cn } from "@/lib/utils";
 
 const EXAMPLE_QUESTIONS = [
@@ -82,49 +91,79 @@ function readFileAsDataURL(file: File): Promise<string> {
   });
 }
 
-const STORAGE_KEY = "docmind-chat-messages";
-
-function loadMessages(): ChatMessage[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as ChatMessage[]) : [];
-  } catch {
-    return [];
-  }
+function toChatMessage(message: ConversationMessage, id: string): ChatMessage {
+  return { id, role: message.role, content: message.content };
 }
 
 export function ChatPage() {
-  const [messages, setMessages] = useState<ChatMessage[]>(loadMessages);
+  const queryClient = useQueryClient();
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [railCollapsed, setRailCollapsed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingCategory, setLoadingCategory] = useState<IndicatorCategory>("general");
   const [loadingHasImages, setLoadingHasImages] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
+  const createMutation = useCreateConversation();
+  const { data: storedMessages = [], isFetching } = useConversationMessages(activeId);
+
+  const messages: ChatMessage[] = storedMessages.map((message, index) =>
+    toChatMessage(
+      message,
+      `${activeId ?? "draft"}-${index}-${message.role}`,
+    ),
+  );
+
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading]);
-
-  // Persist conversation across refresh
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
-  }, [messages]);
+  }, [storedMessages, isLoading]);
 
   // Keep the viewport pinned to the newest content while a response reveals.
   const scrollToLatest = useCallback(() => {
     endRef.current?.scrollIntoView({ block: "end" });
   }, []);
 
+  function appendMessages(
+    conversationId: string | null,
+    updater: (previous: ConversationMessage[] | undefined) => ConversationMessage[],
+  ) {
+    if (!conversationId) return;
+    queryClient.setQueryData<ConversationMessage[]>(
+      conversationsMessagesKey(conversationId),
+      updater,
+    );
+  }
+
+  async function ensureConversation(): Promise<string | null> {
+    if (activeId) return activeId;
+    try {
+      const created = await createMutation.mutateAsync();
+      setActiveId(created.conversation_id);
+      return created.conversation_id;
+    } catch (err) {
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : "Could not start a new conversation.",
+      );
+      return null;
+    }
+  }
+
   async function handleSend(question: string, attachments: File[] = []) {
     const text = question.trim();
     if (!text || isLoading) return;
     setError(null);
+
+    const conversationId = await ensureConversation();
+    if (!conversationId) return;
+
     // Create data URLs so image attachments survive browser refresh
     const imageUrls = await Promise.all(attachments.map(readFileAsDataURL));
-    setMessages((previous) => [
-      ...previous,
+    appendMessages(conversationId, (previous) => [
+      ...(previous ?? []),
       {
-        id: crypto.randomUUID(),
         role: "user",
         content: text,
         ...(imageUrls.length > 0 ? { images: imageUrls } : {}),
@@ -147,11 +186,14 @@ export function ChatPage() {
     setIsLoading(true);
 
     try {
-      const { answer, provider, model, sources } = await chatUser(text, attachments);
-      setMessages((previous) => [
-        ...previous,
+      const { answer, provider, model, sources } = await chatUser(
+        text,
+        attachments,
+        conversationId,
+      );
+      appendMessages(conversationId, (previous) => [
+        ...(previous ?? []),
         {
-          id: crypto.randomUUID(),
           role: "assistant",
           content: answer,
           provider,
@@ -159,6 +201,7 @@ export function ChatPage() {
           sources: sources && sources.length > 0 ? toSources(sources) : undefined,
         },
       ]);
+      void queryClient.invalidateQueries({ queryKey: conversationsKey });
     } catch (err) {
       setError(
         err instanceof ApiError
@@ -170,53 +213,85 @@ export function ChatPage() {
     }
   }
 
+  async function handleNewChat() {
+    setError(null);
+    try {
+      const created = await createMutation.mutateAsync();
+      setActiveId(created.conversation_id);
+      void queryClient.invalidateQueries({ queryKey: conversationsKey });
+    } catch (err) {
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : "Could not start a new conversation.",
+      );
+    }
+  }
+
+  const showEmptyState = storedMessages.length === 0 && !isLoading;
+
   return (
-    <div className="docmind-page relative flex min-h-0 flex-col h-full bg-[#080B0A]">
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
-        {messages.length === 0 ? (
-          <EmptyState onExample={(question) => void handleSend(question)} />
-        ) : (
-          <div className="mx-auto mt-auto flex w-full max-w-3xl flex-col gap-4 p-4 pb-8">
-            {messages.map((message, index) => {
-              const isLatest = index === messages.length - 1 && message.role === "assistant";
-              return (
-                <ChatMessageBubble
-                  key={message.id}
-                  message={message}
-                  animate={isLatest}
-                  onGrow={isLatest ? scrollToLatest : undefined}
-                />
-              );
-            })}
-            {isLoading && (
-              <div className="flex items-start">
-                <TypingIndicator category={loadingCategory} hasImages={loadingHasImages} />
+    <div className="flex h-full min-h-0 flex-col bg-[#080B0A]">
+      <div className="flex min-h-0 flex-1">
+        <ConversationRail
+          activeId={activeId}
+          collapsed={railCollapsed}
+          onSelect={setActiveId}
+          onToggleCollapsed={() => setRailCollapsed((value) => !value)}
+          onNewChat={() => void handleNewChat()}
+        />
+
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
+            {showEmptyState ? (
+              <EmptyState onExample={(question) => void handleSend(question)} />
+            ) : (
+              <div className="mx-auto mt-auto flex w-full max-w-3xl flex-col gap-4 p-4 pb-8">
+                {isFetching && storedMessages.length === 0 && activeId && (
+                  <p className="px-2 text-sm text-muted-foreground/60">
+                    Loading conversation…
+                  </p>
+                )}
+                {messages.map((message, index) => {
+                  const isLatest = index === messages.length - 1 && message.role === "assistant";
+                  return (
+                    <ChatMessageBubble
+                      key={message.id}
+                      message={message}
+                      animate={isLatest}
+                      onGrow={isLatest ? scrollToLatest : undefined}
+                    />
+                  );
+                })}
+                {isLoading && (
+                  <div className="flex items-start">
+                    <TypingIndicator category={loadingCategory} hasImages={loadingHasImages} />
+                  </div>
+                )}
+                <div ref={endRef} />
               </div>
             )}
-            <div ref={endRef} />
           </div>
-        )}
-      </div>
 
-      {/* Composer: flex child pinned to the bottom of the chat layout.
-          Separated from the scrollable conversation area so it never
-          participates in centering or empty-state layout. */}
-      <div className="shrink-0 relative w-full sm:max-w-3xl mx-auto min-w-0 rounded-2xl border border-white/[0.06] bg-[#101C18] p-4 backdrop-blur-xl px-8 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.5)]">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" aria-hidden="true" />
-        <div className="mx-auto w-full max-w-3xl space-y-2">
-          {error && (
-            <div
-              role="alert"
-              className="flex items-start gap-2.5 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive backdrop-blur-sm"
-            >
-              <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-              <span className="min-w-0">{error}</span>
+          {/* Composer */}
+          <div className="relative w-full shrink-0 rounded-2xl border border-white/[0.06] bg-[#101C18] p-4 px-8 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:mx-auto sm:max-w-3xl">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" aria-hidden="true" />
+            <div className="mx-auto w-full max-w-3xl space-y-2">
+              {error && (
+                <div
+                  role="alert"
+                  className="flex items-start gap-2.5 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive backdrop-blur-sm"
+                >
+                  <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                  <span className="min-w-0">{error}</span>
+                </div>
+              )}
+              <ChatInput
+                onSend={(text, attachments) => void handleSend(text, attachments)}
+                disabled={isLoading}
+              />
             </div>
-          )}
-          <ChatInput
-            onSend={(text, attachments) => void handleSend(text, attachments)}
-            disabled={isLoading}
-          />
+          </div>
         </div>
       </div>
     </div>

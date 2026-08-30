@@ -1,5 +1,6 @@
 from app.api.routes.auth import router as auth_router
 from app.api.routes.chat import router as chat_router
+from app.api.routes.conversations import router as conversations_router
 from app.api.routes.documents import router as documents_router
 
 from fastapi import APIRouter
@@ -29,4 +30,4 @@ def health() -> SuccessResponse[HealthData]:
     return SuccessResponse(data=HealthData(status="healthy"))
 
 
-__all__ = ["router", "auth_router", "chat_router", "documents_router"]
+__all__ = ["router", "auth_router", "chat_router", "conversations_router", "documents_router"]

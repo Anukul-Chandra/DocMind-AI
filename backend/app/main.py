@@ -5,7 +5,11 @@ from app.api.dependencies import get_log_repository
 from app.api.errors import register_exception_handlers
 from app.api.middleware.rate_limit import FixedWindowLimiter, RateLimitMiddleware
 from app.api.middleware.request_logging import RequestLogMiddleware
-from app.api.routes import auth_router, chat_router, documents_router, router
+from app.api.routes.auth import router as auth_router
+from app.api.routes.chat import router as chat_router
+from app.api.routes.conversations import router as conversations_router
+from app.api.routes.documents import router as documents_router
+from app.api.routes import router
 from app.api.retrieve import router as retrieve_router
 from app.core.config import settings
 
@@ -63,4 +67,5 @@ app.include_router(router)
 app.include_router(retrieve_router)
 app.include_router(auth_router)
 app.include_router(chat_router)
+app.include_router(conversations_router)
 app.include_router(documents_router)

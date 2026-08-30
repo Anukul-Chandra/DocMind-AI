@@ -14,6 +14,8 @@ export interface ChatResponse {
   category?: string;
   /** Chunks that contributed to the answer; empty unless retrieval was used. */
   sources?: ChatSourceChunk[];
+  /** The conversation the exchange was recorded into, if any. */
+  conversation_id?: string | null;
 }
 
 export interface ClassifyResponse {
@@ -29,9 +31,16 @@ export async function classifyChat(question: string): Promise<ClassifyResponse> 
   return response.data;
 }
 
-export async function chatUser(question: string, attachments: File[] = []): Promise<ChatResponse> {
+export async function chatUser(
+  question: string,
+  attachments: File[] = [],
+  conversationId?: string | null,
+): Promise<ChatResponse> {
   const formData = new FormData();
   formData.append("question", question);
+  if (conversationId) {
+    formData.append("conversation_id", conversationId);
+  }
   for (const file of attachments) {
     formData.append("attachments", file);
   }

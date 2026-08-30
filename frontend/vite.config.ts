@@ -23,6 +23,7 @@ export default defineConfig(({ mode }) => {
         "/auth": { target: apiTarget, changeOrigin: true },
         "/documents": { target: apiTarget, changeOrigin: true },
         "/chat": { target: apiTarget, changeOrigin: true },
+        "/conversations": { target: apiTarget, changeOrigin: true },
         "/retrieve": { target: apiTarget, changeOrigin: true },
         "/health": { target: apiTarget, changeOrigin: true },
       },

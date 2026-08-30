@@ -45,6 +45,7 @@ backend/storage/faiss/
 backend/storage/metadata.json
 backend/storage/documents.json
 backend/storage/users.json
+backend/storage/conversations.json
 backend/storage/metadata/
 backend/storage/*.pdf
 

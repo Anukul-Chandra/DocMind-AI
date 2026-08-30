@@ -65,7 +65,8 @@ class UploadResult(BaseModel):
 
 
 class DeleteResult(BaseModel):
-    """Typed payload returned after a successful document deletion."""
+    """Typed payload returned after a successful document or conversation deletion."""
 
-    document_id: str
+    document_id: str | None = None
+    conversation_id: str | None = None
     status: str
