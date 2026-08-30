@@ -5,6 +5,7 @@ import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
 
 import { ApiError } from "@/api/client";
+import Galaxy from "@/components/Galaxy";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -77,6 +78,18 @@ export function LoginPage() {
         <div className="docmind-grid-fade absolute inset-0 opacity-70" />
         <div className="absolute -top-24 left-1/2 h-80 w-[36rem] -translate-x-1/2 rounded-full bg-brand/6 blur-3xl" />
       </div>
+      {/* Full-viewport pure-black base with the animated galaxy stars on top */}
+      <div className="fixed inset-0 z-0 overflow-hidden bg-[#000000]" aria-hidden="true">
+        <Galaxy
+          mouseRepulsion
+          mouseInteraction
+          density={1.5}
+          glowIntensity={0.5}
+          saturation={0.8}
+          hueShift={140}
+        />
+      </div>
+
 
       <div className="absolute right-4 top-4 z-10">
         <ThemeToggle />
@@ -99,7 +112,7 @@ export function LoginPage() {
         <span aria-hidden="true" className="absolute -right-px -top-px z-10 size-3.5 rounded-tr-md border-r border-t border-brand/40" />
         <span aria-hidden="true" className="absolute -bottom-px -left-px z-10 size-3.5 rounded-bl-md border-b border-l border-brand/40" />
         <span aria-hidden="true" className="absolute -bottom-px -right-px z-10 size-3.5 rounded-br-md border-b border-r border-brand/40" />
-        <Card variant="glass">
+        <Card variant="glass" className="docmind-auth-card">
           <CardHeader className="pb-4 text-center">
             <CardTitle className="text-2xl font-semibold text-foreground">Sign in</CardTitle>
             <CardDescription className="text-base text-muted-foreground">
