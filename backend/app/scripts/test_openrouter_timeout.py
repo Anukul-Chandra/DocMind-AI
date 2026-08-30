@@ -103,6 +103,7 @@ class MockGemini(BaseProvider):
         system_prompt: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1000,
+        images: list[dict] | None = None,
     ) -> str:
         return "Failover succeeded via Gemini (simulated)."
 

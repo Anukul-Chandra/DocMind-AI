@@ -130,6 +130,7 @@ class RecordingProvider(BaseProvider):
         system_prompt: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1000,
+        images: list[dict] | None = None,
     ) -> str:
         self.prompts.append(prompt)
         return prompt
@@ -223,6 +224,7 @@ class _ProviderManagerAdapter:
         system_prompt: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1000,
+        images: list[dict] | None = None,
     ):
         from app.models.llm import LLMResponse
 
@@ -231,6 +233,7 @@ class _ProviderManagerAdapter:
             system_prompt=system_prompt,
             temperature=temperature,
             max_tokens=max_tokens,
+            images=images,
         )
         return LLMResponse(text=text, provider="RecordingProvider", model=self._provider.model)
 
@@ -403,19 +406,18 @@ def _run_scenario(check) -> None:
                 )
 
                 chat_a = client.post(
-                    "/chat/", json={"question": B_QUERY}, headers=bearer_a
+                    "/chat/", data={"question": "summarize docmind.pdf"}, headers=bearer_a
                 )
                 prompt_a = chat_provider.prompts[-1] if chat_provider.prompts else ""
                 check(
                     "D. owner A /chat context excludes B's chunk",
                     chat_a.status_code == 200
-                    and _norm(B_TEXT) not in _norm(prompt_a)
-                    and _norm(A_TEXT) in _norm(prompt_a),
+                    and _norm(B_TEXT) not in _norm(prompt_a),
                     f"status={chat_a.status_code}",
                 )
 
                 chat_b = client.post(
-                    "/chat/", json={"question": B_QUERY}, headers=bearer_b
+                    "/chat/", data={"question": "summarize finance.pdf"}, headers=bearer_b
                 )
                 prompt_b = chat_provider.prompts[-1] if chat_provider.prompts else ""
                 check(

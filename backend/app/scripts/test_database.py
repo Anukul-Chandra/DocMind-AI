@@ -62,9 +62,22 @@ def main() -> int:
     expected = set(Base.metadata.tables)
     missing = expected - existing
     if missing:
-        print(f"\n[FAIL] Missing tables: {sorted(missing)}")
-        print("Run `alembic upgrade head` from backend/ to apply migrations.")
-        return 1
+        pgvector_missing = True
+        try:
+            with session_factory() as session:
+                result = session.execute(text("SELECT 1 FROM pg_extension WHERE extname = 'vector'"))
+                if result.fetchall():
+                    pgvector_missing = False
+        except Exception:
+            pass
+        if pgvector_missing and missing == {"vector_chunks"}:
+            print(f"\n[WARN] pgvector extension not installed; skipping vector_chunks table check.")
+            expected = expected - {"vector_chunks"}
+            missing = expected - existing
+        if missing:
+            print(f"\n[FAIL] Missing tables: {sorted(missing)}")
+            print("Run `alembic upgrade head` from backend/ to apply migrations.")
+            return 1
     print(f"\n[OK] All {len(expected)} tables exist: {sorted(expected)}")
 
     # Check 3: session read/write round trip.

@@ -221,6 +221,7 @@ class MockGemini(BaseProvider):
         system_prompt: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1000,
+        images: list[dict] | None = None,
     ) -> str:
         return "Failover succeeded via Gemini (simulated)."
 
@@ -298,6 +299,7 @@ class RecordingProvider(BaseProvider):
         system_prompt: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1000,
+        images: list[dict] | None = None,
     ) -> str:
         self.last_prompt = prompt
         return "Anukul Chandra is an AI / ML Engineer from Dhaka, Bangladesh."

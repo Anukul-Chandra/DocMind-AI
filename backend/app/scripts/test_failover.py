@@ -33,6 +33,7 @@ class OpenCode(BaseProvider):
         system_prompt: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1000,
+        images: list[dict] | None = None,
     ) -> str:
         raise ProviderError("OpenCode pool exhausted (simulated)")
 
@@ -53,6 +54,7 @@ class OpenRouter(BaseProvider):
         system_prompt: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1000,
+        images: list[dict] | None = None,
     ) -> str:
         raise ProviderError("OpenRouter unavailable (simulated)")
 
@@ -74,6 +76,7 @@ class Gemini(BaseProvider):
         system_prompt: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1000,
+        images: list[dict] | None = None,
     ) -> str:
         if self._failure is not None:
             raise self._failure("Gemini failed (simulated)")
@@ -96,6 +99,7 @@ class Groq(BaseProvider):
         system_prompt: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1000,
+        images: list[dict] | None = None,
     ) -> str:
         return "Failover succeeded via Groq (simulated)."
 
@@ -205,6 +209,7 @@ async def test_priority_short_circuits() -> bool:
             system_prompt: str | None = None,
             temperature: float = 0.0,
             max_tokens: int = 1000,
+            images: list[dict] | None = None,
         ) -> str:
             self.calls += 1
             if not self._succeed:

@@ -118,7 +118,7 @@ def main() -> int:
             tmp = Path(tmp)
             user_repo = JsonUserRepository(tmp / "users.json")
             doc_repo = JsonDocumentRepository(DocumentRegistry(tmp / "documents.json"))
-            metadata_store = MetadataStore()
+            metadata_store = MetadataStore(path=str(tmp / "metadata.json"))
             vector_store = VectorStore(dimension=8)
             document_service = DocumentService(
                 pdf_processor=StubPDFProcessor(),
