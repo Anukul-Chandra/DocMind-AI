@@ -13,12 +13,12 @@ export interface NavItem {
 
 export const appNavItems: NavItem[] = [
   { title: "Dashboard", href: "/app", icon: LayoutDashboard },
-  { title: "Documents", href: "/app/documents", icon: FileText },
+  { title: "Library", href: "/app/documents", icon: FileText },
   { title: "Chat", href: "/app/chat", icon: MessagesSquare },
 ];
 
 export const pageTitles: Record<string, string> = {
   "/app": "Dashboard",
-  "/app/documents": "Documents",
+  "/app/documents": "Library",
   "/app/chat": "Chat",
 };
