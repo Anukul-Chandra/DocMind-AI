@@ -102,7 +102,7 @@ class RaisingRegisterRepository(JsonDocumentRepository):
 class RaisingChatService:
     """A chat service whose underlying provider always fails."""
 
-    async def chat(self, question: str, owner_id: str = ""):
+    async def chat(self, question: str, owner_id: str = "", images=None):
         raise LLMUnavailableError(
             "provider 'openrouter' failed: invalid api key sk-secret123"
         )
@@ -352,7 +352,7 @@ def main() -> int:
             response = client.post(
                 "/chat/",
                 headers={"Authorization": f"Bearer {token}"},
-                json={"question": "What is DocMind?"},
+                data={"question": "What is DocMind?"},
             )
         expect(
             "E. provider failure is a safe 502",

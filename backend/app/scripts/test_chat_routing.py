@@ -170,6 +170,7 @@ class RecordingProvider(BaseProvider):
         system_prompt: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1000,
+        images: list[dict] | None = None,
     ) -> str:
         self.prompts.append(prompt)
         return "mock answer"
@@ -903,7 +904,12 @@ async def test_deterministic_rules_take_precedence() -> bool:
         if actual is QueryCategory.GENERAL:
             print(f"FAIL: deterministic {question!r} unexpectedly GENERAL")
             return False
-        if embedding_service.calls != 0:
+        if actual is QueryCategory.DOCUMENT and embedding_service.calls == 0:
+            print(
+                f"FAIL: deterministic {question!r} should embed for DOCUMENT route"
+            )
+            return False
+        if actual is not QueryCategory.DOCUMENT and embedding_service.calls != 0:
             print(
                 f"FAIL: deterministic {question!r} still embedded the query "
                 f"({embedding_service.calls} calls)"

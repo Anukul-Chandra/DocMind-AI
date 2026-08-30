@@ -96,7 +96,7 @@ class FakeChatService:
     def __init__(self) -> None:
         self.last_owner_id: str | None = None
 
-    async def chat(self, question: str, owner_id: str = ""):
+    async def chat(self, question: str, owner_id: str = "", images=None):
         """Return a canned chat response and record the owner scope.
 
         Args:
@@ -107,7 +107,7 @@ class FakeChatService:
             A simple namespace with provider, model, and text.
         """
         self.last_owner_id = owner_id
-        return SimpleNamespace(provider="fake", model="fake", text="Fake answer.")
+        return SimpleNamespace(provider="fake", model="fake", text="Fake answer.", category="document", sources=[])
 
 
 class RecordingRetriever:
@@ -320,7 +320,7 @@ def _protect_and_own(
     )
     check(
         f"A. {label} no token -> 401 (chat)",
-        client.post("/chat/", json={"question": "hi"}).status_code == 401,
+        client.post("/chat/", data={"question": "hi"}).status_code == 401,
     )
     check(
         f"A. {label} no token -> 401 (retrieve)",
@@ -335,7 +335,7 @@ def _protect_and_own(
     check(
         f"B. {label} invalid token -> 401 (chat)",
         client.post(
-            "/chat/", json={"question": "hi"}, headers=bearer("not.a.jwt")
+            "/chat/", data={"question": "hi"}, headers=bearer("not.a.jwt")
         ).status_code == 401,
     )
     check(
@@ -353,7 +353,7 @@ def _protect_and_own(
         client.get("/documents", headers=bearer(token_a)).status_code == 200,
     )
     chat_response = client.post(
-        "/chat/", json={"question": "hi"}, headers=bearer(token_a)
+        "/chat/", data={"question": "hi"}, headers=bearer(token_a)
     )
     check(
         f"C. {label} valid token -> chat accessible",

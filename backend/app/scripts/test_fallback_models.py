@@ -28,7 +28,7 @@ from app.services.llm.providers.gemini import GeminiProvider
 from app.services.llm.providers.groq import GroqProvider
 
 VERIFIED_GEMINI_MODEL = "gemini-3.6-flash"
-VERIFIED_GROQ_MODEL = "openai/gpt-oss-120b"
+VERIFIED_GROQ_MODEL = "groq/compound-mini"
 RETIRED_MODELS = {"gemini-2.0-flash", "llama-3.3-70b-versatile"}
 
 
