@@ -21,6 +21,103 @@ logger = logging.getLogger(__name__)
 AGNES_DEFAULT_BASE_URL = "https://apihub.agnes-ai.com/v1"
 
 
+async def request_completion(
+    client,
+    model_id: str,
+    api_key: str,
+    prompt: str,
+    system_prompt: str | None = None,
+    temperature: float = 0.0,
+    max_tokens: int = 1000,
+    images: list[dict] | None = None,
+) -> str:
+    """Send one OpenAI-compatible chat completion request to Agnes.
+
+    Performs exactly one HTTP attempt for the given model id and maps failures
+    onto the shared provider error types. Used by both the single-model
+    provider and the rotating runtime layer.
+
+    Args:
+        client: An httpx-compatible async client bound to the Agnes base URL.
+        model_id: The Agnes model identifier to request.
+        api_key: The Agnes API key (sent as a Bearer token; never logged).
+        prompt: The user prompt (already built by ProviderManager-style
+            callers).
+        system_prompt: An optional system prompt guiding the model.
+        temperature: Sampling temperature for the model.
+        max_tokens: Maximum number of tokens to generate.
+        images: Optional list of base64-encoded image dicts.
+
+    Returns:
+        The generated text from the model.
+
+    Raises:
+        ProviderError: If the request fails at the network level or times out.
+        AuthenticationError: If the API key is rejected.
+        RateLimitError: If Agnes rate limits the request.
+        APIError: If Agnes returns another non-success HTTP response.
+        InvalidResponseError: If the response cannot be parsed or contains no
+            usable message content.
+    """
+    messages: list[dict] = []
+    if system_prompt:
+        messages.append({"role": "system", "content": system_prompt})
+    messages.append(
+        {"role": "user", "content": build_user_content(prompt, images)}
+    )
+
+    payload = {
+        "model": model_id,
+        "messages": messages,
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+    }
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+
+    try:
+        response = await client.post(
+            "/chat/completions",
+            headers=headers,
+            json=payload,
+        )
+    except httpx.TimeoutException as exc:
+        raise ProviderError(f"Agnes request timed out: {exc}") from exc
+    except httpx.ConnectError as exc:
+        raise ProviderError(f"Agnes connection failed: {exc}") from exc
+    except httpx.RequestError as exc:
+        raise ProviderError(f"Agnes request failed: {exc}") from exc
+
+    if response.status_code in (401, 403):
+        raise AuthenticationError(
+            "Agnes authentication failed; check your API key."
+        )
+    if response.status_code == 429:
+        raise RateLimitError("Agnes rate limit exceeded.")
+    if response.status_code != 200:
+        raise APIError(
+            f"Agnes returned HTTP {response.status_code}: {response.text}",
+            status_code=response.status_code,
+        )
+
+    try:
+        data = response.json()
+        content = data["choices"][0]["message"]["content"]
+    except (ValueError, KeyError, IndexError, TypeError) as exc:
+        raise InvalidResponseError(
+            f"Invalid Agnes response: {exc}"
+        ) from exc
+
+    if not isinstance(content, str) or not content.strip():
+        raise InvalidResponseError(
+            "Agnes returned an empty message content"
+        )
+
+    return content
+
+
 class AgnesProvider(BaseProvider):
     """Agnes AI-backed LLM provider (OpenAI-compatible chat completions).
 
@@ -98,62 +195,13 @@ class AgnesProvider(BaseProvider):
             InvalidResponseError: If the response cannot be parsed or contains
                 no usable message content.
         """
-        messages: list[dict] = []
-        if system_prompt:
-            messages.append({"role": "system", "content": system_prompt})
-        messages.append(
-            {"role": "user", "content": build_user_content(prompt, images)}
+        return await request_completion(
+            self._client,
+            self._model,
+            self._api_key,
+            prompt,
+            system_prompt=system_prompt,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            images=images,
         )
-
-        payload = {
-            "model": self._model,
-            "messages": messages,
-            "temperature": temperature,
-            "max_tokens": max_tokens,
-        }
-        headers = {
-            "Authorization": f"Bearer {self._api_key}",
-            "Content-Type": "application/json",
-        }
-
-        try:
-            response = await self._client.post(
-                "/chat/completions",
-                headers=headers,
-                json=payload,
-            )
-        except httpx.TimeoutException as exc:
-            raise ProviderError(f"Agnes request timed out: {exc}") from exc
-        except httpx.ConnectError as exc:
-            raise ProviderError(f"Agnes connection failed: {exc}") from exc
-        except httpx.RequestError as exc:
-            raise ProviderError(f"Agnes request failed: {exc}") from exc
-
-        if response.status_code in (401, 403):
-            raise AuthenticationError(
-                "Agnes authentication failed; check your API key."
-            )
-        if response.status_code == 429:
-            raise RateLimitError("Agnes rate limit exceeded.")
-        if response.status_code != 200:
-            raise APIError(
-                f"Agnes returned HTTP {response.status_code}: {response.text}",
-                status_code=response.status_code,
-            )
-
-        try:
-            data = response.json()
-            content = data["choices"][0]["message"]["content"]
-        except (ValueError, KeyError, IndexError, TypeError) as exc:
-            raise InvalidResponseError(
-                f"Invalid Agnes response: {exc}"
-            ) from exc
-
-        # Some models return null/empty content; treat that as invalid so
-        # callers fail over instead of propagating empty text.
-        if not isinstance(content, str) or not content.strip():
-            raise InvalidResponseError(
-                "Agnes returned an empty message content"
-            )
-
-        return content
