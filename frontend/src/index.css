@@ -586,6 +586,51 @@
   -webkit-backdrop-filter: blur(24px) saturate(150%);
 }
 
+/* ---- Light glass auth card (Login/Register) ----
+   Overrides the dark glass card so it sits clearly on the black Galaxy
+   background with light text and light inputs. */
+
+.docmind-auth-card {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  box-shadow:
+    0 12px 40px -14px rgba(0, 0, 0, 0.7),
+    0 4px 16px -8px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+}
+
+.docmind-auth-card .text-foreground {
+  color: oklch(0.16 0.012 165) !important;
+}
+
+.docmind-auth-card .text-muted-foreground {
+  color: oklch(0.42 0.012 165) !important;
+}
+
+.docmind-auth-card [data-slot="card-description"] {
+  color: oklch(0.44 0.012 165) !important;
+}
+
+.docmind-auth-card [data-slot="card-footer"] {
+  border-color: oklch(0.82 0.008 165 / 0.7) !important;
+}
+
+.docmind-auth-card [data-slot="input"] {
+  background-color: #ffffff !important;
+  border-color: oklch(0.84 0.014 165 / 0.9) !important;
+  color: oklch(0.16 0.012 165) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+}
+
+.docmind-auth-card [data-slot="input"]::placeholder {
+  color: oklch(0.56 0.01 165) !important;
+  opacity: 1;
+}
+
+.docmind-auth-card [data-slot="input"]:focus-visible {
+  border-color: var(--brand) !important;
+}
+
 /* ---- Text gradient ---- */
 
 .text-brand-gradient {
