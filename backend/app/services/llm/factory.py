@@ -2,13 +2,18 @@ import logging
 
 from app.config.openrouter_models import OPENROUTER_MODELS
 from app.core.config import settings
+from app.services.llm.agnes_model_catalog import (
+    AgnesModelCatalogError,
+    AgnesNoFreeModelsError,
+    build_agnes_pool,
+)
 from app.services.llm.model_catalog import ModelCatalogService, ModelCatalogError
 from app.services.llm.model_pool import ModelPoolManager, build_curated_pool
 from app.services.llm.opencode_model_pool import build_opencode_pool_manager
 from app.services.llm.provider_manager import ProviderManager
 from app.services.llm.providers.gemini import GeminiProvider
 from app.services.llm.providers.groq import GroqProvider
-from app.services.llm.providers.agnes import AgnesProvider
+from app.services.llm.providers.agnes_rotation import AgnesRotatingProvider
 from app.services.llm.providers.openrouter import OpenRouterProvider
 from app.services.llm.providers.opencode_rotation import OpenCodeRotatingProvider
 
@@ -87,8 +92,15 @@ def build_groq_provider() -> GroqProvider:
     )
 
 
-def build_agnes_provider() -> AgnesProvider | None:
-    """Build an Agnes AI provider with configuration injected from settings.
+def build_agnes_provider() -> AgnesRotatingProvider | None:
+    """Build an Agnes AI provider that rotates across the dynamic free pool.
+
+    Free models are discovered from the TTL-cached models.dev pricing source
+    (zero input/output cost) rather than hardcoded. If discovery is
+    unavailable or yields no free models, the provider still exists but is
+    backed solely by the configured ``settings.agnes_model`` fallback — which
+    is kept strictly separate from the dynamic free pool and is never claimed
+    to be dynamically discovered.
 
     Returns ``None`` when no API key is configured so the provider is skipped
     gracefully (mirroring OpenCode's discovery-failure skip) instead of
@@ -96,13 +108,22 @@ def build_agnes_provider() -> AgnesProvider | None:
     in ``settings.provider_priority``.
 
     Returns:
-        An AgnesProvider instance, or None when the API key is absent.
+        An AgnesRotatingProvider instance, or None when the API key is absent.
     """
     if not settings.agnes_api_key:
         return None
-    return AgnesProvider(
+    pool: list[str] = []
+    try:
+        pool = build_agnes_pool()
+    except (AgnesModelCatalogError, AgnesNoFreeModelsError) as exc:
+        logger.warning(
+            "Agnes model discovery unavailable; using configured fallback "
+            "only: %s", exc
+        )
+    return AgnesRotatingProvider(
         api_key=settings.agnes_api_key,
-        model=settings.agnes_model,
+        models=pool,
+        fallback_model=settings.agnes_model,
         base_url=settings.agnes_base_url,
         timeout=settings.timeout,
     )

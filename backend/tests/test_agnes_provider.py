@@ -62,7 +62,10 @@ def test_construction_and_model_property(monkeypatch):
     assert provider.model == "agnes-2.5-flash"
 
 
-def test_api_key_comes_from_settings():
+def test_api_key_comes_from_settings(monkeypatch):
+    import app.services.llm.factory as factory
+
+    monkeypatch.setattr(factory, "build_agnes_pool", lambda: ["agnes-2.5-flash"])
     original = settings.agnes_api_key
     settings.agnes_api_key = "from-settings-key"
     try:
@@ -253,7 +256,7 @@ def test_factory_includes_agnes_only_when_in_priority(monkeypatch):
     _stub_factory(monkeypatch)
     pm = build_provider_manager()
     names = [type(p).__name__ for p in pm._providers]
-    assert names == ["AgnesProvider", "StubProvider"]
+    assert names == ["AgnesRotatingProvider", "StubProvider"]
 
 
 def test_factory_excludes_agnes_when_not_in_priority(monkeypatch):
@@ -266,13 +269,17 @@ def test_factory_excludes_agnes_when_not_in_priority(monkeypatch):
 
 def _stub_factory(monkeypatch):
     """Replace every builder except Agnes with harmless stubs so routing is
-    deterministic and network-free."""
+    deterministic and network-free. Agnes pool discovery is also stubbed so the
+    factory does not hit the live models.dev catalog during routing tests."""
     import app.services.llm.factory as factory
 
     monkeypatch.setattr(factory, "build_opencode_provider", lambda: None)
     monkeypatch.setattr(factory, "build_openrouter_provider", lambda: StubProvider("or"))
     monkeypatch.setattr(factory, "build_gemini_provider", lambda: StubProvider("gm"))
     monkeypatch.setattr(factory, "build_groq_provider", lambda: StubProvider("gq"))
+    monkeypatch.setattr(
+        factory, "build_agnes_pool", lambda: ["agnes-2.0-flash", "agnes-2.5-flash"]
+    )
 
 
 # ---------------------------------------------------------------------------
