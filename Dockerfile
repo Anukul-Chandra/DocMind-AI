@@ -15,5 +15,7 @@ ENV TOKENIZERS_PARALLELISM=false
 
 EXPOSE 8000
 
-# Exactly one worker, no --reload. FAISS + JSON require a single instance.
-CMD uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-8000}" --workers 1
+# Single-process mode (no --workers). The FAISS + JSON storage backend is
+# process-local and must not be split across workers; single-process uvicorn
+# avoids multiprocessing overhead and the --workers 1 hang.
+CMD python -m uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-8000}"
