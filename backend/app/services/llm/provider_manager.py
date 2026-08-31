@@ -13,6 +13,21 @@ def _is_image_error(exc: Exception) -> bool:
     return "image" in message or "vision" in message or "multimodal" in message
 
 
+def _is_image_error_response(text: str) -> bool:
+    """Return True when a 200-response content looks like an image-support error.
+
+    Some providers (e.g. OpenRouter) return HTTP 200 with an error message in
+    the ``content`` field instead of raising an exception. This detects those
+    responses so the caller can retry text-only.
+    """
+    lowered = text.lower().strip()
+    return (
+        "does not support image" in lowered
+        or "does not support vision" in lowered
+        or "does not support multimodal" in lowered
+    )
+
+
 class LLMUnavailableError(Exception):
     """Raised when all providers fail to generate a response."""
 
@@ -68,6 +83,12 @@ class ProviderManager:
                     max_tokens=max_tokens,
                     images=images,
                 )
+                # Some providers return HTTP 200 with an error message in the
+                # content field (e.g. "this model does not support image
+                # input") instead of raising an exception. Convert that into a
+                # RecoverableError so the text-only retry below applies.
+                if images and _is_image_error_response(text):
+                    raise RecoverableError(text)
                 logger.info("Success: Provider = %s", provider_name)
                 return LLMResponse(
                     text=text,
