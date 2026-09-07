@@ -1,131 +1,25 @@
-import time as _time
-import sys as _sys
-
-def _t(label: str) -> None:
-    print(f"[{_time.strftime('%X')}] (diag-dep) {label}", flush=True)
-
-_t("dependencies import started")
+from __future__ import annotations
 
 from functools import lru_cache
+from typing import TYPE_CHECKING
 
-_t("importing fastapi")
 from fastapi import Depends, Header, HTTPException, Request, status
-_t("fastapi imported")
 
-_t("importing app.core.config")
 from app.core.config import settings
-_t("config imported")
 
-_t("importing app.db.session")
-from app.db.session import get_session_factory
-_t("db.session imported")
-
-_t("importing app.repositories")
-from app.repositories import (
-    ConversationRepository,
-    DocumentRepository,
-    JsonConversationRepository,
-    JsonDocumentRepository,
-    JsonUserRepository,
-    LogRepository,
-    JsonLogRepository,
-    PostgresConversationRepository,
-    PostgresDocumentRepository,
-    PostgresLogRepository,
-    PostgresUserRepository,
-)
-_t("repositories imported")
-
-_t("importing app.services.auth")
-from app.services.auth import (
-    AuthService,
-    AuthenticationError,
-    JWTService,
-    PasswordService,
-    User,
-    UserRepository,
-)
-_t("services.auth imported")
-
-_t("importing app.services.chat.chat_service")
-from app.services.chat.chat_service import ChatService
-_t("chat_service imported")
-
-_t("importing app.services.chat.conversations_service")
-from app.services.chat.conversations_service import ConversationsService
-_t("conversations_service imported")
-
-_t("importing app.services.chat.memory")
-from app.services.chat.memory import ConversationMemory
-_t("chat.memory imported")
-
-_t("importing app.services.chat.query_router")
-from app.services.chat.query_router import QueryRouter
-_t("query_router imported")
-
-_t("importing app.services.document (pdf_processor + chunker)")
-from app.services.document import (
-    Chunker,
-    DocumentClassifier,
-    DocumentService,
-    PDFProcessor,
-)
-_t("services.document imported")
-
-_t("importing app.services.document.extraction")
-from app.services.document.extraction import ExtractionService
-_t("extraction imported")
-
-_t("importing app.services.document_registry")
-from app.services.document_registry import DocumentRegistry
-_t("document_registry imported")
-
-_t("importing app.services.embedding")
-from app.services.embedding import EmbeddingService
-_t("embedding imported")
-
-_t("importing app.services.llm.factory")
-from app.services.llm.factory import build_provider_manager
-_t("llm.factory imported")
-
-_t("importing app.services.llm.prompt_builder")
-from app.services.llm.prompt_builder import PromptBuilder
-_t("prompt_builder imported")
-
-_t("importing app.services.logging.request_logger")
-from app.services.logging.request_logger import RequestLogger
-_t("request_logger imported")
-
-_t("importing app.services.retrieval")
-from app.services.retrieval import BM25Retriever, HybridRetriever, Retriever
-_t("retrieval imported")
-
-_t("importing app.services.storage_backends")
-from app.services.storage_backends import MetadataBackend, VectorBackend
-_t("storage_backends imported")
-
-_t("importing app.services.vector_store")
-from app.services.vector_store import VectorStore
-_t("vector_store imported")
-
-_t("importing app.services.vectorstore.metadata_store")
-from app.services.vectorstore.metadata_store import MetadataStore
-_t("metadata_store imported")
-
-_t("importing app.services.vectorstore.retriever")
-from app.services.vectorstore.retriever import SemanticRetriever
-_t("retriever imported")
-
-_t("ALL dependencies imports done")
+if TYPE_CHECKING:
+    from app.services.auth import User
 
 
 @lru_cache
-def get_embedding_service() -> EmbeddingService:
+def get_embedding_service():
+    from app.services.embedding import EmbeddingService
     return EmbeddingService()
 
 
 @lru_cache
-def get_vector_store() -> VectorBackend:
+def get_vector_store():
+    from app.services.vector_store import VectorStore
     return VectorStore(
         get_embedding_service().get_embedding_dimension(),
         index_path=settings.faiss_index_path,
@@ -133,12 +27,22 @@ def get_vector_store() -> VectorBackend:
 
 
 @lru_cache
-def get_metadata_store() -> MetadataBackend:
+def get_metadata_store():
+    from app.services.vectorstore.metadata_store import MetadataStore
     return MetadataStore(path=settings.metadata_path)
 
 
 @lru_cache
-def get_document_service() -> DocumentService:
+def get_document_service():
+    from app.services.document import (
+        Chunker,
+        DocumentClassifier,
+        DocumentService,
+        PDFProcessor,
+    )
+    from app.services.document.extraction import ExtractionService
+    from app.services.llm.factory import build_provider_manager
+
     return DocumentService(
         PDFProcessor(),
         Chunker(),
@@ -153,70 +57,51 @@ def get_document_service() -> DocumentService:
 
 
 @lru_cache
-def get_document_registry() -> DocumentRegistry:
+def get_document_registry():
+    from app.services.document_registry import DocumentRegistry
     return DocumentRegistry(settings.documents_path)
 
 
 @lru_cache
-def get_document_repository() -> DocumentRepository:
-    """Return the DocumentRepository selected by the configured persistence backend.
-
-    ``persistence_backend`` of ``"json"`` (the default) uses the JSON-backed
-    registry; ``"postgres"`` uses the SQLAlchemy-backed repository. Callers
-    only ever see the resulting repository, never the backend. Retrieval and
-    indexing infrastructure (FAISS, MetadataStore) is not affected by this
-    selection.
-    """
+def get_document_repository():
     if settings.persistence_backend == "postgres":
+        from app.repositories.postgres.document_repository import PostgresDocumentRepository
+        from app.db.session import get_session_factory
         return PostgresDocumentRepository(get_session_factory())
+    from app.repositories.json.document_repository import JsonDocumentRepository
     return JsonDocumentRepository(get_document_registry())
 
 
 @lru_cache
-def get_user_repository() -> UserRepository:
-    """Return the UserRepository selected by the configured persistence backend.
-
-    ``persistence_backend`` of ``"json"`` (the default) uses the JSON store;
-    ``"postgres"`` uses the SQLAlchemy-backed repository. AuthService only ever
-    sees the resulting repository, never the backend.
-    """
+def get_user_repository():
     if settings.persistence_backend == "postgres":
+        from app.repositories.postgres.user_repository import PostgresUserRepository
+        from app.db.session import get_session_factory
         return PostgresUserRepository(get_session_factory())
+    from app.repositories.json.user_repository import JsonUserRepository
     return JsonUserRepository(settings.users_path)
 
 
 @lru_cache
-def get_conversation_repository() -> ConversationRepository:
-    """Return the ConversationRepository selected by the configured persistence backend.
-
-    ``persistence_backend`` of ``"json"`` (the default) uses the file-backed
-    JSON conversation store; ``"postgres"`` uses the SQLAlchemy-backed
-    repository. Callers only ever see the resulting repository, never the
-    backend.
-    """
+def get_conversation_repository():
     if settings.persistence_backend == "postgres":
+        from app.repositories.postgres.conversation_repository import PostgresConversationRepository
+        from app.db.session import get_session_factory
         return PostgresConversationRepository(get_session_factory())
+    from app.repositories.json.conversation_repository import JsonConversationRepository
+    from app.services.chat.memory import ConversationMemory
     return JsonConversationRepository(ConversationMemory(settings.conversations_path))
 
 
 @lru_cache
-def get_conversations_service() -> ConversationsService:
-    """Return the ConversationsService bound to the configured repository.
-
-    The service receives the repository selected by
-    ``get_conversation_repository``, so it never knows whether persistence is
-    JSON or PostgreSQL.
-    """
+def get_conversations_service():
+    from app.services.chat.conversations_service import ConversationsService
     return ConversationsService(get_conversation_repository())
 
 
 @lru_cache
-def get_auth_service() -> AuthService:
-    """Return the AuthService bound to the configured user repository.
-
-    The service receives the repository selected by ``get_user_repository``,
-    so it never knows whether persistence is JSON or PostgreSQL.
-    """
+def get_auth_service():
+    from app.services.auth import AuthService, JWTService, PasswordService
     return AuthService(
         users=get_user_repository(),
         passwords=PasswordService(),
@@ -230,16 +115,13 @@ def get_auth_service() -> AuthService:
 
 
 @lru_cache
-def get_log_repository() -> LogRepository:
-    """Return the LogRepository selected by the configured persistence backend.
-
-    ``persistence_backend`` of ``"json"`` (the default) appends JSONL files
-    under ``settings.logs_dir``; ``"postgres"`` persists rows into the
-    ``request_logs`` table. Both implementations are best-effort and never
-    raise, so request logging can never fail an API request.
-    """
+def get_log_repository():
     if settings.persistence_backend == "postgres":
+        from app.repositories.postgres.log_repository import PostgresLogRepository
+        from app.db.session import get_session_factory
         return PostgresLogRepository(get_session_factory())
+    from app.repositories.json.log_repository import JsonLogRepository
+    from app.services.logging.request_logger import RequestLogger
     return JsonLogRepository(RequestLogger(settings.logs_dir))
 
 
@@ -247,15 +129,6 @@ _GENERIC_AUTH_FAILURE = "Invalid or missing authentication token."
 
 
 def _extract_bearer_token(authorization: str | None) -> str | None:
-    """Extract a Bearer access token from an Authorization header value.
-
-    Args:
-        authorization: The raw Authorization header value, or None.
-
-    Returns:
-        The bearer token, or None if the header is absent, malformed, or does
-        not use the Bearer scheme.
-    """
     if not authorization:
         return None
     parts = authorization.split()
@@ -270,34 +143,10 @@ def _extract_bearer_token(authorization: str | None) -> str | None:
 def get_current_user(
     request: Request,
     authorization: str | None = Header(None),
-    auth_service: AuthService = Depends(get_auth_service),
-) -> User:
-    """Resolve the authenticated user from a Bearer access token.
+    auth_service = Depends(get_auth_service),
+):
+    from app.services.auth import AuthenticationError
 
-    The token is verified by the existing JWTService through AuthService, and
-    the user is loaded through the configured UserRepository, so the
-    dependency works identically for JSON and PostgreSQL persistence. Every
-    authentication failure (missing or malformed header, invalid or expired
-    token, refresh token, unknown user, inactive user) raises the same generic
-    401 response.
-
-    On success the resolved user id is stamped into the request state so the
-    request-logging middleware can associate the request with the user without
-    ever logging the token itself.
-
-    Args:
-        request: The current request, used only to expose the resolved user id
-            to observability.
-        authorization: The raw Authorization header value.
-        auth_service: The AuthService used to verify the token and resolve
-            the user.
-
-    Returns:
-        The active domain User identified by the token.
-
-    Raises:
-        HTTPException: If authentication fails for any reason.
-    """
     token = _extract_bearer_token(authorization)
     if token is None:
         raise HTTPException(
@@ -316,13 +165,8 @@ def get_current_user(
 
 
 @lru_cache
-def get_semantic_retriever() -> SemanticRetriever:
-    """Return the shared semantic retriever for the default workspace.
-
-    One instance is shared between the hybrid retriever and the chat query
-    router so the relevance gate and retrieval both see the same vector store,
-    metadata store, and document repository.
-    """
+def get_semantic_retriever():
+    from app.services.vectorstore.retriever import SemanticRetriever
     return SemanticRetriever(
         get_embedding_service(),
         get_vector_store(),
@@ -332,7 +176,8 @@ def get_semantic_retriever() -> SemanticRetriever:
 
 
 @lru_cache
-def get_retriever() -> Retriever:
+def get_retriever():
+    from app.services.retrieval.hybrid_retriever import HybridRetriever
     return HybridRetriever(
         semantic_retriever=get_semantic_retriever(),
         bm25_retriever=get_bm25_retriever(),
@@ -340,8 +185,8 @@ def get_retriever() -> Retriever:
 
 
 @lru_cache
-def get_bm25_retriever() -> BM25Retriever:
-    """Return the shared BM25 retriever for the default workspace."""
+def get_bm25_retriever():
+    from app.services.retrieval.bm25_retriever import BM25Retriever
     return BM25Retriever(
         get_metadata_store(),
         get_document_repository(),
@@ -349,12 +194,9 @@ def get_bm25_retriever() -> BM25Retriever:
 
 
 @lru_cache
-def get_query_router() -> QueryRouter:
-    """Return the shared QueryRouter for chat classification.
+def get_query_router():
+    from app.services.chat.query_router import QueryRouter
 
-    Uses the same embedding service and scorers as the ChatService so that
-    classification results are consistent and embeddings are reused.
-    """
     semantic_retriever = get_semantic_retriever()
     bm25_retriever = get_bm25_retriever()
 
@@ -363,7 +205,6 @@ def get_query_router() -> QueryRouter:
         owner_id: str,
         query_embedding: list[float] | None,
     ) -> float:
-        """Score a question against the owner's corpus for the router."""
         return semantic_retriever.best_similarity(
             question,
             owner_id=owner_id,
@@ -371,7 +212,6 @@ def get_query_router() -> QueryRouter:
         )
 
     def _lexical_score(question: str, owner_id: str) -> float:
-        """Score a question lexically against the owner's corpus for the router."""
         return bm25_retriever.best_score(question, owner_id=owner_id)
 
     return QueryRouter(
@@ -385,7 +225,10 @@ def get_query_router() -> QueryRouter:
 
 
 @lru_cache
-def get_chat_service() -> ChatService:
+def get_chat_service():
+    from app.services.chat.chat_service import ChatService
+    from app.services.llm.factory import build_provider_manager
+    from app.services.llm.prompt_builder import PromptBuilder
     from app.services.rag.query_rewriter import QueryRewriter
     from app.services.rag.retrieval_evaluator import RetrievalEvaluator
 
