@@ -89,6 +89,11 @@ class ModelCatalogService:
     #: Model id suffix that marks a model as explicitly free in this catalog.
     FREE_MODEL_SUFFIX: str = ":free"
 
+    #: Default timeout for catalog HTTP requests.  Bounded so a slow or
+    #: unreachable provider cannot stall startup or the first request
+    #: indefinitely.  10 s is generous for a lightweight /models listing.
+    DEFAULT_TIMEOUT: float = 10.0
+
     def __init__(
         self,
         api_key: str,
@@ -100,13 +105,15 @@ class ModelCatalogService:
         Args:
             api_key: The API key used to list models.
             base_url: The OpenAI-compatible catalog base URL.
-            timeout: Optional HTTP timeout in seconds for catalog requests.
-                ``None`` keeps the underlying client's default timeout.
+            timeout: HTTP timeout in seconds for catalog requests.
+                ``None`` falls back to :attr:`DEFAULT_TIMEOUT`.
         """
-        client_kwargs: dict = {}
-        if timeout is not None:
-            client_kwargs["timeout"] = timeout
-        self._client = OpenAI(api_key=api_key, base_url=base_url, **client_kwargs)
+        effective_timeout = timeout if timeout is not None else self.DEFAULT_TIMEOUT
+        self._client = OpenAI(
+            api_key=api_key,
+            base_url=base_url,
+            timeout=effective_timeout,
+        )
 
     def get_all_models(self) -> list[str]:
         """Return the complete list of model ids from the provider.
