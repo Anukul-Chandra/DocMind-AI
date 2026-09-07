@@ -1,7 +1,5 @@
 """PDF text extraction for the document indexing pipeline."""
 
-import fitz
-
 
 class PDFProcessor:
     """Extract clean text content from a PDF file on disk.
@@ -39,6 +37,8 @@ class PDFProcessor:
             ValueError: If the file is not a readable PDF, the OCR engine is
                 unavailable, or no text could be extracted.
         """
+        import fitz
+
         try:
             doc = fitz.open(file_path)
         except Exception as exc:
@@ -54,7 +54,7 @@ class PDFProcessor:
             raise ValueError(f"The PDF contains no extractable text: {file_path}")
         return text
 
-    def _extract_selectable_text(self, doc: fitz.Document) -> str:
+    def _extract_selectable_text(self, doc) -> str:
         """Concatenate the selectable text layer of every page.
 
         Args:
@@ -65,7 +65,7 @@ class PDFProcessor:
         """
         return "\n".join(page.get_text() for page in doc)
 
-    def _extract_text_with_ocr(self, doc: fitz.Document) -> str:
+    def _extract_text_with_ocr(self, doc) -> str:
         """Recognize the text of an image-only PDF page by page.
 
         Each page is rasterized at ``self._ocr_dpi`` and recognized with the

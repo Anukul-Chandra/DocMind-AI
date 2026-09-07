@@ -1,49 +1,22 @@
 import logging
-import time
 
-from app.config.openrouter_models import OPENROUTER_MODELS
 from app.core.config import settings
-from app.services.llm.agnes_model_catalog import (
-    AgnesModelCatalogError,
-    AgnesNoFreeModelsError,
-    build_agnes_pool,
-)
-from app.services.llm.model_catalog import ModelCatalogService, ModelCatalogError
-from app.services.llm.model_pool import ModelPoolManager, build_curated_pool
-from app.services.llm.opencode_model_pool import build_opencode_pool_manager
-from app.services.llm.provider_manager import ProviderManager
-from app.services.llm.providers.gemini import GeminiProvider
-from app.services.llm.providers.groq import GroqProvider
-from app.services.llm.providers.agnes_rotation import AgnesRotatingProvider
-from app.services.llm.providers.openrouter import OpenRouterProvider
-from app.services.llm.providers.opencode_rotation import OpenCodeRotatingProvider
 
 logger = logging.getLogger(__name__)
 
 
-def _diag_ts() -> str:
-    return time.strftime("%H:%M:%S")
+def build_openrouter_provider():
+    from app.config.openrouter_models import OPENROUTER_MODELS
+    from app.services.llm.model_catalog import ModelCatalogError, ModelCatalogService
+    from app.services.llm.model_pool import ModelPoolManager, build_curated_pool
+    from app.services.llm.providers.openrouter import OpenRouterProvider
 
-
-def build_openrouter_provider() -> OpenRouterProvider:
-    """Build an OpenRouter provider with a dynamically discovered model pool.
-
-    Configuration is read from settings once, here in the composition root,
-    and injected into the provider constructor.
-
-    Returns:
-        An OpenRouterProvider instance.
-    """
-    logger.info("[%s] (diag) build_openrouter_provider start", _diag_ts())
     try:
         models = ModelCatalogService(api_key=settings.openrouter_api_key).get_free_models()
-        logger.info("[%s] (diag) OpenRouter discovery OK: %d models", _diag_ts(), len(models))
     except ModelCatalogError:
-        logger.warning("[%s] (diag) Model discovery failed; using default OpenRouter models", _diag_ts())
         models = list(OPENROUTER_MODELS)
     pool_models = build_curated_pool(models, preferred=OPENROUTER_MODELS)
     if not pool_models:
-        logger.warning("No suitable OpenRouter models; using trusted defaults")
         pool_models = build_curated_pool(OPENROUTER_MODELS)
     return OpenRouterProvider(
         ModelPoolManager(pool_models),
@@ -52,19 +25,11 @@ def build_openrouter_provider() -> OpenRouterProvider:
     )
 
 
-def build_opencode_provider() -> OpenCodeRotatingProvider | None:
-    """Build an OpenCode rotating provider from the dynamic model catalog.
+def build_opencode_provider():
+    from app.services.llm.model_catalog import ModelCatalogError
+    from app.services.llm.opencode_model_pool import build_opencode_pool_manager
+    from app.services.llm.providers.opencode_rotation import OpenCodeRotatingProvider
 
-    Models are discovered live (free catalog -> curation -> dedupe -> stable
-    pool); nothing is hardcoded. If discovery fails at construction time,
-    ``None`` is returned so the provider chain simply skips OpenCode instead
-    of failing startup — mirroring OpenRouter's graceful default-fallback
-    path.
-
-    Returns:
-        An OpenCodeRotatingProvider, or None when the catalog is unavailable.
-    """
-    logger.info("[%s] (diag) build_opencode_provider start", _diag_ts())
     try:
         pool = build_opencode_pool_manager()
     except ModelCatalogError as exc:
@@ -72,55 +37,38 @@ def build_opencode_provider() -> OpenCodeRotatingProvider | None:
             "OpenCode model discovery failed; skipping OpenCode provider: %s", exc
         )
         return None
-    logger.info("OpenCode pool ready with %d models", pool.total_models())
     return OpenCodeRotatingProvider(pool)
 
 
-def build_gemini_provider() -> GeminiProvider:
-    """Build a Gemini provider with configuration injected from settings.
+def build_gemini_provider():
+    from app.services.llm.providers.gemini import GeminiProvider
 
-    Returns:
-        A GeminiProvider instance.
-    """
     return GeminiProvider(
         api_key=settings.gemini_api_key,
         model=settings.gemini_model,
     )
 
 
-def build_groq_provider() -> GroqProvider:
-    """Build a Groq provider with configuration injected from settings.
+def build_groq_provider():
+    from app.services.llm.providers.groq import GroqProvider
 
-    Returns:
-        A GroqProvider instance.
-    """
     return GroqProvider(
         api_key=settings.groq_api_key,
         model=settings.groq_model,
     )
 
 
-def build_agnes_provider() -> AgnesRotatingProvider | None:
-    """Build an Agnes AI provider that rotates across the dynamic free pool.
-
-    Free models are discovered from the TTL-cached models.dev pricing source
-    (zero input/output cost) rather than hardcoded. If discovery is
-    unavailable or yields no free models, the provider still exists but is
-    backed solely by the configured ``settings.agnes_model`` fallback — which
-    is kept strictly separate from the dynamic free pool and is never claimed
-    to be dynamically discovered.
-
-    Returns ``None`` when no API key is configured so the provider is skipped
-    gracefully (mirroring OpenCode's discovery-failure skip) instead of
-    failing startup. Agnes is opt-in: it is only used when ``agnes`` appears
-    in ``settings.provider_priority``.
-
-    Returns:
-        An AgnesRotatingProvider instance, or None when the API key is absent.
-    """
+def build_agnes_provider():
     if not settings.agnes_api_key:
         return None
-    logger.info("[%s] (diag) build_agnes_provider start", _diag_ts())
+
+    from app.services.llm.agnes_model_catalog import (
+        AgnesModelCatalogError,
+        AgnesNoFreeModelsError,
+        build_agnes_pool,
+    )
+    from app.services.llm.providers.agnes_rotation import AgnesRotatingProvider
+
     pool: list[str] = []
     try:
         pool = build_agnes_pool()
@@ -138,13 +86,9 @@ def build_agnes_provider() -> AgnesRotatingProvider | None:
     )
 
 
-def build_provider_manager() -> ProviderManager:
-    """Build a ProviderManager from the configured provider priority.
+def build_provider_manager():
+    from app.services.llm.provider_manager import ProviderManager
 
-    Returns:
-        A ProviderManager with providers in configured priority order.
-    """
-    logger.info("[%s] (diag) build_provider_manager start (priority=%s)", _diag_ts(), settings.provider_priority)
     providers: list = []
     for name in settings.provider_priority.split(","):
         name = name.strip()
@@ -162,5 +106,4 @@ def build_provider_manager() -> ProviderManager:
             provider = build_agnes_provider()
             if provider is not None:
                 providers.append(provider)
-    logger.info("[%s] (diag) build_provider_manager done: %d providers", _diag_ts(), len(providers))
     return ProviderManager(providers)

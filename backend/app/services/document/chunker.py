@@ -1,7 +1,5 @@
 """Text chunking for the document indexing pipeline."""
 
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-
 from app.core.config import settings
 
 
@@ -19,6 +17,8 @@ class Chunker:
             chunk_size: Maximum number of characters per chunk.
             chunk_overlap: Number of overlapping characters between chunks.
         """
+        from langchain_text_splitters import RecursiveCharacterTextSplitter
+
         self._splitter = RecursiveCharacterTextSplitter(
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,

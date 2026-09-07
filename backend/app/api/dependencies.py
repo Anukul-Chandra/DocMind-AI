@@ -1,14 +1,10 @@
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import TYPE_CHECKING
 
 from fastapi import Depends, Header, HTTPException, Request, status
 
 from app.core.config import settings
-
-if TYPE_CHECKING:
-    from app.services.auth import User
 
 
 @lru_cache
@@ -65,8 +61,10 @@ def get_document_registry():
 @lru_cache
 def get_document_repository():
     if settings.persistence_backend == "postgres":
-        from app.repositories.postgres.document_repository import PostgresDocumentRepository
         from app.db.session import get_session_factory
+        from app.repositories.postgres.document_repository import (
+            PostgresDocumentRepository,
+        )
         return PostgresDocumentRepository(get_session_factory())
     from app.repositories.json.document_repository import JsonDocumentRepository
     return JsonDocumentRepository(get_document_registry())
@@ -75,8 +73,8 @@ def get_document_repository():
 @lru_cache
 def get_user_repository():
     if settings.persistence_backend == "postgres":
-        from app.repositories.postgres.user_repository import PostgresUserRepository
         from app.db.session import get_session_factory
+        from app.repositories.postgres.user_repository import PostgresUserRepository
         return PostgresUserRepository(get_session_factory())
     from app.repositories.json.user_repository import JsonUserRepository
     return JsonUserRepository(settings.users_path)
@@ -85,8 +83,10 @@ def get_user_repository():
 @lru_cache
 def get_conversation_repository():
     if settings.persistence_backend == "postgres":
-        from app.repositories.postgres.conversation_repository import PostgresConversationRepository
         from app.db.session import get_session_factory
+        from app.repositories.postgres.conversation_repository import (
+            PostgresConversationRepository,
+        )
         return PostgresConversationRepository(get_session_factory())
     from app.repositories.json.conversation_repository import JsonConversationRepository
     from app.services.chat.memory import ConversationMemory
@@ -117,8 +117,8 @@ def get_auth_service():
 @lru_cache
 def get_log_repository():
     if settings.persistence_backend == "postgres":
-        from app.repositories.postgres.log_repository import PostgresLogRepository
         from app.db.session import get_session_factory
+        from app.repositories.postgres.log_repository import PostgresLogRepository
         return PostgresLogRepository(get_session_factory())
     from app.repositories.json.log_repository import JsonLogRepository
     from app.services.logging.request_logger import RequestLogger
