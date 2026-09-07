@@ -1,9 +1,26 @@
+import time as _time
+import sys as _sys
+
+def _t(label: str) -> None:
+    print(f"[{_time.strftime('%X')}] (diag-dep) {label}", flush=True)
+
+_t("dependencies import started")
+
 from functools import lru_cache
 
+_t("importing fastapi")
 from fastapi import Depends, Header, HTTPException, Request, status
+_t("fastapi imported")
 
+_t("importing app.core.config")
 from app.core.config import settings
+_t("config imported")
+
+_t("importing app.db.session")
 from app.db.session import get_session_factory
+_t("db.session imported")
+
+_t("importing app.repositories")
 from app.repositories import (
     ConversationRepository,
     DocumentRepository,
@@ -17,6 +34,9 @@ from app.repositories import (
     PostgresLogRepository,
     PostgresUserRepository,
 )
+_t("repositories imported")
+
+_t("importing app.services.auth")
 from app.services.auth import (
     AuthService,
     AuthenticationError,
@@ -25,27 +45,78 @@ from app.services.auth import (
     User,
     UserRepository,
 )
+_t("services.auth imported")
+
+_t("importing app.services.chat.chat_service")
 from app.services.chat.chat_service import ChatService
+_t("chat_service imported")
+
+_t("importing app.services.chat.conversations_service")
 from app.services.chat.conversations_service import ConversationsService
+_t("conversations_service imported")
+
+_t("importing app.services.chat.memory")
 from app.services.chat.memory import ConversationMemory
+_t("chat.memory imported")
+
+_t("importing app.services.chat.query_router")
 from app.services.chat.query_router import QueryRouter
+_t("query_router imported")
+
+_t("importing app.services.document (pdf_processor + chunker)")
 from app.services.document import (
     Chunker,
     DocumentClassifier,
     DocumentService,
     PDFProcessor,
 )
+_t("services.document imported")
+
+_t("importing app.services.document.extraction")
 from app.services.document.extraction import ExtractionService
+_t("extraction imported")
+
+_t("importing app.services.document_registry")
 from app.services.document_registry import DocumentRegistry
+_t("document_registry imported")
+
+_t("importing app.services.embedding")
 from app.services.embedding import EmbeddingService
+_t("embedding imported")
+
+_t("importing app.services.llm.factory")
 from app.services.llm.factory import build_provider_manager
+_t("llm.factory imported")
+
+_t("importing app.services.llm.prompt_builder")
 from app.services.llm.prompt_builder import PromptBuilder
+_t("prompt_builder imported")
+
+_t("importing app.services.logging.request_logger")
 from app.services.logging.request_logger import RequestLogger
+_t("request_logger imported")
+
+_t("importing app.services.retrieval")
 from app.services.retrieval import BM25Retriever, HybridRetriever, Retriever
+_t("retrieval imported")
+
+_t("importing app.services.storage_backends")
 from app.services.storage_backends import MetadataBackend, VectorBackend
+_t("storage_backends imported")
+
+_t("importing app.services.vector_store")
 from app.services.vector_store import VectorStore
+_t("vector_store imported")
+
+_t("importing app.services.vectorstore.metadata_store")
 from app.services.vectorstore.metadata_store import MetadataStore
+_t("metadata_store imported")
+
+_t("importing app.services.vectorstore.retriever")
 from app.services.vectorstore.retriever import SemanticRetriever
+_t("retriever imported")
+
+_t("ALL dependencies imports done")
 
 
 @lru_cache
@@ -116,7 +187,7 @@ def get_user_repository() -> UserRepository:
 
 @lru_cache
 def get_conversation_repository() -> ConversationRepository:
-    """Return the ConversationRepository selected by the persistence backend.
+    """Return the ConversationRepository selected by the configured persistence backend.
 
     ``persistence_backend`` of ``"json"`` (the default) uses the file-backed
     JSON conversation store; ``"postgres"`` uses the SQLAlchemy-backed
@@ -179,7 +250,7 @@ def _extract_bearer_token(authorization: str | None) -> str | None:
     """Extract a Bearer access token from an Authorization header value.
 
     Args:
-        authorization: The raw Authorization header, or None.
+        authorization: The raw Authorization header value, or None.
 
     Returns:
         The bearer token, or None if the header is absent, malformed, or does
