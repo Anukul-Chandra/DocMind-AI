@@ -1,3 +1,9 @@
+import time as _time
+import logging as _logging
+
+_t = lambda: _time.strftime("%H:%M:%S")
+_logging.getLogger(__name__).info("[%s] (diag) app.main module import started", _t())
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -69,3 +75,5 @@ app.include_router(auth_router)
 app.include_router(chat_router)
 app.include_router(conversations_router)
 app.include_router(documents_router)
+
+_logging.getLogger(__name__).info("[%s] (diag) app.main module import finished — FastAPI app ready", _t())
