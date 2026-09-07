@@ -25,11 +25,12 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
-# Environment
-# TODO:
-# Before making this repository public,
-# add .env back to .gitignore and remove it from Git history if necessary.
-.env.local
+# Environment - never commit files with secrets.
+# Covers .env at any level (root, backend/, frontend/) plus all variants.
+.env
+.env.*
+!.env.example
+!.env.*.example
 
 # Local environment file with secrets. Never commit; keep it only on disk.
 backend/.env
