@@ -25,9 +25,7 @@ export interface ClassifyResponse {
 export async function classifyChat(question: string): Promise<ClassifyResponse> {
   const formData = new FormData();
   formData.append("question", question);
-  const response = await apiClient.post<ClassifyResponse>("/chat/classify", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const response = await apiClient.post<ClassifyResponse>("/chat/classify", formData);
   return response.data;
 }
 
@@ -44,8 +42,6 @@ export async function chatUser(
   for (const file of attachments) {
     formData.append("attachments", file);
   }
-  const response = await apiClient.post<ChatResponse>("/chat/", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const response = await apiClient.post<ChatResponse>("/chat/", formData);
   return response.data;
 }
