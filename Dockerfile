@@ -9,6 +9,10 @@ COPY backend/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
+# Pre-download the embedding model so the backend can start offline.
+# The image build environment has outbound internet; Render runtime may not.
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+
 # Copy only the application package. The .env file and runtime storage/ are
 # provided at runtime (env_file + volume) and are intentionally NOT baked in.
 COPY backend/app /app/app
