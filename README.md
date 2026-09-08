@@ -126,6 +126,42 @@ DATABASE_URL=postgresql+psycopg://docmind:docmind@localhost:5432/docmind
 
 and apply migrations with Alembic (`alembic upgrade head`). With the default `PERSISTENCE_BACKEND=json`, no database is needed at all.
 
+## 🚢 Production Deployment (Render + Vercel)
+
+### Backend (Render)
+
+1. Connect your repo to Render and use the provided `Dockerfile`.
+2. Set the following environment variables in the Render dashboard:
+
+```env
+JWT_SECRET=<long-random-string>
+CORS_ORIGINS=https://doc-mind-3l76mm0bk-anukul-chandras-projects.vercel.app
+RATE_LIMIT_TRUST_PROXY_HEADERS=true
+# at least one LLM provider key
+OPENROUTER_API_KEY=sk-or-v1-...
+```
+
+3. Ensure the `PORT` env var is left to Render's default (the `start.sh` reads it automatically).
+4. Deploy. The health endpoint is `/health`.
+
+### Frontend (Vercel)
+
+1. Import the `frontend/` folder into Vercel.
+2. Set the following environment variable in the Vercel dashboard:
+
+```env
+VITE_API_BASE_URL=https://docmind-ai-untx.onrender.com
+```
+
+3. Build command: `npm run build`
+4. Output directory: `dist`
+5. Deploy.
+
+> **Troubleshooting**
+> - **CORS errors**: Verify `CORS_ORIGINS` on Render exactly matches the Vercel frontend URL (including `https://` and any trailing path). A missing or mismatched origin will block the preflight.
+> - **Timeout after ~90s**: This usually means `VITE_API_BASE_URL` is missing on Vercel, so the frontend falls back to `http://localhost:8000` and the browser hangs trying to reach your machine. Set `VITE_API_BASE_URL` to the Render URL.
+> - **Rate-limit 429 on Render**: Set `RATE_LIMIT_TRUST_PROXY_HEADERS=true` so the limiter sees real client IPs instead of Render's load-balancer IP.
+
 ## 📡 API Reference
 
 All responses use a standard envelope: `{ success, data }` or `{ success, error: { code, message } }`.

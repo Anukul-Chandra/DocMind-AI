@@ -56,7 +56,10 @@ class Settings(BaseSettings):
     #: Maximum requests per client IP per minute on /auth endpoints.
     rate_limit_auth_per_minute: int = 60
     #: Trust X-Forwarded-For for the client IP when behind a reverse proxy.
-    rate_limit_trust_proxy_headers: bool = False
+    #: Defaults to True because most production hosts (Render, Vercel, AWS, etc.)
+    #: terminate TLS at a load balancer; without this, every request appears to
+    #: come from the proxy IP and rate limiting collapses to a single shared bucket.
+    rate_limit_trust_proxy_headers: bool = True
 
     embedding_model: str = "all-MiniLM-L6-v2"
 
