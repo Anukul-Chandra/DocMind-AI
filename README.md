@@ -135,7 +135,7 @@ and apply migrations with Alembic (`alembic upgrade head`). With the default `PE
 
 ```env
 JWT_SECRET=<long-random-string>
-CORS_ORIGINS=https://doc-mind-3l76mm0bk-anukul-chandras-projects.vercel.app
+CORS_ORIGINS=https://doc-mind-amuts5wyi-anukul-chandras-projects.vercel.app
 RATE_LIMIT_TRUST_PROXY_HEADERS=true
 # at least one LLM provider key
 OPENROUTER_API_KEY=sk-or-v1-...
