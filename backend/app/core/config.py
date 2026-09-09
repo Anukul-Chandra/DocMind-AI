@@ -46,6 +46,11 @@ class Settings(BaseSettings):
     #: Comma-separated list of browser origins allowed to call the API.
     #: Empty disallows all cross-origin browser requests (same-origin still works).
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
+    #: Optional regex (Python re syntax) matched against the Origin header,
+    #: in addition to the exact-match cors_origins list. Use this to allow
+    #: every Vercel preview deployment for a project, e.g.
+    #: r"^https://doc-mind-ai-s(-[a-z0-9]+)*\.vercel\.app$"
+    cors_origin_regex: str = ""
     #: Whether the CORS response advertises that credentials are supported.
     cors_allow_credentials: bool = True
 

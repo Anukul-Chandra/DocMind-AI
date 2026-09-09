@@ -43,6 +43,7 @@ def _add_security_middleware() -> None:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origin_list,
+        allow_origin_regex=settings.cors_origin_regex or None,
         allow_credentials=settings.cors_allow_credentials,
         allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
         allow_headers=["*"],
@@ -58,7 +59,11 @@ def _add_request_logging_middleware() -> None:
     )
 
 
-if settings.rate_limit_enabled or settings.cors_origins.strip():
+if (
+    settings.rate_limit_enabled
+    or settings.cors_origins.strip()
+    or settings.cors_origin_regex.strip()
+):
     _add_security_middleware()
 
 _add_request_logging_middleware()
