@@ -6,8 +6,6 @@
 
 **A full-stack Retrieval-Augmented Generation (RAG) platform** built with FastAPI + React 19
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Try%20it%20now-2563eb?style=for-the-badge&logo=vercel&logoColor=white)](https://doc-mind-ai-s.vercel.app)
-
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.139-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
@@ -23,6 +21,15 @@
 ## 🤔 What is DocMind?
 
 Upload PDFs, and DocMind indexes them into a **FAISS vector store**; ask questions in plain language and get answers grounded strictly in *your* corpus — with a smart relevance gate that knows when **not** to retrieve and defers to the LLM's general knowledge instead.
+
+## 🌐 Live Demo
+
+Try the deployed application:
+
+- **Frontend:** https://doc-mind-ai-s.vercel.app
+- **Backend API:** https://docmind-ai-untx.onrender.com
+
+The live instance runs on Render's free tier with lightweight BM25-only retrieval enabled to stay within the 512 MiB memory limit.
 
 ```text
  📄 PDF ──▶ 🔍 extract ──▶ 🧹 clean ──▶ ✂️ chunk ──▶ 🧮 embed ──▶ ⚡ FAISS
