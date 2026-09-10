@@ -28,6 +28,8 @@ Experience DocMind AI in action — upload a document, ask questions, and get gr
 
 **Try the live app:** https://doc-mind-ai-s.vercel.app
 
+---
+
 ```text
  📄 PDF ──▶ 🔍 extract ──▶ 🧹 clean ──▶ ✂️ chunk ──▶ 🧮 embed ──▶ ⚡ FAISS
                                                                   │
