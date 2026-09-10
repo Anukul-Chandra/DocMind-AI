@@ -161,6 +161,7 @@ VITE_API_BASE_URL=https://docmind-ai-untx.onrender.com
 > - **CORS errors**: Verify `CORS_ORIGINS` on Render exactly matches the Vercel frontend URL (including `https://` and any trailing path). A missing or mismatched origin will block the preflight.
 > - **Timeout after ~90s**: This usually means `VITE_API_BASE_URL` is missing on Vercel, so the frontend falls back to `http://localhost:8000` and the browser hangs trying to reach your machine. Set `VITE_API_BASE_URL` to the Render URL.
 > - **Rate-limit 429 on Render**: Set `RATE_LIMIT_TRUST_PROXY_HEADERS=true` so the limiter sees real client IPs instead of Render's load-balancer IP.
+> - **Container restarts / OOM on Render free tier (512MiB)**: Set `ENABLE_EMBEDDINGS=false` in Render. This skips the heavy PyTorch + sentence-transformers model and runs BM25-only retrieval, which fits in the free-tier memory limit. Keep `true` only when you have enough RAM.
 
 ## 📡 API Reference
 

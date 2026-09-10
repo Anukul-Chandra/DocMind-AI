@@ -166,6 +166,8 @@ def get_current_user(
 
 @lru_cache
 def get_semantic_retriever():
+    if not settings.enable_embeddings:
+        return None
     from app.services.vectorstore.retriever import SemanticRetriever
     return SemanticRetriever(
         get_embedding_service(),
@@ -205,6 +207,8 @@ def get_query_router():
         owner_id: str,
         query_embedding: list[float] | None,
     ) -> float:
+        if semantic_retriever is None:
+            return 0.0
         return semantic_retriever.best_similarity(
             question,
             owner_id=owner_id,
@@ -215,7 +219,7 @@ def get_query_router():
         return bm25_retriever.best_score(question, owner_id=owner_id)
 
     return QueryRouter(
-        get_embedding_service(),
+        get_embedding_service() if settings.enable_embeddings else None,
         relevance_scorer=_relevance_score,
         lexical_scorer=_lexical_score,
         personal_floor=settings.rag_personal_floor,

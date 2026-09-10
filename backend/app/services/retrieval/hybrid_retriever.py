@@ -66,12 +66,16 @@ class HybridRetriever(Retriever):
             The top-k merged, deduplicated, reranked chunks (best first),
             constrained to the workspace and owner.
         """
-        semantic_results = self._semantic.retrieve(
-            query,
-            k=k,
-            workspace_id=workspace_id,
-            owner_id=owner_id,
-            query_embedding=query_embedding,
+        semantic_results = (
+            self._semantic.retrieve(
+                query,
+                k=k,
+                workspace_id=workspace_id,
+                owner_id=owner_id,
+                query_embedding=query_embedding,
+            )
+            if self._semantic is not None
+            else []
         )
         keyword_results = self._bm25.retrieve(
             query, k=k, workspace_id=workspace_id, owner_id=owner_id
@@ -161,4 +165,6 @@ class HybridRetriever(Retriever):
         Returns:
             Whether the chunk is eligible for the workspace and owner.
         """
+        if self._semantic is None:
+            return self._bm25.is_eligible(document, workspace_id, owner_id)
         return self._semantic.is_eligible(document, workspace_id, owner_id)

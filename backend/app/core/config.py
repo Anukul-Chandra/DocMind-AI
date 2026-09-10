@@ -67,6 +67,10 @@ class Settings(BaseSettings):
     rate_limit_trust_proxy_headers: bool = True
 
     embedding_model: str = "all-MiniLM-L6-v2"
+    #: Disable semantic embeddings to run in lightweight BM25-only mode.
+    #: Set False on memory-constrained hosts (e.g. Render free tier 512MiB)
+    #: to skip loading PyTorch + sentence-transformers and avoid OOM crashes.
+    enable_embeddings: bool = True
 
     #: Minimum cosine similarity between a chat query and the user's best
     #: matching indexed chunk for the query to be routed to document
