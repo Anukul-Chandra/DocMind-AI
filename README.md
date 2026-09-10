@@ -24,12 +24,9 @@ Upload PDFs, and DocMind indexes them into a **FAISS vector store**; ask questio
 
 ## 🌐 Live Demo
 
-Try the deployed application:
+Experience DocMind AI in action — upload a document, ask questions, and get grounded answers instantly. No setup required.
 
-- **Frontend:** https://doc-mind-ai-s.vercel.app
-- **Backend API:** https://docmind-ai-untx.onrender.com
-
-The live instance runs on Render's free tier with lightweight BM25-only retrieval enabled to stay within the 512 MiB memory limit.
+**Try the live app:** https://doc-mind-ai-s.vercel.app
 
 ```text
  📄 PDF ──▶ 🔍 extract ──▶ 🧹 clean ──▶ ✂️ chunk ──▶ 🧮 embed ──▶ ⚡ FAISS
