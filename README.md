@@ -6,6 +6,8 @@
 
 **A full-stack Retrieval-Augmented Generation (RAG) platform** built with FastAPI + React 19
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Try%20it%20now-2563eb?style=for-the-badge&logo=vercel&logoColor=white)](https://doc-mind-ai-s.vercel.app)
+
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.139-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
