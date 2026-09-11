@@ -7,6 +7,14 @@ from app.services.rag.crag import CragOrchestrator
 from app.services.rag.query_rewriter import QueryRewriter
 from app.services.rag.retrieval_evaluator import RetrievalEvaluator
 from app.services.retrieval.base import Retriever
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+# Keep the prompt history bounded to the same ten exchange window used by the
+# JSON conversation store.  A complete exchange is two messages.
+HISTORY_MESSAGE_LIMIT = 20
 
 
 class ChatService:
@@ -110,6 +118,7 @@ class ChatService:
         Raises:
             LLMUnavailableError: If every provider fails.
         """
+        history = self._load_history(conversation_id, owner_id)
         route = self._query_router.classify_with_embedding(
             question, owner_id=owner_id
         )
@@ -118,7 +127,7 @@ class ChatService:
         if category is QueryCategory.METADATA:
             response = self._answer_metadata(owner_id)
         elif category is QueryCategory.GENERAL:
-            prompt = self._prompt_builder.build_general_prompt(question)
+            prompt = self._prompt_builder.build_general_prompt(question, history=history)
             response = await self._provider_manager.generate(
                 prompt.text, images=images,
             )
@@ -137,7 +146,9 @@ class ChatService:
                 )
                 if self._retrieval_evaluator is not None:
                     self._retrieval_evaluator.evaluate(question, contexts)
-            rag_prompt = self._prompt_builder.build_prompt(question, contexts)
+            rag_prompt = self._prompt_builder.build_prompt(
+                question, contexts, history=history
+            )
             response = await self._provider_manager.generate(
                 rag_prompt.text, images=images,
             )
@@ -147,6 +158,29 @@ class ChatService:
             conversation_id, owner_id, question, response
         )
         return response
+
+    def _load_history(
+        self, conversation_id: str | None, owner_id: str
+    ) -> list[dict[str, str]]:
+        """Load the bounded, owner-scoped history preceding this chat turn.
+
+        The API route validates ownership before calling this service.  The
+        repository applies the same owner scope as defense in depth, so a
+        conversation ID can never expose messages from another user.
+        """
+        if (
+            conversation_id is None
+            or not owner_id
+            or self._conversation_repository is None
+        ):
+            return []
+        messages = self._conversation_repository.get_messages(
+            conversation_id, owner_id
+        )
+        return [
+            {"role": message.role, "content": message.content}
+            for message in messages[-HISTORY_MESSAGE_LIMIT:]
+        ]
 
     def _record_exchange(
         self,
@@ -158,9 +192,11 @@ class ChatService:
         """Persist a chat exchange to the conversation history when available.
 
         Recording is best-effort: a missing conversation repository, an empty
-        owner, or an ownership mismatch must never fail the chat turn, so
-        persistence errors are swallowed. The answer text is read defensively
-        so responses that are plain strings (as in some tests) do not crash.
+        owner, or an ownership mismatch must never fail the chat turn.
+        Persistence errors are logged at warning level so they are visible
+        in production monitoring but do not fail the request. The answer
+        text is read defensively so responses that are plain strings (as in
+        some tests) do not crash.
 
         Args:
             conversation_id: The conversation to record into, or None.
@@ -185,8 +221,13 @@ class ChatService:
                 question,
                 str(answer),
             )
-        except Exception:
-            return
+        except Exception as exc:
+            logger.warning(
+                "Failed to record exchange for conversation %s owner %s: %s",
+                conversation_id,
+                owner_id,
+                exc,
+            )
 
     def _answer_metadata(self, owner_id: str) -> LLMResponse:
         """Answer a document-list question without retrieval or an LLM call.
