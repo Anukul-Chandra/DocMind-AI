@@ -271,6 +271,7 @@ export default function Galaxy({
 
     const mesh = new Mesh(gl, { geometry, program });
     let animateId;
+    let lastRenderTime = 0;
 
     function update(t) {
       animateId = requestAnimationFrame(update);
@@ -289,6 +290,8 @@ export default function Galaxy({
       program.uniforms.uMouse.value[1] = smoothMousePos.current.y;
       program.uniforms.uMouseActiveFactor.value = smoothMouseActive.current;
 
+      if (t - lastRenderTime < 33) return;
+      lastRenderTime = t;
       renderer.render({ scene: mesh });
     }
     animateId = requestAnimationFrame(update);
