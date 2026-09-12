@@ -137,7 +137,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
                 aria-label="Remove attachment"
                 className="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full border border-border/60 bg-card text-muted-foreground/60 opacity-0 shadow-sm transition-all hover:border-destructive/40 hover:text-destructive group-hover:opacity-100"
               >
-                <span className="text-white text-xs leading-none" aria-hidden="true">×</span>
+                <span className="text-foreground dark:text-white text-xs leading-none" aria-hidden="true">×</span>
               </button>
             </div>
           ))}
@@ -146,13 +146,13 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
 
       <div
         className={cn(
-          "relative flex items-end rounded-2xl bg-[#050807] border-2 border-white/[0.08] p-2.5 shadow-sm transition-colors",
-          "focus-within:border-white/[0.15] focus-within:ring-3 focus-within:ring-white/5",
+          "relative flex items-end rounded-2xl bg-card dark:bg-[#050807] border-2 border-border/50 dark:border-white/[0.08] p-2.5 shadow-sm transition-colors",
+          "focus-within:border-border/40 dark:focus-within:border-white/[0.15] focus-within:ring-3 focus-within:ring-ring/40 dark:focus-within:ring-white/5",
         )}
       >
         {/* Focus accent hairline */}
         <span
-          className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent opacity-0 transition-opacity duration-300 focus-within:opacity-100"
+          className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-border/40 dark:via-white/15 to-transparent opacity-0 transition-opacity duration-300 focus-within:opacity-100"
           aria-hidden="true"
         />
         <textarea
