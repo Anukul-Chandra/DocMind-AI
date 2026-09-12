@@ -79,7 +79,7 @@ export function LoginPage() {
         <div className="absolute -top-24 left-1/2 h-80 w-[36rem] -translate-x-1/2 rounded-full bg-brand/6 blur-3xl" />
       </div>
       {/* Full-viewport pure-black base with the animated galaxy stars on top */}
-      <div className="fixed inset-0 z-0 overflow-hidden bg-[#000000]" aria-hidden="true">
+      <div className="fixed inset-0 z-0 overflow-hidden bg-background dark:bg-[#000000]" aria-hidden="true">
         <Galaxy
           mouseRepulsion
           mouseInteraction
