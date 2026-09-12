@@ -228,7 +228,7 @@ export function ChatPage() {
   const showEmptyState = storedMessages.length === 0 && !isLoading;
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-[#080B0A]">
+    <div className="flex h-full min-h-0 flex-col bg-background dark:bg-[#080B0A]">
       <div className="flex min-h-0 flex-1">
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
@@ -263,8 +263,8 @@ export function ChatPage() {
           </div>
 
           {/* Composer */}
-          <div className="relative w-full shrink-0 rounded-2xl border border-white/[0.06] bg-[#101C18] p-4 px-8 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:mx-auto sm:max-w-3xl">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" aria-hidden="true" />
+          <div className="relative w-full shrink-0 rounded-2xl border border-border/60 dark:border-white/[0.06] bg-card dark:bg-[#101C18] p-4 px-8 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:mx-auto sm:max-w-3xl">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-border/40 dark:via-white/10 to-transparent" aria-hidden="true" />
             <div className="mx-auto w-full max-w-3xl space-y-2">
               {error && (
                 <div
