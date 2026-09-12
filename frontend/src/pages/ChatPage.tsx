@@ -93,7 +93,15 @@ function readFileAsDataURL(file: File): Promise<string> {
 }
 
 function toChatMessage(message: ConversationMessage, id: string): ChatMessage {
-  return { id, role: message.role, content: message.content };
+  return {
+    id,
+    role: message.role,
+    content: message.content,
+    images: message.images,
+    provider: message.provider,
+    model: message.model,
+    sources: message.sources,
+  };
 }
 
 export function ChatPage() {
