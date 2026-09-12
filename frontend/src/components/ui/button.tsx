@@ -21,7 +21,7 @@ const buttonVariants = cva(
           "hover:bg-brand/8 hover:text-brand dark:hover:bg-brand/10",
         link: "text-brand underline-offset-4 hover:underline",
         glass:
-          "glass text-foreground shadow-glass hover:bg-white/10 dark:hover:bg-white/5",
+          "glass text-foreground shadow-glass hover:bg-muted/30 dark:hover:bg-white/5",
       },
       size: {
         default: "h-10 px-4 py-2 has-[>svg]:px-3",
