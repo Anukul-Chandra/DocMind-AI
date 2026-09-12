@@ -8,6 +8,7 @@ from app.services.rag.query_rewriter import QueryRewriter
 from app.services.rag.retrieval_evaluator import RetrievalEvaluator
 from app.services.retrieval.base import Retriever
 import logging
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -118,45 +119,88 @@ class ChatService:
         Raises:
             LLMUnavailableError: If every provider fails.
         """
+        _t_start = time.perf_counter()
+        _t_retrieve = 0.0
+
+        _t0 = time.perf_counter()
         history = self._load_history(conversation_id, owner_id)
+        _t_history = time.perf_counter() - _t0
+
+        _t0 = time.perf_counter()
         route = self._query_router.classify_with_embedding(
             question, owner_id=owner_id
         )
+        _t_classify = time.perf_counter() - _t0
+
         category = route.category
         query_embedding = route.query_embedding
+
         if category is QueryCategory.METADATA:
             response = self._answer_metadata(owner_id)
+            _t_prompt = 0.0
+            _t_provider = 0.0
         elif category is QueryCategory.GENERAL:
+            _t0 = time.perf_counter()
             prompt = self._prompt_builder.build_general_prompt(question, history=history)
+            _t_prompt = time.perf_counter() - _t0
+
+            _t0 = time.perf_counter()
             response = await self._provider_manager.generate(
                 prompt.text, images=images,
             )
+            _t_provider = time.perf_counter() - _t0
         else:
             if self._crag is not None:
+                _t0 = time.perf_counter()
                 contexts = await self._crag.retrieve(
                     question,
                     owner_id=owner_id,
                     query_embedding=query_embedding,
                 )
             else:
+                _t0 = time.perf_counter()
                 contexts = self._retriever.retrieve(
                     question,
                     owner_id=owner_id,
                     query_embedding=query_embedding,
                 )
-                if self._retrieval_evaluator is not None:
-                    self._retrieval_evaluator.evaluate(question, contexts)
+            _t_retrieve = time.perf_counter() - _t0
+
+            if self._crag is None and self._retrieval_evaluator is not None:
+                self._retrieval_evaluator.evaluate(question, contexts)
+
+            _t0 = time.perf_counter()
             rag_prompt = self._prompt_builder.build_prompt(
                 question, contexts, history=history
             )
+            _t_prompt = time.perf_counter() - _t0
+
+            _t0 = time.perf_counter()
             response = await self._provider_manager.generate(
                 rag_prompt.text, images=images,
             )
+            _t_provider = time.perf_counter() - _t0
+
             response.category = category.value
             response.sources = contexts
+
+        _t0 = time.perf_counter()
         self._record_exchange(
             conversation_id, owner_id, question, response
         )
+        _t_persist = time.perf_counter() - _t0
+
+        _t_total = time.perf_counter() - _t_start
+        logger.info(
+            "chat_timing total=%.3fs history=%.4fs classify=%.3fs "
+            "retrieve=%.3fs prompt=%.4fs provider=%.3fs persist=%.4fs "
+            "category=%s provider=%s model=%s",
+            _t_total, _t_history, _t_classify, _t_retrieve, _t_prompt,
+            _t_provider, _t_persist, category.value,
+            getattr(response, "provider", ""),
+            getattr(response, "model", ""),
+        )
+
         return response
 
     def _load_history(

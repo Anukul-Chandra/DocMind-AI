@@ -1,4 +1,5 @@
 import logging
+import time
 from typing import AsyncIterator
 
 from app.models.llm import LLMResponse, LLMStreamChunk
@@ -72,10 +73,12 @@ class ProviderManager:
             LLMUnavailableError: If every provider fails.
         """
         self._errors = []
+        _t_total = time.perf_counter()
         for provider in self._providers:
             provider_name = type(provider).__name__
             logger.info("Trying %s...", provider_name)
             try:
+                _t_att = time.perf_counter()
                 text = await provider.generate(
                     prompt,
                     system_prompt=system_prompt,
@@ -89,19 +92,23 @@ class ProviderManager:
                 # RecoverableError so the text-only retry below applies.
                 if images and _is_image_error_response(text):
                     raise RecoverableError(text)
-                logger.info("Success: Provider = %s", provider_name)
+                _t_elapsed = time.perf_counter() - _t_att
+                logger.info("Success: Provider = %s in %.3fs", provider_name, _t_elapsed)
                 return LLMResponse(
                     text=text,
                     provider=provider_name,
                     model=provider.model,
                 )
             except RecoverableError as exc:
+                _t_elapsed = time.perf_counter() - _t_att
                 if images and _is_image_error(exc):
                     logger.info(
-                        "Provider %s rejected images; retrying text-only",
+                        "Provider %s rejected images after %.3fs; retrying text-only",
                         provider_name,
+                        _t_elapsed,
                     )
                     try:
+                        _t_att = time.perf_counter()
                         text = await provider.generate(
                             prompt,
                             system_prompt=system_prompt,
@@ -109,9 +116,10 @@ class ProviderManager:
                             max_tokens=max_tokens,
                             images=None,
                         )
+                        _t_retry = time.perf_counter() - _t_att
                         logger.info(
-                            "Success: Provider = %s (text-only retry)",
-                            provider_name,
+                            "Success: Provider = %s (text-only retry) in %.3fs",
+                            provider_name, _t_retry,
                         )
                         return LLMResponse(
                             text=text,
@@ -122,8 +130,13 @@ class ProviderManager:
                         pass
                 self._errors.append((provider_name, exc))
                 logger.warning(
-                    "Provider %s failed: %s", provider_name, exc
+                    "Provider %s failed after %.3fs: %s",
+                    provider_name, _t_elapsed, exc,
                 )
+        logger.info(
+            "All providers failed; total failover time %.3fs",
+            time.perf_counter() - _t_total,
+        )
         raise LLMUnavailableError("All providers failed to generate a response.")
 
     async def generate_stream(

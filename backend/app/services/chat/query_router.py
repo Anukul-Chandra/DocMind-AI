@@ -39,10 +39,14 @@ GENERAL.
 
 from dataclasses import dataclass
 from enum import Enum
+import logging
 import re
+import time
 
 from app.core.config import settings
 from app.services.embedding import EmbeddingService
+
+logger = logging.getLogger(__name__)
 
 
 class QueryCategory(Enum):
@@ -548,17 +552,30 @@ class QueryRouter:
         returned (for DOCUMENT) so retrieval always uses the current question's
         vector rather than any shared cached state.
         """
+        t_embed_start = time.perf_counter()
         query_embedding = self._embed(question)
         if query_embedding is None:
             return RouteResult(QueryCategory.GENERAL, None)
+        t_embed = time.perf_counter() - t_embed_start
+
+        t_sem_start = time.perf_counter()
         similarity = self._relevance_scorer(
             question,
             owner_id,
             query_embedding,
         )
+        t_semantic = time.perf_counter() - t_sem_start
+
+        t_bm25_start = time.perf_counter()
         lexical = 0.0
         if self._lexical_scorer is not None:
             lexical = self._lexical_scorer(question, owner_id)
+        t_bm25 = time.perf_counter() - t_bm25_start
+
+        logger.debug(
+            "classify_subtiming embed=%.4fs semantic=%.3fs bm25=%.3fs",
+            t_embed, t_semantic, t_bm25,
+        )
         personal = self._has_personal_reference(text)
         docnoun = self._has_document_noun(text)
         self_attribute = self._has_self_attribute(text)
