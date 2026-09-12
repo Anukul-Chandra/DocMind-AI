@@ -50,7 +50,7 @@ export function ChatMessageBubble({ message, animate = false, onGrow }: ChatMess
                     key={i}
                     type="button"
                     onClick={() => setPreviewIndex(i)}
-                    className="size-20 shrink-0 cursor-zoom-in overflow-hidden rounded-lg border border-white/10 shadow-sm transition-opacity hover:opacity-80"
+                    className="size-20 shrink-0 cursor-zoom-in overflow-hidden rounded-lg border border-border/40 dark:border-white/10 shadow-sm transition-opacity hover:opacity-80"
                   >
                     <img
                       src={url}
@@ -70,7 +70,7 @@ export function ChatMessageBubble({ message, animate = false, onGrow }: ChatMess
         {/* Full-size image preview modal */}
         {images && previewIndex !== null && (
           <div
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 dark:bg-black/80 backdrop-blur-sm"
             role="dialog"
             aria-label="Image preview"
             onClick={closePreview}
@@ -78,7 +78,7 @@ export function ChatMessageBubble({ message, animate = false, onGrow }: ChatMess
             <button
               type="button"
               onClick={closePreview}
-              className="absolute right-4 top-4 flex size-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
+              className="absolute right-4 top-4 flex size-10 items-center justify-center rounded-full bg-muted/30 text-foreground transition-colors hover:bg-muted/40 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
               aria-label="Close preview"
             >
               <X className="size-5" />
