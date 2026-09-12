@@ -294,6 +294,16 @@ export default function Galaxy({
     animateId = requestAnimationFrame(update);
     ctn.appendChild(gl.canvas);
 
+    function onVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        if (!animateId) animateId = requestAnimationFrame(update);
+      } else {
+        cancelAnimationFrame(animateId);
+        animateId = null;
+      }
+    }
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
     function handleMouseMove(e) {
       const rect = ctn.getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width;
@@ -313,6 +323,7 @@ export default function Galaxy({
 
     return () => {
       cancelAnimationFrame(animateId);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       window.removeEventListener('resize', resize);
       if (mouseInteraction) {
         ctn.removeEventListener('mousemove', handleMouseMove);
