@@ -26,6 +26,7 @@ from collections.abc import Callable
 import httpx
 
 from app.services.llm.providers.agnes import (
+    AGNES_ATTEMPT_TIMEOUT_SECONDS,
     AGNES_DEFAULT_BASE_URL,
     request_completion,
 )
@@ -35,6 +36,7 @@ from app.services.llm.providers.base import (
     ProviderError,
 )
 from app.services.llm.providers.opencode_rotation import (
+
     COOLDOWN,
     DEAD,
     FATAL,
@@ -67,6 +69,7 @@ class AgnesRotatingProvider(BaseProvider):
         fallback_model: str,
         base_url: str = AGNES_DEFAULT_BASE_URL,
         timeout: int = 60,
+        attempt_timeout: float = AGNES_ATTEMPT_TIMEOUT_SECONDS,
         cooldown_seconds: float = DEFAULT_COOLDOWN_SECONDS,
         clock: Callable[[], float] = time.monotonic,
     ) -> None:
@@ -81,6 +84,10 @@ class AgnesRotatingProvider(BaseProvider):
                 ``settings.agnes_model``), kept separate from the pool.
             base_url: The Agnes OpenAI-compatible base URL.
             timeout: HTTP client timeout in seconds per attempt.
+            attempt_timeout: Per-attempt timeout in seconds. A single model
+                attempt that exceeds this is abandoned so rotation and
+                ProviderManager failover can proceed without waiting for the full
+                HTTP timeout.
             cooldown_seconds: Temporary cooldown for rate-limited/unavailable
                 models.
             clock: Injectable monotonic-style clock (test seam).
@@ -91,6 +98,7 @@ class AgnesRotatingProvider(BaseProvider):
             raise ValueError("AgnesRotatingProvider needs a pool or a fallback model")
         self._fallback_model = fallback_model
         self._base_url = base_url.rstrip("/")
+        self._attempt_timeout = attempt_timeout
         self._cooldown = CooldownTracker(
             default_seconds=cooldown_seconds, clock=clock
         )
@@ -193,6 +201,7 @@ class AgnesRotatingProvider(BaseProvider):
                     temperature=temperature,
                     max_tokens=max_tokens,
                     images=images,
+                    attempt_timeout=self._attempt_timeout,
                 )
             except (ProviderError, AuthenticationError) as exc:
                 action = classify_opencode_failure(exc)
@@ -243,6 +252,7 @@ class AgnesRotatingProvider(BaseProvider):
                     temperature=temperature,
                     max_tokens=max_tokens,
                     images=images,
+                    attempt_timeout=self._attempt_timeout,
                 )
             except (ProviderError, AuthenticationError) as exc:
                 action = classify_opencode_failure(exc)

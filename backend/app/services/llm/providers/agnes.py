@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 import httpx
@@ -19,6 +20,7 @@ logger = logging.getLogger(__name__)
 #: settings.agnes_base_url so alternate/regional routes can be configured
 #: without code changes.
 AGNES_DEFAULT_BASE_URL = "https://apihub.agnes-ai.com/v1"
+AGNES_ATTEMPT_TIMEOUT_SECONDS = 10.0
 
 
 async def request_completion(
@@ -30,6 +32,7 @@ async def request_completion(
     temperature: float = 0.0,
     max_tokens: int = 1000,
     images: list[dict] | None = None,
+    attempt_timeout: float | None = None,
 ) -> str:
     """Send one OpenAI-compatible chat completion request to Agnes.
 
@@ -47,6 +50,9 @@ async def request_completion(
         temperature: Sampling temperature for the model.
         max_tokens: Maximum number of tokens to generate.
         images: Optional list of base64-encoded image dicts.
+        attempt_timeout: Optional per-attempt timeout in seconds. A single
+            attempt that exceeds this is abandoned with a :class:`ProviderError`
+            so provider rotation/fallback can proceed.
 
     Returns:
         The generated text from the model.
@@ -78,11 +84,19 @@ async def request_completion(
     }
 
     try:
-        response = await client.post(
+        request = client.post(
             "/chat/completions",
             headers=headers,
             json=payload,
         )
+        if attempt_timeout is None:
+            response = await request
+        else:
+            response = await asyncio.wait_for(request, timeout=attempt_timeout)
+    except asyncio.TimeoutError as exc:
+        raise ProviderError(
+            f"Agnes request timed out after {attempt_timeout}s"
+        ) from exc
     except httpx.TimeoutException as exc:
         raise ProviderError(f"Agnes request timed out: {exc}") from exc
     except httpx.ConnectError as exc:
@@ -137,6 +151,7 @@ class AgnesProvider(BaseProvider):
         model: str,
         base_url: str = AGNES_DEFAULT_BASE_URL,
         timeout: int = 60,
+        attempt_timeout: float = AGNES_ATTEMPT_TIMEOUT_SECONDS,
     ) -> None:
         """Initialize the provider with an API key, model, and base URL.
 
@@ -145,6 +160,10 @@ class AgnesProvider(BaseProvider):
             model: The Agnes model identifier (e.g. ``agnes-2.5-flash``).
             base_url: The Agnes OpenAI-compatible base URL.
             timeout: HTTP client timeout in seconds.
+            attempt_timeout: Per-attempt timeout in seconds. A single model
+                attempt that exceeds this is abandoned so provider rotation and
+                ProviderManager failover can proceed without waiting for the full
+                HTTP timeout.
         """
         if not api_key:
             raise ValueError("AgnesProvider requires an API key")
@@ -153,6 +172,7 @@ class AgnesProvider(BaseProvider):
         self._api_key = api_key
         self._model = model
         self._base_url = base_url.rstrip("/")
+        self._attempt_timeout = attempt_timeout
         self._client = httpx.AsyncClient(
             base_url=self._base_url,
             timeout=timeout,
@@ -204,4 +224,5 @@ class AgnesProvider(BaseProvider):
             temperature=temperature,
             max_tokens=max_tokens,
             images=images,
+            attempt_timeout=self._attempt_timeout,
         )

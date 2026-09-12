@@ -5,6 +5,7 @@ fake so we can assert request shape, error mapping, and ProviderManager
 failover in isolation. The live smoke test is performed separately.
 """
 
+import asyncio
 import logging
 
 import pytest
@@ -225,6 +226,38 @@ async def test_provider_manager_fails_over_after_agnes_error(monkeypatch):
     pm = ProviderManager([failing, StubProvider("fallback-answer")])
     result = await pm.generate("q")
     assert result.text == "fallback-answer"
+
+
+class HangingClient:
+    """Fake client whose request never completes (simulates a slow Agnes)."""
+
+    def __init__(self):
+        self.calls = []
+
+    async def post(self, url, headers=None, json=None):
+        self.calls.append(json.get("model"))
+        await asyncio.sleep(60)
+
+
+@pytest.mark.asyncio
+async def test_provider_manager_fails_over_after_agnes_timeout(monkeypatch):
+    client = HangingClient()
+    monkeypatch.setattr(agnes.httpx, "AsyncClient", lambda *a, **k: client)
+    provider = AgnesProvider(
+        api_key="k",
+        model="agnes-2.5-flash",
+        timeout=60,
+        attempt_timeout=0.05,
+    )
+    pm = ProviderManager([provider, StubProvider("fallback-answer")])
+    start = asyncio.get_event_loop().time()
+    result = await pm.generate("q")
+    elapsed = asyncio.get_event_loop().time() - start
+    assert result.text == "fallback-answer"
+    assert pm.errors[0][0] == "AgnesProvider"
+    assert "timed out after 0.05s" in str(pm.errors[0][1])
+    assert elapsed < 5.0  # fast-fail, not 60s
+
 
 
 # ---------------------------------------------------------------------------
