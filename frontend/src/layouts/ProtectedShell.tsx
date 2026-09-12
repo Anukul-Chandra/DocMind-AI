@@ -67,7 +67,7 @@ export function ProtectedShell() {
           aria-label="Navigation"
         >
           <div
-            className="docmind-drawer-overlay absolute inset-0 bg-black/50 backdrop-blur-sm"
+            className="docmind-drawer-overlay absolute inset-0 bg-background/80 dark:bg-black/50 backdrop-blur-sm"
             onClick={() => setSidebarOpen(false)}
             aria-hidden="true"
           />
