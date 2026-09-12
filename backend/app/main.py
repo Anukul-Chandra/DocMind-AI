@@ -1,7 +1,9 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.dependencies import get_log_repository
+from app.api.dependencies import get_chat_service, get_log_repository
 from app.api.errors import register_exception_handlers
 from app.api.middleware.rate_limit import FixedWindowLimiter, RateLimitMiddleware
 from app.api.middleware.request_logging import RequestLogMiddleware
@@ -14,6 +16,14 @@ from app.api.routes.documents import router as documents_router
 from app.core.config import settings
 
 _docs_enabled = settings.enable_docs
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    get_chat_service()
+    yield
+
+
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
@@ -21,6 +31,7 @@ app = FastAPI(
     docs_url="/docs" if _docs_enabled else None,
     redoc_url="/redoc" if _docs_enabled else None,
     openapi_url="/openapi.json" if _docs_enabled else None,
+    lifespan=lifespan,
 )
 
 register_exception_handlers(app)
