@@ -81,8 +81,8 @@ export function RegisterPage() {
       {/* Full-viewport pure-black base with the animated galaxy stars on top */}
       <div className="fixed inset-0 z-0 overflow-hidden bg-background dark:bg-[#000000]" aria-hidden="true">
         <Galaxy
-          mouseRepulsion
-          mouseInteraction
+          mouseRepulsion={false}
+          mouseInteraction={false}
           density={1.5}
           glowIntensity={0.5}
           saturation={0.8}
