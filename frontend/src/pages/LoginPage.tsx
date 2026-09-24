@@ -18,8 +18,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
+import { useAuthPageTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 const loginSchema = z.object({
@@ -38,6 +38,8 @@ export function LoginPage() {
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  useAuthPageTheme();
 
   const state = location.state as LoginLocationState | null;
   const from = state?.from?.pathname ?? "/app";
@@ -88,11 +90,6 @@ export function LoginPage() {
           saturation={0.8}
           hueShift={140}
         />
-      </div>
-
-
-      <div className="absolute right-4 top-4 z-10">
-        <ThemeToggle />
       </div>
 
       {/* Brand */}

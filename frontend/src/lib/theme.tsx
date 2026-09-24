@@ -90,3 +90,15 @@ export function useTheme(): ThemeContextValue {
   }
   return context;
 }
+
+export function useAuthPageTheme(): void {
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    const wasDark = root.classList.contains("dark");
+    root.classList.add("dark");
+
+    return () => {
+      if (!wasDark) root.classList.remove("dark");
+    };
+  }, []);
+}

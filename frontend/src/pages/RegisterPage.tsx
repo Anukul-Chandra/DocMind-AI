@@ -18,8 +18,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
+import { useAuthPageTheme } from "@/lib/theme";
 
 const registerSchema = z
   .object({
@@ -40,6 +40,8 @@ type RegisterValues = z.infer<typeof registerSchema>;
 export function RegisterPage() {
   const { register: registerAccount, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  useAuthPageTheme();
 
   const {
     register,
@@ -86,11 +88,6 @@ export function RegisterPage() {
           saturation={0.8}
           hueShift={140}
         />
-      </div>
-
-
-      <div className="absolute right-4 top-4 z-10">
-        <ThemeToggle />
       </div>
 
       {/* Brand */}
