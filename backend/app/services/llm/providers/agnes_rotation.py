@@ -35,14 +35,15 @@ from app.services.llm.providers.base import (
     BaseProvider,
     ProviderError,
 )
-from app.services.llm.providers.opencode_rotation import (
-
+from gateway.llm_gateway.cooldown import (
+    CooldownTracker,
+)
+from gateway.llm_gateway.failure_policy import (
     COOLDOWN,
     DEAD,
     FATAL,
     ROTATE,
-    CooldownTracker,
-    classify_opencode_failure,
+    classify_failure as classify_opencode_failure,
 )
 
 logger = logging.getLogger(__name__)

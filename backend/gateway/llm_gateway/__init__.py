@@ -31,6 +31,16 @@ from gateway.llm_gateway.cooldown import (
     CooldownTracker,
     DEFAULT_COOLDOWN_SECONDS,
 )
+from gateway.llm_gateway.failure_policy import (
+    COOLDOWN,
+    DEAD,
+    FATAL,
+    ROTATE,
+    _MODEL_UNAVAILABLE_MARKERS,
+    _MODEL_UNAVAILABLE_PATTERN,
+    classify_failure,
+    classify_opencode_failure,
+)
 
 __all__ = [
     "APIError",
@@ -56,4 +66,12 @@ __all__ = [
     "_model_slug",
     "CooldownTracker",
     "DEFAULT_COOLDOWN_SECONDS",
+    "COOLDOWN",
+    "DEAD",
+    "FATAL",
+    "ROTATE",
+    "_MODEL_UNAVAILABLE_MARKERS",
+    "_MODEL_UNAVAILABLE_PATTERN",
+    "classify_failure",
+    "classify_opencode_failure",
 ]
