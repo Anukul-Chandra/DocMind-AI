@@ -91,7 +91,7 @@ def test_gateway_has_no_docmind_imports():
 def test_gateway_only_imports_stdlib_and_pydantic():
     """The gateway contracts must depend only on the standard library and
     pydantic — no third-party provider SDKs, no DocMind code."""
-    allowed = {"pydantic", "abc", "logging", "time", "typing", "gateway", "re", "collections", "httpx", "threading"}
+    allowed = {"pydantic", "abc", "logging", "time", "typing", "gateway", "re", "collections", "httpx", "threading", "asyncio"}
     violations = []
     for path in _gateway_files():
         tree = _read_source(path)

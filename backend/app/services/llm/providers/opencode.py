@@ -1,5 +1,9 @@
 """Compatibility adapter for the extracted gateway OpenCode provider."""
 
+import httpx as _httpx
+
+httpx = _httpx
+
 from gateway.llm_gateway.providers.opencode import (
     OPENCODE_BASE_URL,
     OpenCodeProvider,
