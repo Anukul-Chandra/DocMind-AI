@@ -43,6 +43,19 @@ export function setAccessToken(token: string | null): void {
   }
 }
 
+// Eagerly hydrate Authorization from localStorage so the first
+// authenticated request after a page reload already carries the token.
+// AuthProvider's useEffect runs after mount, which is too late for
+// initial data fetches like GET /conversations.
+try {
+  const _initial = getStoredTokens();
+  if (_initial?.accessToken) {
+    setAccessToken(_initial.accessToken);
+  }
+} catch {
+  // localStorage unavailable (SSR/tests) — ignore
+}
+
 interface RefreshableRequestConfig extends InternalAxiosRequestConfig {
   _retried?: boolean;
 }
