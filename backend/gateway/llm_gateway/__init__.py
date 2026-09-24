@@ -1,5 +1,15 @@
-"""Provider-independent contracts, failover, model pool, and cooldown tracking for the reusable LLM gateway boundary."""
+"""Provider-independent contracts, failover, model pool, and cooldown tracking for the reusable LLM gateway boundary.
 
+Public API keeps only the reusable surface; internal ``_`` helpers remain
+importable via their submodules but are no longer advertised in ``__all__``.
+"""
+
+from gateway.llm_gateway.catalog import (
+    ModelsDevCatalog,
+    ModelsDevCatalogError,
+    get_shared_catalog,
+    parse_provider_free_models,
+)
 from gateway.llm_gateway.contracts import (
     APIError,
     AuthenticationError,
@@ -13,47 +23,19 @@ from gateway.llm_gateway.contracts import (
     RecoverableError,
     build_user_content,
 )
-from gateway.llm_gateway.provider_manager import (
-    ProviderManager,
-    _is_image_error,
-    _is_image_error_response,
-)
+from gateway.llm_gateway.cooldown import CooldownTracker
+from gateway.llm_gateway.failure_policy import classify_failure
 from gateway.llm_gateway.model_pool import (
-    ModelPoolManager,
     ModelCatalogError,
+    ModelPoolManager,
     NoFreeModelsError,
-    curate_models,
     build_curated_pool,
-    UNSUITABLE_MODEL_TOKENS,
-    _model_slug,
+    curate_models,
 )
-from gateway.llm_gateway.cooldown import (
-    CooldownTracker,
-    DEFAULT_COOLDOWN_SECONDS,
-)
-from gateway.llm_gateway.failure_policy import (
-    COOLDOWN,
-    DEAD,
-    FATAL,
-    ROTATE,
-    _MODEL_UNAVAILABLE_MARKERS,
-    _MODEL_UNAVAILABLE_PATTERN,
-    classify_failure,
-    classify_opencode_failure,
-)
-from gateway.llm_gateway.catalog import (
-    DEFAULT_CACHE_TTL_SECONDS,
-    DEFAULT_CATALOG_TIMEOUT_SECONDS,
-    MODELS_DEV_URL,
-    ModelsDevCatalog,
-    ModelsDevCatalogError,
-    _CatalogEntry,
-    _is_free_cost,
-    get_shared_catalog,
-    parse_provider_free_models,
-)
+from gateway.llm_gateway.provider_manager import ProviderManager
 
 __all__ = [
+    # contracts — ProviderError hierarchy + base + responses
     "APIError",
     "AuthenticationError",
     "BaseProvider",
@@ -65,33 +47,18 @@ __all__ = [
     "RateLimitError",
     "RecoverableError",
     "build_user_content",
-    "ProviderManager",
-    "_is_image_error",
-    "_is_image_error_response",
-    "ModelPoolManager",
+    # catalog errors (part of ProviderError hierarchy)
     "ModelCatalogError",
     "NoFreeModelsError",
+    "ModelsDevCatalogError",
+    # core gateway components
+    "ProviderManager",
+    "ModelPoolManager",
     "curate_models",
     "build_curated_pool",
-    "UNSUITABLE_MODEL_TOKENS",
-    "_model_slug",
     "CooldownTracker",
-    "DEFAULT_COOLDOWN_SECONDS",
-    "COOLDOWN",
-    "DEAD",
-    "FATAL",
-    "ROTATE",
-    "_MODEL_UNAVAILABLE_MARKERS",
-    "_MODEL_UNAVAILABLE_PATTERN",
     "classify_failure",
-    "classify_opencode_failure",
-    "MODELS_DEV_URL",
-    "DEFAULT_CACHE_TTL_SECONDS",
-    "DEFAULT_CATALOG_TIMEOUT_SECONDS",
     "ModelsDevCatalog",
-    "ModelsDevCatalogError",
-    "_CatalogEntry",
-    "_is_free_cost",
     "parse_provider_free_models",
     "get_shared_catalog",
 ]
