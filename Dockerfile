@@ -17,6 +17,8 @@ RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTr
 # provided at runtime (env_file + volume) and are intentionally NOT baked in.
 COPY backend/app /app/app
 COPY backend/start.sh /app/start.sh
+COPY backend/alembic.ini /app/alembic.ini
+COPY backend/alembic /app/alembic
 RUN chmod +x /app/start.sh
 
 # Keep memory predictable on constrained hosts (e.g. Render free tier = 512Mi).
