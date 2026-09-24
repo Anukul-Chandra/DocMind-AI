@@ -1,5 +1,9 @@
 from app.models.llm import LLMResponse
-from app.repositories.interfaces import ConversationRepository, DocumentRepository
+from app.repositories.interfaces import (
+    ConversationRepository,
+    DocumentRepository,
+    UserMemoryRepository,
+)
 from app.services.chat.query_router import QueryCategory, QueryRouter
 from app.services.llm.prompt_builder import PromptBuilder
 from app.services.llm.provider_manager import ProviderManager
@@ -7,6 +11,7 @@ from app.services.rag.crag import CragOrchestrator
 from app.services.rag.query_rewriter import QueryRewriter
 from app.services.rag.retrieval_evaluator import RetrievalEvaluator
 from app.services.retrieval.base import Retriever
+from app.services.chat.user_memory import UserMemoryExtractor
 import logging
 import time
 
@@ -45,6 +50,7 @@ class ChatService:
         retrieval_evaluator: RetrievalEvaluator | None = None,
         query_rewriter: QueryRewriter | None = None,
         conversation_repository: ConversationRepository | None = None,
+        user_memory_repository: UserMemoryRepository | None = None,
     ) -> None:
         """Initialize the chat service with its collaborators.
 
@@ -69,6 +75,7 @@ class ChatService:
             conversation_repository: Persists the question/answer exchange to
                 the owning user's conversation history, or None to skip
                 history recording.
+            user_memory_repository: Repository for user memory.
         """
         self._retriever = retriever
         self._prompt_builder = prompt_builder
@@ -77,6 +84,8 @@ class ChatService:
         self._query_router = query_router or QueryRouter()
         self._retrieval_evaluator = retrieval_evaluator
         self._conversation_repository = conversation_repository
+        self._user_memory_repository = user_memory_repository
+        self._user_memory_extractor = UserMemoryExtractor()
 
         self._crag: CragOrchestrator | None = None
         if retrieval_evaluator is not None and query_rewriter is not None:
@@ -127,6 +136,11 @@ class ChatService:
         _t_history = time.perf_counter() - _t0
 
         _t0 = time.perf_counter()
+        self._save_user_memory(question, owner_id)
+        user_memory = self._load_user_memory(owner_id)
+        _t_memory = time.perf_counter() - _t0
+
+        _t0 = time.perf_counter()
         route = self._query_router.classify_with_embedding(
             question, owner_id=owner_id
         )
@@ -141,7 +155,9 @@ class ChatService:
             _t_provider = 0.0
         elif category is QueryCategory.GENERAL:
             _t0 = time.perf_counter()
-            prompt = self._prompt_builder.build_general_prompt(question, history=history)
+            prompt = self._prompt_builder.build_general_prompt(
+                question, history=history, user_memory=user_memory
+            )
             _t_prompt = time.perf_counter() - _t0
 
             _t0 = time.perf_counter()
@@ -171,7 +187,7 @@ class ChatService:
 
             _t0 = time.perf_counter()
             rag_prompt = self._prompt_builder.build_prompt(
-                question, contexts, history=history
+                question, contexts, history=history, user_memory=user_memory
             )
             _t_prompt = time.perf_counter() - _t0
 
@@ -192,16 +208,43 @@ class ChatService:
 
         _t_total = time.perf_counter() - _t_start
         logger.info(
-            "chat_timing total=%.3fs history=%.4fs classify=%.3fs "
+            "chat_timing total=%.3fs history=%.4fs memory=%.4fs classify=%.3fs "
             "retrieve=%.3fs prompt=%.4fs provider=%.3fs persist=%.4fs "
             "category=%s provider=%s model=%s",
-            _t_total, _t_history, _t_classify, _t_retrieve, _t_prompt,
-            _t_provider, _t_persist, category.value,
+            _t_total, _t_history, _t_memory, _t_classify, _t_retrieve,
+            _t_prompt, _t_provider, _t_persist, category.value,
             getattr(response, "provider", ""),
             getattr(response, "model", ""),
         )
 
         return response
+
+    def _load_user_memory(self, owner_id: str) -> list[dict[str, str]]:
+        """Load only durable memories belonging to the authenticated user."""
+        if not owner_id or self._user_memory_repository is None:
+            return []
+        try:
+            return [
+                {"key": memory.key, "value": memory.value}
+                for memory in self._user_memory_repository.list_memories(owner_id)
+            ]
+        except Exception as exc:
+            logger.warning("Failed to load user memory for owner %s: %s", owner_id, exc)
+            return []
+
+    def _save_user_memory(self, question: str, owner_id: str) -> None:
+        """Persist an explicit durable fact without saving ordinary messages."""
+        if not owner_id or self._user_memory_repository is None:
+            return
+        candidate = self._user_memory_extractor.extract(question)
+        if candidate is None:
+            return
+        try:
+            self._user_memory_repository.upsert_memory(
+                owner_id, candidate.key, candidate.value
+            )
+        except Exception as exc:
+            logger.warning("Failed to save user memory for owner %s: %s", owner_id, exc)
 
     def _load_history(
         self, conversation_id: str | None, owner_id: str

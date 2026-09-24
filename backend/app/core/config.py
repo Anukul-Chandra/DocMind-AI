@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     documents_path: str = str(PROJECT_ROOT / "storage" / "documents.json")
     users_path: str = str(PROJECT_ROOT / "storage" / "users.json")
     conversations_path: str = str(PROJECT_ROOT / "storage" / "conversations.json")
+    user_memories_path: str = str(PROJECT_ROOT / "storage" / "user_memories.json")
     logs_dir: str = str(PROJECT_ROOT / "storage" / "logs")
 
     persistence_backend: str = "json"

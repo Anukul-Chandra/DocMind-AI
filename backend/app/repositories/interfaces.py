@@ -7,7 +7,7 @@ logic (Dependency Inversion Principle).
 
 from abc import ABC, abstractmethod
 
-from app.services.chat_domain import ConversationMessage, ConversationMeta
+from app.services.chat_domain import ConversationMessage, ConversationMeta, UserMemory
 from app.services.document_registry import Document
 from app.services.logging.request_logger import RequestLogEntry
 
@@ -242,6 +242,18 @@ class ConversationRepository(ABC):
             True if the conversation was found, owned by the caller, and
             deleted.
         """
+
+
+class UserMemoryRepository(ABC):
+    """Repository for durable, authenticated-user-scoped memory."""
+
+    @abstractmethod
+    def list_memories(self, owner_id: str) -> list[UserMemory]:
+        """Return only the memories owned by ``owner_id``."""
+
+    @abstractmethod
+    def upsert_memory(self, owner_id: str, key: str, value: str) -> UserMemory:
+        """Create or replace one durable memory key for the owner."""
 
 
 class LogRepository(ABC):

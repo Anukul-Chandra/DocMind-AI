@@ -94,6 +94,18 @@ def get_conversation_repository():
 
 
 @lru_cache
+def get_user_memory_repository():
+    if settings.persistence_backend == "postgres":
+        from app.db.session import get_session_factory
+        from app.repositories.postgres.user_memory_repository import (
+            PostgresUserMemoryRepository,
+        )
+        return PostgresUserMemoryRepository(get_session_factory())
+    from app.repositories.json.user_memory_repository import JsonUserMemoryRepository
+    return JsonUserMemoryRepository(settings.user_memories_path)
+
+
+@lru_cache
 def get_conversations_service():
     from app.services.chat.conversations_service import ConversationsService
     return ConversationsService(get_conversation_repository())
@@ -246,4 +258,5 @@ def get_chat_service():
         retrieval_evaluator=RetrievalEvaluator(),
         query_rewriter=QueryRewriter(provider_manager),
         conversation_repository=get_conversation_repository(),
+        user_memory_repository=get_user_memory_repository(),
     )

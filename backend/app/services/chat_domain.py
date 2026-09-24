@@ -44,3 +44,14 @@ class ConversationMeta(BaseModel):
     created_at: datetime | None = None
     updated_at: datetime | None = None
     message_count: int = 0
+
+
+class UserMemory(BaseModel):
+    """A durable fact or preference owned by one authenticated user."""
+
+    memory_id: str
+    owner_id: str
+    key: str
+    value: str
+    created_at: datetime
+    updated_at: datetime
