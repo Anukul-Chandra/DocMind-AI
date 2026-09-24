@@ -41,6 +41,17 @@ from gateway.llm_gateway.failure_policy import (
     classify_failure,
     classify_opencode_failure,
 )
+from gateway.llm_gateway.catalog import (
+    DEFAULT_CACHE_TTL_SECONDS,
+    DEFAULT_CATALOG_TIMEOUT_SECONDS,
+    MODELS_DEV_URL,
+    ModelsDevCatalog,
+    ModelsDevCatalogError,
+    _CatalogEntry,
+    _is_free_cost,
+    get_shared_catalog,
+    parse_provider_free_models,
+)
 
 __all__ = [
     "APIError",
@@ -74,4 +85,13 @@ __all__ = [
     "_MODEL_UNAVAILABLE_PATTERN",
     "classify_failure",
     "classify_opencode_failure",
+    "MODELS_DEV_URL",
+    "DEFAULT_CACHE_TTL_SECONDS",
+    "DEFAULT_CATALOG_TIMEOUT_SECONDS",
+    "ModelsDevCatalog",
+    "ModelsDevCatalogError",
+    "_CatalogEntry",
+    "_is_free_cost",
+    "parse_provider_free_models",
+    "get_shared_catalog",
 ]

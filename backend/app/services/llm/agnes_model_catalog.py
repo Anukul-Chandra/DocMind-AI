@@ -11,16 +11,16 @@ from __future__ import annotations
 
 import logging
 
-from app.services.llm.model_catalog import (
-    ModelCatalogError,
-    NoFreeModelsError,
-    curate_models,
-)
-from app.services.llm.models_dev_catalog import (
+from gateway.llm_gateway.catalog import (
     MODELS_DEV_URL,
     ModelsDevCatalog,
     ModelsDevCatalogError,
     get_shared_catalog,
+)
+from gateway.llm_gateway.model_pool import (
+    ModelCatalogError,
+    NoFreeModelsError,
+    curate_models,
 )
 
 logger = logging.getLogger(__name__)
