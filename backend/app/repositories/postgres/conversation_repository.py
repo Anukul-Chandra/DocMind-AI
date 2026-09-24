@@ -1,6 +1,7 @@
 """PostgreSQL-backed implementation of the ConversationRepository interface."""
 
 import uuid
+import json
 from datetime import datetime, timezone
 
 from sqlalchemy import delete, func, select
@@ -166,6 +167,7 @@ class PostgresConversationRepository(ConversationRepository):
                 role=row.role,
                 content=row.content,
                 conversation_id=row.conversation_id,
+                images=json.loads(row.images) if row.images else [],
             )
             for row in rows
         ]
@@ -176,6 +178,7 @@ class PostgresConversationRepository(ConversationRepository):
         owner_id: str,
         user_message: str,
         assistant_response: str,
+        images: list[str] | None = None,
     ) -> None:
         """Record a user/assistant exchange, deriving the title on first use.
 
@@ -201,6 +204,7 @@ class PostgresConversationRepository(ConversationRepository):
                     user_id=owner_id,
                     role="user",
                     content=user_message,
+                    images=json.dumps(images or []),
                     created_at=now,
                 )
             )

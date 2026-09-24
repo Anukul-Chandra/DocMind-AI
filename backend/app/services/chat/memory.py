@@ -113,6 +113,7 @@ class ConversationMemory:
                 role=message["role"],
                 content=message["content"],
                 conversation_id=conversation_id,
+                images=message.get("images", []),
             )
             for message in record.get("messages", [])
         ]
@@ -123,6 +124,7 @@ class ConversationMemory:
         owner_id: str,
         user_message: str,
         assistant_response: str,
+        images: list[str] | None = None,
     ) -> None:
         """Record a user/assistant exchange, trimming to the latest pairs.
 
@@ -143,7 +145,14 @@ class ConversationMemory:
         if record.get("title") is None:
             record["title"] = self._derive_title(user_message)
         messages: list[dict] = record.setdefault("messages", [])
-        messages.append({"role": "user", "content": user_message, "created_at": now})
+        messages.append(
+            {
+                "role": "user",
+                "content": user_message,
+                "images": images or [],
+                "created_at": now,
+            }
+        )
         messages.append(
             {"role": "assistant", "content": assistant_response, "created_at": now}
         )

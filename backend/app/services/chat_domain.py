@@ -23,6 +23,7 @@ class ConversationMessage(BaseModel):
     role: str
     content: str
     conversation_id: str = ""
+    images: list[str] = []
 
 
 class ConversationMeta(BaseModel):

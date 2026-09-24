@@ -68,6 +68,30 @@ def test_same_conversation_history_reaches_general_llm_prompt():
     assert prompt.index("User: My name is Anukul.") < prompt.index("What is my name?")
 
 
+def test_image_attachment_is_persisted_with_user_message(tmp_path: Path):
+    repository = ConversationMemory(tmp_path / "conversations.json")
+    provider = CaptureProviderManager()
+    service = make_service(repository, provider, GeneralRouter())
+    conversation_id = repository.create_conversation("user-a")
+
+    asyncio.run(
+        service.chat(
+            "Describe this image.",
+            owner_id="user-a",
+            conversation_id=conversation_id,
+            images=[{"mime": "image/png", "data": "IMAGE_DATA"}],
+        )
+    )
+
+    messages = repository.get_messages(conversation_id, "user-a")
+    assert messages[0].images == ["data:image/png;base64,IMAGE_DATA"]
+
+    reloaded = ConversationMemory(tmp_path / "conversations.json")
+    assert reloaded.get_messages(conversation_id, "user-a")[0].images == [
+        "data:image/png;base64,IMAGE_DATA"
+    ]
+
+
 def test_history_is_isolated_to_the_current_conversation():
     repository = ConversationMemory()
     provider = CaptureProviderManager()

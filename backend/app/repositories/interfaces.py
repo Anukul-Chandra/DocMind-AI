@@ -200,6 +200,7 @@ class ConversationRepository(ABC):
         owner_id: str,
         user_message: str,
         assistant_response: str,
+        images: list[str] | None = None,
     ) -> None:
         """Record a user/assistant exchange in a conversation.
 

@@ -23,6 +23,17 @@ logger = logging.getLogger(__name__)
 HISTORY_MESSAGE_LIMIT = 20
 
 
+def _image_data_urls(images: list[dict] | None) -> list[str]:
+    """Convert provider image payloads into browser-renderable data URLs."""
+    if not images:
+        return []
+    return [
+        f"data:{image.get('mime', 'image/png')};base64,{image['data']}"
+        for image in images
+        if image.get("data")
+    ]
+
+
 class ChatService:
     """Orchestrate query routing, retrieval, prompt construction, and generation.
 
@@ -202,7 +213,7 @@ class ChatService:
 
         _t0 = time.perf_counter()
         self._record_exchange(
-            conversation_id, owner_id, question, response
+            conversation_id, owner_id, question, response, images
         )
         _t_persist = time.perf_counter() - _t0
 
@@ -275,6 +286,7 @@ class ChatService:
         owner_id: str,
         question: str,
         response: object,
+        images: list[dict] | None = None,
     ) -> None:
         """Persist a chat exchange to the conversation history when available.
 
@@ -307,6 +319,7 @@ class ChatService:
                 owner_id,
                 question,
                 str(answer),
+                _image_data_urls(images),
             )
         except Exception as exc:
             logger.warning(

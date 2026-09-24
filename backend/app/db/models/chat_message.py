@@ -21,6 +21,7 @@ class ChatMessage(Base):
     user_id: Mapped[str] = mapped_column(String(64), index=True)
     role: Mapped[str] = mapped_column(String(32))
     content: Mapped[str] = mapped_column(Text)
+    images: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utcnow
     )

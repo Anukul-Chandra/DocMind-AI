@@ -79,6 +79,7 @@ class JsonConversationRepository(ConversationRepository):
         owner_id: str,
         user_message: str,
         assistant_response: str,
+        images: list[str] | None = None,
     ) -> None:
         """Record a user/assistant exchange in a conversation.
 
@@ -93,6 +94,7 @@ class JsonConversationRepository(ConversationRepository):
             owner_id,
             user_message,
             assistant_response,
+            images,
         )
 
     def rename_conversation(
