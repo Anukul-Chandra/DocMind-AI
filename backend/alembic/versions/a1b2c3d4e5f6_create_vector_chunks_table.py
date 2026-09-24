@@ -34,6 +34,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Create the vector_chunks table."""
+    op.execute("CREATE EXTENSION IF NOT EXISTS vector")
     op.create_table(
         "vector_chunks",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
