@@ -16,6 +16,7 @@ RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTr
 # Copy only the application package. The .env file and runtime storage/ are
 # provided at runtime (env_file + volume) and are intentionally NOT baked in.
 COPY backend/app /app/app
+COPY backend/gateway /app/gateway
 COPY backend/start.sh /app/start.sh
 COPY backend/alembic.ini /app/alembic.ini
 COPY backend/alembic /app/alembic
