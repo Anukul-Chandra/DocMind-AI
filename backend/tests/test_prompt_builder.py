@@ -80,7 +80,7 @@ class TestPromptStructure:
         prompt = builder.build_prompt("what is this?", contexts)
         assert "doc content" in prompt.text
         assert "Question:" in prompt.text
-        assert "Answer:" in prompt.text
+        assert "Assistant:" in prompt.text
 
     def test_rag_prompt_includes_history(self, builder):
         history = [{"role": "user", "content": "previous question"}]
@@ -91,7 +91,7 @@ class TestPromptStructure:
         prompt = builder.build_general_prompt("what is AI?")
         assert "what is AI?" in prompt.text
         assert "Question:" in prompt.text
-        assert "Answer:" in prompt.text
+        assert "Assistant:" in prompt.text
 
     def test_rag_prompt_sources_populated(self, builder):
         contexts = [

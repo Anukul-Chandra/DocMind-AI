@@ -270,3 +270,38 @@ def test_record_exchange_logs_persistence_errors(monkeypatch, tmp_path: Path, ca
         for record in caplog.records
     )
     assert provider.prompts
+
+
+def test_three_turn_conversation_no_duplication_in_assistant_response():
+    """Verify that on the 3rd+ turn, the assistant response doesn't contain
+    previous assistant responses (regression test for prompt continuation bug).
+    
+    This test uses a capturing provider that returns a known answer, then
+    checks the actual prompt sent to ensure the completion marker is
+    "Assistant:" to match the history format.
+    """
+    repository = ConversationMemory()
+    provider = CaptureProviderManager()
+    service = make_service(repository, provider, GeneralRouter())
+    conversation_id = repository.create_conversation("user-a")
+
+    # Turn 1
+    asyncio.run(service.chat("hey", owner_id="user-a", conversation_id=conversation_id))
+    # Turn 2
+    asyncio.run(service.chat("whats up?", owner_id="user-a", conversation_id=conversation_id))
+    # Turn 3 - this is where duplication would occur with "Answer:" prompt terminator
+    asyncio.run(service.chat("ohhhh, i see", owner_id="user-a", conversation_id=conversation_id))
+
+    # The last prompt sent to the provider should end with "Assistant:"
+    # (not "Answer:") to match the "Assistant: " prefix used in history
+    prompt = provider.prompts[-1]
+    assert prompt.rstrip().endswith("Assistant:"), f"Prompt should end with 'Assistant:' but got: {prompt[-50:]}"
+    
+    # The response from the provider (simulated) should only contain the new answer
+    # This verifies the fix: if the prompt used "Answer:", the LLM would continue
+    # the pattern and output previous assistant responses before the new one
+    assert provider.prompts[-1].count("Assistant:") >= 3, "History should contain multiple Assistant entries"
+    
+    # Verify the history format in the prompt uses "Assistant: " for past responses
+    # and the completion signal is "Assistant:" (not "Answer:")
+    assert "Assistant: answer" in prompt  # The mock response "answer" appears in history

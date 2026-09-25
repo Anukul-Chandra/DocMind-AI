@@ -70,7 +70,7 @@ class PromptBuilder:
             f"{history_block}"
             "Question:\n\n"
             f"{question}\n\n"
-            "Answer:"
+            "Assistant:"
         )
         sources = [
             {"filename": context["filename"], "chunk_id": context["chunk_id"]}
@@ -119,7 +119,7 @@ class PromptBuilder:
             f"{history_block}"
             "Question:\n\n"
             f"{question}\n\n"
-            "Answer:"
+            "Assistant:"
         )
         return RAGPrompt(text=text, sources=[])
 
