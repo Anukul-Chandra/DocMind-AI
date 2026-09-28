@@ -216,3 +216,14 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+# Startup diagnostic: log API key configuration status (safe metadata only)
+import logging
+_logger = logging.getLogger(__name__)
+for key_name in ["openrouter_api_key", "gemini_api_key", "groq_api_key", "agnes_api_key"]:
+    key_value = getattr(settings, key_name, "")
+    if key_value:
+        _logger.info("LLM provider key configured: %s (length=%d)", key_name, len(key_value))
+    else:
+        _logger.warning("LLM provider key NOT configured: %s", key_name)
+_logger.info("Provider priority: %s", settings.provider_priority)

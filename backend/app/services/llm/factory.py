@@ -6,6 +6,10 @@ logger = logging.getLogger(__name__)
 
 
 def build_openrouter_provider():
+    if not settings.openrouter_api_key:
+        logger.warning("OpenRouter API key not configured; skipping OpenRouter provider")
+        return None
+
     from app.config.openrouter_models import OPENROUTER_MODELS
     from app.services.llm.model_catalog import ModelCatalogError, ModelCatalogService
     from app.services.llm.model_pool import ModelPoolManager, build_curated_pool
@@ -41,6 +45,10 @@ def build_opencode_provider():
 
 
 def build_gemini_provider():
+    if not settings.gemini_api_key:
+        logger.warning("Gemini API key not configured; skipping Gemini provider")
+        return None
+
     from app.services.llm.providers.gemini import GeminiProvider
 
     return GeminiProvider(
@@ -50,6 +58,10 @@ def build_gemini_provider():
 
 
 def build_groq_provider():
+    if not settings.groq_api_key:
+        logger.warning("Groq API key not configured; skipping Groq provider")
+        return None
+
     from app.services.llm.providers.groq import GroqProvider
 
     return GroqProvider(
@@ -94,16 +106,24 @@ def build_provider_manager():
         name = name.strip()
         if name == "opencode":
             provider = build_opencode_provider()
-            if provider is not None:
-                providers.append(provider)
         elif name == "openrouter":
-            providers.append(build_openrouter_provider())
+            provider = build_openrouter_provider()
         elif name == "gemini":
-            providers.append(build_gemini_provider())
+            provider = build_gemini_provider()
         elif name == "groq":
-            providers.append(build_groq_provider())
+            provider = build_groq_provider()
         elif name == "agnes":
             provider = build_agnes_provider()
-            if provider is not None:
-                providers.append(provider)
+        else:
+            logger.warning("Unknown provider in PROVIDER_PRIORITY: %s", name)
+            continue
+        if provider is not None:
+            providers.append(provider)
+        else:
+            logger.info("Provider %s not available (missing API key or model discovery failed)", name)
+    if not providers:
+        logger.error(
+            "No LLM providers available! Check that at least one provider API key is configured "
+            "and PROVIDER_PRIORITY includes available providers."
+        )
     return ProviderManager(providers)

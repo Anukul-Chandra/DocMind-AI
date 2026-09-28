@@ -35,8 +35,6 @@ class ProviderManager:
     """Coordinate multiple LLM providers with automatic failover."""
 
     def __init__(self, providers: list[BaseProvider]) -> None:
-        if not providers:
-            raise ValueError("providers must not be empty")
         self._providers: list[BaseProvider] = list(providers)
         self._errors: list[tuple[str, Exception]] = []
 
@@ -54,6 +52,11 @@ class ProviderManager:
         images: list[dict] | None = None,
     ) -> LLMResponse:
         """Generate a response, failing over to the next provider on error."""
+        if not self._providers:
+            raise LLMUnavailableError(
+                "No LLM providers configured. Check that at least one provider API key is set "
+                "and the provider is included in PROVIDER_PRIORITY."
+            )
         self._errors = []
         _t_total = time.perf_counter()
         for provider in self._providers:
@@ -129,6 +132,11 @@ class ProviderManager:
         images: list[dict] | None = None,
     ) -> AsyncIterator[LLMStreamChunk]:
         """Stream a response, failing over before the first chunk."""
+        if not self._providers:
+            raise LLMUnavailableError(
+                "No LLM providers configured. Check that at least one provider API key is set "
+                "and the provider is included in PROVIDER_PRIORITY."
+            )
         self._errors = []
         for provider in self._providers:
             provider_name = type(provider).__name__
