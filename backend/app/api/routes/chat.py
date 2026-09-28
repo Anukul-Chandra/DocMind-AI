@@ -1,5 +1,7 @@
 import base64
 import logging
+import os
+import subprocess
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, Form, status
 
@@ -9,6 +11,7 @@ from app.api.dependencies import (
     get_current_user,
     get_query_router,
 )
+from app.core.config import settings
 from app.services.auth import User
 from app.services.chat.chat_service import ChatService
 from app.services.chat.conversations_service import (
@@ -17,6 +20,7 @@ from app.services.chat.conversations_service import (
 )
 from app.services.chat.query_router import QueryCategory, QueryRouter
 from app.services.llm.provider_manager import LLMUnavailableError
+from app.services.llm.factory import build_provider_manager
 
 logger = logging.getLogger(__name__)
 
@@ -151,3 +155,73 @@ async def classify(
     """
     category = query_router.classify(question, owner_id=current_user.user_id)
     return {"category": category.value}
+
+
+@router.get("/diagnostics")
+async def diagnostics() -> dict:
+    """Runtime diagnostic endpoint - reports configuration state without exposing secrets."""
+    # Get git commit SHA
+    commit_sha = "unknown"
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            capture_output=True,
+            text=True,
+            timeout=2,
+            cwd="/app",
+        )
+        if result.returncode == 0:
+            commit_sha = result.stdout.strip()
+    except Exception:
+        pass
+
+    # Check raw environment variables
+    env_vars = {}
+    for key in ["OPENROUTER_API_KEY", "GEMINI_API_KEY", "GROQ_API_KEY", "AGNES_API_KEY", "OPENCODE_API_KEY"]:
+        val = os.environ.get(key)
+        env_vars[key] = {
+            "configured": bool(val),
+            "length": len(val) if val else 0,
+        }
+
+    # Check Pydantic settings
+    settings_vars = {}
+    for key in ["openrouter_api_key", "gemini_api_key", "groq_api_key", "agnes_api_key"]:
+        val = getattr(settings, key, "")
+        settings_vars[key] = {
+            "configured": bool(val),
+            "length": len(val) if val else 0,
+        }
+
+    # Build provider manager to check initialization
+    provider_info = {}
+    try:
+        pm = build_provider_manager()
+        for p in pm._providers:
+            provider_name = type(p).__name__
+            provider_info[provider_name] = {
+                "created": True,
+                "model": getattr(p, "model", "unknown"),
+            }
+            # Check API key on provider (if it has one)
+            if hasattr(p, "_api_key"):
+                provider_info[provider_name]["api_key_configured"] = bool(p._api_key)
+                provider_info[provider_name]["api_key_length"] = len(p._api_key) if p._api_key else 0
+            elif hasattr(p, "_model_pool") and hasattr(p._model_pool, "_api_key"):
+                # OpenRouter rotating provider
+                provider_info[provider_name]["api_key_configured"] = bool(p._api_key)
+                provider_info[provider_name]["api_key_length"] = len(p._api_key) if p._api_key else 0
+            else:
+                provider_info[provider_name]["api_key_configured"] = "n/a (no auth)"
+                provider_info[provider_name]["api_key_length"] = 0
+        provider_info["total_providers"] = len(pm._providers)
+    except Exception as e:
+        provider_info["error"] = str(e)
+
+    return {
+        "commit_sha": commit_sha,
+        "provider_priority": settings.provider_priority,
+        "environment_variables": env_vars,
+        "pydantic_settings": settings_vars,
+        "provider_initialization": provider_info,
+    }
