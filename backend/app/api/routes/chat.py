@@ -225,3 +225,126 @@ async def diagnostics() -> dict:
         "pydantic_settings": settings_vars,
         "provider_initialization": provider_info,
     }
+
+
+@router.get("/diagnostics/providers")
+async def diagnostics_providers() -> dict:
+    """Test each provider independently with one simple request."""
+    results = {}
+    
+    # Test OpenRouter
+    try:
+        from app.services.llm.model_pool import ModelPoolManager
+        from app.services.llm.providers.openrouter import OpenRouterProvider
+        pool = ModelPoolManager(["poolside/laguna-s-2.1:free"])
+        provider = OpenRouterProvider(model_pool=pool, api_key=settings.openrouter_api_key, timeout=30)
+        result = await provider.generate("Say hello", temperature=0, max_tokens=10)
+        results["openrouter"] = {
+            "configured": True,
+            "key_length": len(settings.openrouter_api_key) if settings.openrouter_api_key else 0,
+            "model": "poolside/laguna-s-2.1:free",
+            "endpoint": "https://openrouter.ai/api/v1/chat/completions",
+            "auth": "Bearer token",
+            "success": True,
+            "response_preview": result[:50] if result else "empty",
+        }
+    except Exception as e:
+        results["openrouter"] = {
+            "configured": bool(settings.openrouter_api_key),
+            "key_length": len(settings.openrouter_api_key) if settings.openrouter_api_key else 0,
+            "model": "poolside/laguna-s-2.1:free",
+            "endpoint": "https://openrouter.ai/api/v1/chat/completions",
+            "auth": "Bearer token",
+            "success": False,
+            "error_type": type(e).__name__,
+            "error": str(e)[:200],
+        }
+    
+    # Test Gemini
+    try:
+        from app.services.llm.providers.gemini import GeminiProvider
+        provider = GeminiProvider(api_key=settings.gemini_api_key, model=settings.gemini_model)
+        result = await provider.generate("Say hello", temperature=0, max_tokens=10)
+        results["gemini"] = {
+            "configured": True,
+            "key_length": len(settings.gemini_api_key) if settings.gemini_api_key else 0,
+            "model": settings.gemini_model,
+            "endpoint": "Google Generative AI API",
+            "auth": "API key in client init",
+            "success": True,
+            "response_preview": result[:50] if result else "empty",
+        }
+    except Exception as e:
+        results["gemini"] = {
+            "configured": bool(settings.gemini_api_key),
+            "key_length": len(settings.gemini_api_key) if settings.gemini_api_key else 0,
+            "model": settings.gemini_model,
+            "endpoint": "Google Generative AI API",
+            "auth": "API key in client init",
+            "success": False,
+            "error_type": type(e).__name__,
+            "error": str(e)[:200],
+        }
+    
+    # Test Groq
+    try:
+        from app.services.llm.providers.groq import GroqProvider
+        provider = GroqProvider(api_key=settings.groq_api_key, model=settings.groq_model)
+        result = await provider.generate("Say hello", temperature=0, max_tokens=10)
+        results["groq"] = {
+            "configured": True,
+            "key_length": len(settings.groq_api_key) if settings.groq_api_key else 0,
+            "model": settings.groq_model,
+            "endpoint": "https://api.groq.com/openai/v1/chat/completions",
+            "auth": "Bearer token via SDK",
+            "success": True,
+            "response_preview": result[:50] if result else "empty",
+        }
+    except Exception as e:
+        results["groq"] = {
+            "configured": bool(settings.groq_api_key),
+            "key_length": len(settings.groq_api_key) if settings.groq_api_key else 0,
+            "model": settings.groq_model,
+            "endpoint": "https://api.groq.com/openai/v1/chat/completions",
+            "auth": "Bearer token via SDK",
+            "success": False,
+            "error_type": type(e).__name__,
+            "error": str(e)[:200],
+        }
+    
+    # Test Agnes (single model, longer timeout)
+    try:
+        from gateway.llm_gateway.providers.agnes import AgnesProvider
+        provider = AgnesProvider(
+            api_key=settings.agnes_api_key,
+            model=settings.agnes_model,
+            base_url=settings.agnes_base_url,
+            timeout=60,
+            attempt_timeout=30.0,
+        )
+        result = await provider.generate("Say hello", temperature=0, max_tokens=10)
+        results["agnes"] = {
+            "configured": True,
+            "key_length": len(settings.agnes_api_key) if settings.agnes_api_key else 0,
+            "model": settings.agnes_model,
+            "endpoint": settings.agnes_base_url + "/chat/completions",
+            "auth": "Bearer token",
+            "success": True,
+            "response_preview": result[:50] if result else "empty",
+        }
+    except Exception as e:
+        results["agnes"] = {
+            "configured": bool(settings.agnes_api_key),
+            "key_length": len(settings.agnes_api_key) if settings.agnes_api_key else 0,
+            "model": settings.agnes_model,
+            "endpoint": settings.agnes_base_url + "/chat/completions",
+            "auth": "Bearer token",
+            "success": False,
+            "error_type": type(e).__name__,
+            "error": str(e)[:200],
+        }
+    
+    return {
+        "commit_sha": "unknown",
+        "results": results,
+    }
