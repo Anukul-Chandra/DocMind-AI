@@ -45,3 +45,25 @@ export async function chatUser(
   const response = await apiClient.post<ChatResponse>("/chat/", formData);
   return response.data;
 }
+
+/**
+ * Regenerate the assistant response for one user message as a true branch.
+ * The backend truncates the stored conversation to the messages preceding
+ * `messageIndex`, generates against that truncated context, and replaces the
+ * superseded branch. Pass `question` to edit, omit it for pure regenerate
+ * (stored text and image attachments are reused server-side).
+ */
+export async function chatRegenerate(
+  conversationId: string,
+  messageIndex: number,
+  question?: string | null,
+): Promise<ChatResponse> {
+  const formData = new FormData();
+  formData.append("conversation_id", conversationId);
+  formData.append("message_index", String(messageIndex));
+  if (question !== undefined && question !== null) {
+    formData.append("question", question);
+  }
+  const response = await apiClient.post<ChatResponse>("/chat/regenerate", formData);
+  return response.data;
+}

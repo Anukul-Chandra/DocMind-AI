@@ -4,6 +4,7 @@ from app.repositories.interfaces import (
     DocumentRepository,
     UserMemoryRepository,
 )
+from app.services.chat.conversations_service import ConversationNotFoundError
 from app.services.chat.query_router import QueryCategory, QueryRouter
 from app.services.llm.prompt_builder import PromptBuilder
 from app.services.llm.provider_manager import ProviderManager
@@ -32,6 +33,33 @@ def _image_data_urls(images: list[dict] | None) -> list[str]:
         for image in images
         if image.get("data")
     ]
+
+
+def _images_from_data_urls(stored: list[str] | None) -> tuple[list[dict], list[str]]:
+    """Split persisted image data URLs back into provider payloads.
+
+    Args:
+        stored: The ``images`` list persisted on a user message
+            (``data:<mime>;base64,<data>`` URLs).
+
+    Returns:
+        A ``(provider_images, storage_images)`` pair: provider payloads with
+        ``mime``/``data`` keys for the LLM call, and the original storage
+        URLs (only the well-formed ones) to re-record with the new exchange.
+        Malformed entries are dropped from both lists.
+    """
+    provider_images: list[dict] = []
+    storage_images: list[str] = []
+    for url in stored or []:
+        if not isinstance(url, str) or not url.startswith("data:") or "," not in url:
+            continue
+        header, data = url.split(",", 1)
+        if ";base64" not in header or not data:
+            continue
+        mime = header[len("data:"):].split(";")[0].strip() or "image/png"
+        provider_images.append({"mime": mime, "data": data})
+        storage_images.append(url)
+    return provider_images, storage_images
 
 
 class ChatService:
@@ -152,64 +180,10 @@ class ChatService:
         _t_memory = time.perf_counter() - _t0
 
         _t0 = time.perf_counter()
-        route = self._query_router.classify_with_embedding(
-            question, owner_id=owner_id
+        response = await self._generate_answer(
+            question, history, user_memory, images, owner_id=owner_id
         )
-        _t_classify = time.perf_counter() - _t0
-
-        category = route.category
-        query_embedding = route.query_embedding
-
-        if category is QueryCategory.METADATA:
-            response = self._answer_metadata(owner_id)
-            _t_prompt = 0.0
-            _t_provider = 0.0
-        elif category is QueryCategory.GENERAL:
-            _t0 = time.perf_counter()
-            prompt = self._prompt_builder.build_general_prompt(
-                question, history=history, user_memory=user_memory
-            )
-            _t_prompt = time.perf_counter() - _t0
-
-            _t0 = time.perf_counter()
-            response = await self._provider_manager.generate(
-                prompt.text, images=images,
-            )
-            _t_provider = time.perf_counter() - _t0
-        else:
-            if self._crag is not None:
-                _t0 = time.perf_counter()
-                contexts = await self._crag.retrieve(
-                    question,
-                    owner_id=owner_id,
-                    query_embedding=query_embedding,
-                )
-            else:
-                _t0 = time.perf_counter()
-                contexts = self._retriever.retrieve(
-                    question,
-                    owner_id=owner_id,
-                    query_embedding=query_embedding,
-                )
-            _t_retrieve = time.perf_counter() - _t0
-
-            if self._crag is None and self._retrieval_evaluator is not None:
-                self._retrieval_evaluator.evaluate(question, contexts)
-
-            _t0 = time.perf_counter()
-            rag_prompt = self._prompt_builder.build_prompt(
-                question, contexts, history=history, user_memory=user_memory
-            )
-            _t_prompt = time.perf_counter() - _t0
-
-            _t0 = time.perf_counter()
-            response = await self._provider_manager.generate(
-                rag_prompt.text, images=images,
-            )
-            _t_provider = time.perf_counter() - _t0
-
-            response.category = category.value
-            response.sources = contexts
+        _t_generate = time.perf_counter() - _t0
 
         _t0 = time.perf_counter()
         self._record_exchange(
@@ -219,15 +193,193 @@ class ChatService:
 
         _t_total = time.perf_counter() - _t_start
         logger.info(
-            "chat_timing total=%.3fs history=%.4fs memory=%.4fs classify=%.3fs "
-            "retrieve=%.3fs prompt=%.4fs provider=%.3fs persist=%.4fs "
+            "chat_timing total=%.3fs history=%.4fs memory=%.4fs "
+            "generate=%.3fs persist=%.4fs "
             "category=%s provider=%s model=%s",
-            _t_total, _t_history, _t_memory, _t_classify, _t_retrieve,
-            _t_prompt, _t_provider, _t_persist, category.value,
+            _t_total, _t_history, _t_memory,
+            _t_generate, _t_persist, getattr(response, "category", ""),
             getattr(response, "provider", ""),
             getattr(response, "model", ""),
         )
 
+        return response
+
+    async def regenerate_branch(
+        self,
+        conversation_id: str,
+        owner_id: str,
+        message_index: int,
+        new_question: str | None = None,
+    ) -> LLMResponse:
+        """Regenerate the assistant response for one user message as a branch.
+
+        The superseded branch is replaced atomically from the caller's point
+        of view: the answer is generated against the truncated history
+        (everything before ``message_index``) and only persisted on success,
+        so a failed regeneration never corrupts the stored conversation and
+        the old branch can never leak into the new prompt.
+
+        For ``User A / Assistant A / User B / Assistant B`` with
+        ``message_index`` pointing at ``User B``, the prompt sees only
+        ``User A / Assistant A`` plus the (possibly edited) ``User B`` text,
+        and the stored history becomes
+        ``User A / Assistant A / User B(-edited) / Assistant B-new``.
+
+        Args:
+            conversation_id: The conversation to rewrite.
+            owner_id: The user id that owns the conversation.
+            message_index: Position of the target user message in the stored
+                message list (0-based, counting both roles).
+            new_question: Edited replacement text, or None to reuse the
+                stored message (pure regenerate).
+
+        Returns:
+            The new LLM response.
+
+        Raises:
+            ConversationNotFoundError: If the conversation is unknown or
+                belongs to another owner.
+            ValueError: If the index is out of range, does not point at a
+                user message, or the resulting question is empty.
+            LLMUnavailableError: If every provider fails (nothing persisted).
+        """
+        if self._conversation_repository is None:
+            raise ValueError("Conversation history is unavailable.")
+        if not conversation_id or not owner_id:
+            raise ValueError("conversation_id and owner_id are required.")
+        if self._conversation_repository.get_conversation(
+            conversation_id, owner_id
+        ) is None:
+            raise ConversationNotFoundError(conversation_id)
+
+        stored = self._conversation_repository.get_messages(
+            conversation_id, owner_id
+        )
+        if message_index < 0 or message_index >= len(stored):
+            raise ValueError("message_index is out of range.")
+        target = stored[message_index]
+        if target.role != "user":
+            raise ValueError("message_index must point at a user message.")
+
+        if new_question is not None:
+            question = new_question.strip()
+            if not question:
+                raise ValueError("Edited message must not be empty.")
+        else:
+            question = target.content.strip()
+            if not question:
+                raise ValueError("Cannot regenerate an empty message.")
+
+        # Attachments reuse: the backend persists image data URLs on the user
+        # message, so the original multimodal request can be reconstructed
+        # without re-uploading files.
+        provider_images, storage_images = _images_from_data_urls(
+            target.images
+        )
+
+        # Truncated context: only the exchanges preceding the target message.
+        keep = message_index
+        history = [
+            {"role": message.role, "content": message.content}
+            for message in stored[:keep][-HISTORY_MESSAGE_LIMIT:]
+        ]
+
+        _t_start = time.perf_counter()
+        self._save_user_memory(question, owner_id)
+        user_memory = self._load_user_memory(owner_id)
+        response = await self._generate_answer(
+            question, history, user_memory,
+            provider_images if provider_images else None,
+            owner_id=owner_id,
+        )
+
+        # Replace the branch only after a successful generation.
+        if not self._conversation_repository.truncate_messages(
+            conversation_id, owner_id, keep
+        ):
+            raise ConversationNotFoundError(conversation_id)
+        answer = getattr(response, "text", None)
+        if answer is None:
+            answer = response if isinstance(response, str) else ""
+        self._conversation_repository.add_exchange(
+            conversation_id, owner_id, question, str(answer), storage_images
+        )
+        logger.info(
+            "chat_regenerate total=%.3fs category=%s provider=%s model=%s "
+            "conversation=%s index=%d edited=%s",
+            time.perf_counter() - _t_start,
+            getattr(response, "category", ""),
+            getattr(response, "provider", ""),
+            getattr(response, "model", ""),
+            conversation_id, message_index, new_question is not None,
+        )
+        return response
+
+    async def _generate_answer(
+        self,
+        question: str,
+        history: list[dict[str, str]],
+        user_memory: list[dict[str, str]],
+        images: list[dict] | None,
+        owner_id: str = "",
+    ) -> LLMResponse:
+        """Route one question and generate its answer against ``history``.
+
+        Shared by :meth:`chat` (full stored history) and
+        :meth:`regenerate_branch` (truncated branch history) so both paths
+        use identical routing, retrieval, and prompt construction.
+
+        Args:
+            question: The user's question text.
+            history: Prior ``{"role", "content"}`` turns visible to the LLM.
+            user_memory: The owner's durable memories.
+            images: Optional base64 image payloads for multimodal providers.
+            owner_id: The user id scoping retrieval and document listing.
+
+        Returns:
+            The LLM response with routing provenance filled in.
+        """
+        route = self._query_router.classify_with_embedding(
+            question, owner_id=owner_id
+        )
+
+        category = route.category
+        query_embedding = route.query_embedding
+
+        if category is QueryCategory.METADATA:
+            return self._answer_metadata(owner_id)
+        if category is QueryCategory.GENERAL:
+            prompt = self._prompt_builder.build_general_prompt(
+                question, history=history, user_memory=user_memory
+            )
+            return await self._provider_manager.generate(
+                prompt.text, images=images,
+            )
+
+        if self._crag is not None:
+            contexts = await self._crag.retrieve(
+                question,
+                owner_id=owner_id,
+                query_embedding=query_embedding,
+            )
+        else:
+            contexts = self._retriever.retrieve(
+                question,
+                owner_id=owner_id,
+                query_embedding=query_embedding,
+            )
+
+        if self._crag is None and self._retrieval_evaluator is not None:
+            self._retrieval_evaluator.evaluate(question, contexts)
+
+        rag_prompt = self._prompt_builder.build_prompt(
+            question, contexts, history=history, user_memory=user_memory
+        )
+        response = await self._provider_manager.generate(
+            rag_prompt.text, images=images,
+        )
+        response.category = category.value
+        response.sources = contexts
         return response
 
     def _load_user_memory(self, owner_id: str) -> list[dict[str, str]]:

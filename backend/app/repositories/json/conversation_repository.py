@@ -97,6 +97,22 @@ class JsonConversationRepository(ConversationRepository):
             images,
         )
 
+    def truncate_messages(
+        self, conversation_id: str, owner_id: str, keep_count: int
+    ) -> bool:
+        """Keep only the first ``keep_count`` messages of a conversation.
+
+        Args:
+            conversation_id: The conversation identifier.
+            owner_id: The user id that owns the conversation.
+            keep_count: Number of leading messages to keep.
+
+        Returns:
+            True if the conversation was found, owned by the caller, and
+            truncated.
+        """
+        return self._memory.truncate_messages(conversation_id, owner_id, keep_count)
+
     def rename_conversation(
         self, conversation_id: str, owner_id: str, title: str
     ) -> bool:

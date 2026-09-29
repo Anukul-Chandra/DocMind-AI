@@ -223,6 +223,55 @@ class PostgresConversationRepository(ConversationRepository):
                 session.rollback()
                 raise
 
+    def truncate_messages(
+        self, conversation_id: str, owner_id: str, keep_count: int
+    ) -> bool:
+        """Keep only the first ``keep_count`` messages of a conversation.
+
+        Ownership is enforced: conversations owned by another user are left
+        untouched.
+
+        Args:
+            conversation_id: The conversation identifier.
+            owner_id: The user id that owns the conversation.
+            keep_count: Number of leading (oldest) messages to keep.
+
+        Returns:
+            True if the conversation was found, owned by the caller, and
+            truncated (or already within the limit); False otherwise.
+        """
+        if keep_count < 0:
+            return False
+        with self._session_factory() as session:
+            owned = session.execute(
+                select(db.Conversation).where(
+                    db.Conversation.id == conversation_id,
+                    db.Conversation.user_id == owner_id,
+                )
+            ).scalar_one_or_none()
+            if owned is None:
+                return False
+            rows = (
+                session.execute(
+                    select(db.ChatMessage.id)
+                    .where(db.ChatMessage.conversation_id == conversation_id)
+                    .order_by(db.ChatMessage.id)
+                )
+                .scalars()
+                .all()
+            )
+            surplus = [row_id for row_id in rows[keep_count:]]
+            if surplus:
+                session.execute(
+                    delete(db.ChatMessage).where(db.ChatMessage.id.in_(surplus))
+                )
+            try:
+                session.commit()
+            except Exception:
+                session.rollback()
+                raise
+            return True
+
     def rename_conversation(
         self, conversation_id: str, owner_id: str, title: str
     ) -> bool:

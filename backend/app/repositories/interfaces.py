@@ -216,6 +216,29 @@ class ConversationRepository(ABC):
         """
 
     @abstractmethod
+    def truncate_messages(
+        self, conversation_id: str, owner_id: str, keep_count: int
+    ) -> bool:
+        """Keep only the first ``keep_count`` messages of a conversation.
+
+        Drops the message branch starting at position ``keep_count`` (the
+        superseded user message and everything after it) so a regenerated
+        answer can replace it. Ownership is enforced: truncations for a
+        conversation that belongs to another owner are ignored.
+
+        Args:
+            conversation_id: The conversation identifier.
+            owner_id: The user id that owns the conversation.
+            keep_count: Number of leading messages to keep. ``0`` clears the
+                conversation; values at or above the message count are a
+                no-op. Negative values are rejected by callers.
+
+        Returns:
+            True if the conversation was found, owned by the caller, and
+            truncated (or already within the limit).
+        """
+
+    @abstractmethod
     def rename_conversation(
         self, conversation_id: str, owner_id: str, title: str
     ) -> bool:

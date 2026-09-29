@@ -160,6 +160,33 @@ class ConversationMemory:
         record["updated_at"] = now
         self._save()
 
+    def truncate_messages(
+        self, conversation_id: str, owner_id: str, keep_count: int
+    ) -> bool:
+        """Keep only the first ``keep_count`` messages of a conversation.
+
+        Args:
+            conversation_id: The conversation identifier.
+            owner_id: The expected owner of the conversation.
+            keep_count: Number of leading messages to keep.
+
+        Returns:
+            True if the conversation was found, owned by the caller, and
+            truncated; False when unknown, not owned, or ``keep_count`` is
+            negative.
+        """
+        if keep_count < 0:
+            return False
+        record = self._get_owned(conversation_id, owner_id)
+        if record is None:
+            return False
+        messages: list[dict] = record.setdefault("messages", [])
+        if keep_count < len(messages):
+            del messages[keep_count:]
+            record["updated_at"] = datetime.now(timezone.utc).isoformat()
+            self._save()
+        return True
+
     def rename_conversation(
         self, conversation_id: str, owner_id: str, title: str
     ) -> bool:

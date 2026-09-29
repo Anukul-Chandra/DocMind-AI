@@ -94,6 +94,28 @@ class ConversationsService:
             raise ConversationNotFoundError(conversation_id)
         return self._repository.get_messages(conversation_id, owner_id)
 
+    def truncate(
+        self, conversation_id: str, owner_id: str, keep_count: int
+    ) -> None:
+        """Keep only the first ``keep_count`` messages of a conversation.
+
+        Args:
+            conversation_id: The conversation identifier.
+            owner_id: The expected owner of the conversation.
+            keep_count: Number of leading messages to keep.
+
+        Raises:
+            ConversationNotFoundError: If the conversation is unknown or
+                belongs to another owner.
+            ValueError: If ``keep_count`` is negative.
+        """
+        if keep_count < 0:
+            raise ValueError("keep_count must be >= 0.")
+        if not self._repository.truncate_messages(
+            conversation_id, owner_id, keep_count
+        ):
+            raise ConversationNotFoundError(conversation_id)
+
     def rename(self, conversation_id: str, owner_id: str, title: str) -> ConversationMeta:
         """Rename a conversation if it belongs to the owner.
 

@@ -132,6 +132,85 @@ async def chat(
 
 
 @router.post(
+    "/regenerate",
+    status_code=status.HTTP_200_OK,
+)
+async def regenerate(
+    conversation_id: str = Form(...),
+    message_index: int = Form(...),
+    question: str | None = Form(default=None),
+    current_user: User = Depends(get_current_user),
+    chat_service: ChatService = Depends(get_chat_service),
+    conversation_svc: ConversationsService = Depends(get_conversations_service),
+) -> dict:
+    """Regenerate the assistant response for one user message as a new branch.
+
+    Truncates the stored conversation to the messages preceding
+    ``message_index`` (which must point at a user message), generates a fresh
+    answer against that truncated context, and records the
+    user/assistant pair in place of the superseded branch. Pass ``question``
+    to edit the user message, or omit it for a pure regenerate that reuses
+    the stored text and its image attachments.
+
+    Args:
+        conversation_id: The conversation to rewrite.
+        message_index: Position of the target user message (0-based, counting
+            both user and assistant messages).
+        question: Optional edited replacement text.
+        current_user: The authenticated owner of the conversation.
+        chat_service: The ChatService that orchestrates retrieval/generation.
+        conversation_svc: Ownership guard for the conversation.
+
+    Returns:
+        A chat response dict with the provider, model, and answer.
+
+    Raises:
+        HTTPException: 404 if the conversation is unknown / not owned, 400
+            for an invalid index or empty message, 502 when no LLM provider
+            is available.
+    """
+    try:
+        conversation_svc.get(conversation_id, current_user.user_id)
+    except ConversationNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Conversation not found.",
+        ) from exc
+
+    try:
+        response = await chat_service.regenerate_branch(
+            conversation_id,
+            owner_id=current_user.user_id,
+            message_index=message_index,
+            new_question=question,
+        )
+    except ConversationNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Conversation not found.",
+        ) from exc
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+    except LLMUnavailableError as exc:
+        logger.error("All LLM providers failed for regenerate request", exc_info=exc)
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="The AI service is temporarily unavailable. Please try again later.",
+        ) from exc
+    return {
+        "provider": response.provider,
+        "model": response.model,
+        "answer": response.text,
+        "category": response.category,
+        "sources": response.sources,
+        "conversation_id": conversation_id,
+    }
+
+
+@router.post(
     "/classify",
     status_code=status.HTTP_200_OK,
 )

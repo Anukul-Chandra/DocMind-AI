@@ -4,7 +4,7 @@ import { useOutletContext } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { ApiError } from "@/api/client";
-import { chatUser, classifyChat, type ChatSourceChunk } from "@/api/chat";
+import { chatRegenerate, chatUser, classifyChat, type ChatSourceChunk } from "@/api/chat";
 import type { ChatShellContext } from "@/layouts/ProtectedShell";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { ChatMessageBubble } from "@/components/chat/ChatMessageBubble";
@@ -189,6 +189,30 @@ export function ChatPage() {
     setLoadingHasImages(hasImages);
 
     try {
+      await runAssistantTurn(conversationId, text, attachments);
+    } catch (err) {
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : "Failed to get an answer. Please try again.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  /**
+   * Shared assistant-turn logic for sending a new message.
+   * Classifies for the loading indicator, calls the existing chat API, and
+   * appends the assistant reply. (Regenerate/Edit use `handleBranchTurn`
+   * with the branch-aware `/chat/regenerate` endpoint instead.)
+   */
+  async function runAssistantTurn(
+    conversationId: string,
+    text: string,
+    attachments: File[] = [],
+  ) {
+    try {
       const classifyResult = await classifyChat(text);
       if (classifyResult.category === "document" || classifyResult.category === "metadata") {
         setLoadingCategory(classifyResult.category);
@@ -197,13 +221,79 @@ export function ChatPage() {
       // If classify fails, fall back to general
     }
 
+    const { answer, provider, model, sources } = await chatUser(
+      text,
+      attachments,
+      conversationId,
+    );
+    appendMessages(conversationId, (previous) => [
+      ...(previous ?? []),
+      {
+        role: "assistant",
+        content: answer,
+        provider,
+        model,
+        sources: sources && sources.length > 0 ? toSources(sources) : undefined,
+      },
+    ]);
+    void queryClient.invalidateQueries({ queryKey: conversationsKey });
+  }
+
+  /**
+   * Shared branch-turn flow for Regenerate and Edit-save.
+   *
+   * The backend (`POST /chat/regenerate`) truncates the stored conversation
+   * to the messages preceding `index`, generates against that truncated
+   * context, and replaces the superseded branch — so a refresh can never
+   * resurrect the old branch and it can never leak into the new prompt.
+   * The React Query cache is truncated optimistically to the same shape;
+   * on failure the server is untouched, so the cache is refetched to roll
+   * back. `editedText` set means Edit (replace text), undefined means pure
+   * Regenerate (server reuses stored text + image attachments).
+   */
+  async function handleBranchTurn(index: number, editedText?: string) {
+    if (isLoading || !activeId) return;
+    const target = storedMessages[index];
+    if (!target || target.role !== "user") return;
+    const text = (editedText ?? target.content).trim();
+    if (!text) return;
+    setError(null);
+    setIsLoading(true);
+    setLoadingCategory("general");
+    // Regenerate/Edit reuses the stored image attachments server-side.
+    setLoadingHasImages((target.images?.length ?? 0) > 0);
+
+    if (editedText !== undefined) {
+      appendMessages(activeId, (previous) => {
+        const list = [...(previous ?? [])];
+        if (!list[index] || list[index].role !== "user") return list;
+        // Update the edited user message and drop everything after it.
+        return [
+          ...list.slice(0, index),
+          { ...list[index], content: text },
+        ];
+      });
+    } else {
+      // Drop the stale assistant reply (and any later branch) locally.
+      appendMessages(activeId, (previous) => (previous ?? []).slice(0, index + 1));
+    }
+
     try {
-      const { answer, provider, model, sources } = await chatUser(
-        text,
-        attachments,
-        conversationId,
+      try {
+        const classifyResult = await classifyChat(text);
+        if (classifyResult.category === "document" || classifyResult.category === "metadata") {
+          setLoadingCategory(classifyResult.category);
+        }
+      } catch {
+        // If classify fails, fall back to general
+      }
+
+      const { answer, provider, model, sources } = await chatRegenerate(
+        activeId,
+        index,
+        editedText,
       );
-      appendMessages(conversationId, (previous) => [
+      appendMessages(activeId, (previous) => [
         ...(previous ?? []),
         {
           role: "assistant",
@@ -218,11 +308,30 @@ export function ChatPage() {
       setError(
         err instanceof ApiError
           ? err.message
-          : "Failed to get an answer. Please try again.",
+          : "Failed to regenerate the answer. Please try again.",
       );
+      // The server persists a new branch only on success, so refetching
+      // restores the untouched original branch.
+      void queryClient.invalidateQueries({
+        queryKey: conversationsMessagesKey(activeId),
+      });
     } finally {
       setIsLoading(false);
     }
+  }
+
+  /**
+   * Regenerate the assistant response for the user message at `index`.
+   */
+  async function handleRegenerate(index: number) {
+    await handleBranchTurn(index);
+  }
+
+  /**
+   * Replace a user message's content and regenerate its response.
+   */
+  async function handleEditSave(index: number, newContent: string) {
+    await handleBranchTurn(index, newContent);
   }
 
   const showEmptyState = storedMessages.length === 0 && !isLoading;
@@ -249,6 +358,17 @@ export function ChatPage() {
                       message={message}
                       animate={isLatest}
                       onGrow={isLatest ? scrollToLatest : undefined}
+                      onRegenerate={
+                        message.role === "user"
+                          ? () => void handleRegenerate(index)
+                          : undefined
+                      }
+                      onSaveEdit={
+                        message.role === "user"
+                          ? (text) => void handleEditSave(index, text)
+                          : undefined
+                      }
+                      actionsDisabled={isLoading}
                     />
                   );
                 })}
